@@ -185,27 +185,35 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.setScreen(() -> null);
 	}
 
-	/** Brain coral colours and the barracuda model, close up on a platform in the sky. */
+	/** On a platform in the sky: full kit with gray fins, brain coral colours and the barracuda, close up. */
 	private static void showcase(ClientGameTestContext context, TestSingleplayerContext sp) {
 		var server = sp.getServer();
 		int bx = 40, by = 200, bz = 40;
-		server.runCommand("fill " + (bx - 6) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 6) + " " + (by - 1) + " " + (bz + 10) + " minecraft:smooth_stone");
+		server.runCommand("tp @p " + bx + ".5 " + by + " " + bz + ".5 0 15");
+		context.waitTicks(10);
+		sp.getConnection().waitForChunksRender(false, 20 * 60);
+		server.runCommand("fill " + (bx - 6) + " " + (by - 1) + " " + (bz - 6) + " " + (bx + 6) + " " + (by - 1) + " " + (bz + 10) + " minecraft:smooth_stone");
 		for (int i = 0; i < 9; i++) {
 			int x = bx - 4 + i;
 			server.runCommand("setblock " + x + " " + by + " " + (bz + 6) + " scubadive:brain_coral");
 			server.runCommand("setblock " + x + " " + (by + 1) + " " + (bz + 6 + (i % 2)) + " scubadive:brain_coral");
 		}
+		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
+		context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+		context.getInput().lookAt(180, 25);
+		context.waitTicks(40);
+		context.takeScreenshot("09_kit_on_platform_front");
+		context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
-		server.runCommand("tp @p " + bx + ".5 " + by + " " + bz + ".5 0 15");
-		sp.getConnection().waitForChunksRender(false, 20 * 60);
 		server.runCommand("summon scubadive:barracuda " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[90f,0f]}");
 		server.runCommand("summon scubadive:barracuda " + (bx + 2) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[-60f,0f]}");
-		sp.getConnection().waitForChunksRender(false, 20 * 60);
+		context.getInput().lookAt(0, 20);
 		context.waitTicks(40);
-		context.takeScreenshot("09_showcase_coral_barracuda");
-		server.runCommand("tp @p " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 1) + ".5 0 20");
+		context.takeScreenshot("10_showcase_coral_barracuda");
+		server.runCommand("tp @p " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 1) + ".5");
+		context.getInput().lookAt(0, 25);
 		context.waitTicks(40);
-		context.takeScreenshot("10_barracuda_closeup");
+		context.takeScreenshot("11_barracuda_closeup");
 		server.runCommand("kill @e[type=scubadive:barracuda]");
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
 	}
@@ -229,7 +237,8 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		server.runCommand("gamemode survival @p");
 		server.runCommand("effect give @p minecraft:water_breathing 600 0 true");
 		server.runCommand("effect give @p minecraft:resistance 600 4 true");
-		context.waitTicks(20);
+		context.getInput().lookAt(0, 45);
+		context.waitTicks(40);
 		context.takeScreenshot("07_underwater_light");
 		for (int phase = 1; phase <= 3; phase++) {
 			context.waitTicks(200);
