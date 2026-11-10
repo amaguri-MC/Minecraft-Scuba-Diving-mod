@@ -22,6 +22,31 @@ loom {
 	}
 }
 
+// Automated end-to-end test on a real client: ./gradlew runClientGameTest (CI runs it under xvfb).
+sourceSets {
+	gametest {
+		compileClasspath += main.compileClasspath + main.output + client.compileClasspath + client.output
+		runtimeClasspath += main.runtimeClasspath + main.output + client.runtimeClasspath + client.output
+	}
+}
+
+loom {
+	mods {
+		"scubadive-gametest" {
+			sourceSet sourceSets.gametest
+		}
+	}
+	runs {
+		clientGameTest {
+			client()
+			name "Client Game Test"
+			source sourceSets.gametest
+			vmArg "-Dfabric.client.gametest"
+			runDir "run"
+		}
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"

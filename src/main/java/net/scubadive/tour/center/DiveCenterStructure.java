@@ -35,6 +35,11 @@ public class DiveCenterStructure extends Structure {
 	/** Candidate origins: offsets from the start chunk's middle. */
 	private static final int[] OFFSETS = {-24, -18, -12, -6, 0, 6, 12, 18, 24};
 
+	/** Cost counters for the site search (read by the automated client game test). */
+	public static final java.util.concurrent.atomic.AtomicLong SEARCH_CALLS = new java.util.concurrent.atomic.AtomicLong();
+	public static final java.util.concurrent.atomic.AtomicLong SEARCH_NANOS = new java.util.concurrent.atomic.AtomicLong();
+	public static final java.util.concurrent.atomic.AtomicLong HEIGHT_SAMPLES = new java.util.concurrent.atomic.AtomicLong();
+
 	public DiveCenterStructure(StructureSettings settings) {
 		super(settings);
 	}
@@ -53,10 +58,12 @@ public class DiveCenterStructure extends Structure {
 	/** Noise-stage view of the terrain used by the site search. */
 	private record Terrain(ChunkGenerator gen, LevelHeightAccessor height, RandomState random, int sea) {
 		int floor(int x, int z) {
+			HEIGHT_SAMPLES.incrementAndGet();
 			return gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, height, random);
 		}
 
 		int surface(int x, int z) {
+			HEIGHT_SAMPLES.incrementAndGet();
 			return gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, random);
 		}
 
@@ -78,6 +85,16 @@ public class DiveCenterStructure extends Structure {
 
 	@Override
 	protected Optional<GenerationStub> findGenerationPoint(GenerationContext context) {
+		long start = System.nanoTime();
+		try {
+			return search(context);
+		} finally {
+			SEARCH_CALLS.incrementAndGet();
+			SEARCH_NANOS.addAndGet(System.nanoTime() - start);
+		}
+	}
+
+	private Optional<GenerationStub> search(GenerationContext context) {
 		ChunkPos chunk = context.chunkPos();
 		Terrain t = new Terrain(context.chunkGenerator(), context.heightAccessor(), context.randomState(),
 				context.chunkGenerator().getSeaLevel());

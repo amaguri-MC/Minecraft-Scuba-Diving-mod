@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "scubadive-gametest",
+	"version": "1.0.0",
+	"name": "Scuba Dive client game test",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"net.scubadive.gametest.ScubaClientGameTest"
+		]
+	},
+	"depends": {
+		"scubadive": "*"
+	}
+}

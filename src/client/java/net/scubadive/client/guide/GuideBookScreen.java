@@ -60,7 +60,7 @@ public final class GuideBookScreen extends Screen {
 		this.spread = Math.min(lastSpread, spreadCount() - 1);
 	}
 
-	private static int spreadCount() {
+	public static int spreadCount() {
 		return (GuidePages.PAGES.size() + 1) / 2;
 	}
 
