@@ -29,6 +29,7 @@ import net.scubadive.dive.DiveClientState;
 import net.scubadive.dive.DiveData;
 import net.scubadive.dive.DiveInputPayload;
 import net.scubadive.dive.ScubaDiveGear;
+import net.scubadive.tour.TourApi;
 import net.scubadive.equipment.WristSlot;
 
 /**
@@ -229,8 +230,8 @@ public final class ScubaDiveGearClient {
 		String time = String.format("%d:%02d", seconds / 60, seconds % 60);
 		float shownDepth = depth();
 		// Tours use a single 100 bar cylinder, so the gauge and warnings scale to it.
-		boolean tour = net.scubadive.tour.TourApi.noRefill(player);
-		float tank = tour ? net.scubadive.tour.TourApi.TOUR_TANK : DiveData.FULL_TANK;
+		boolean tour = TourApi.noRefill(player);
+		float tank = tour ? TourApi.TOUR_TANK : DiveData.FULL_TANK;
 		float low = tour ? 15f : 50f;
 		int pColor = !bcd ? 0xFF80A0B0 : pressure > tank * 0.5f ? 0xFF7CFFAA : pressure > low ? 0xFFFFD84A : 0xFFFF5050;
 		boolean blink = (System.currentTimeMillis() / 400L) % 2L == 0L;
