@@ -5,7 +5,8 @@
 	"mixins": [
 		"LivingEntityBreathMixin",
 		"MobFullSetMixin",
-		"PlayerSwimPoseMixin"
+		"PlayerSwimPoseMixin",
+		"PlayerIdleSwimPitchMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

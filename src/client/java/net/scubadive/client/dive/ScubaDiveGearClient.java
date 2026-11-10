@@ -152,7 +152,7 @@ public final class ScubaDiveGearClient {
 				if (DiveClientState.neutral) {
 					target = NEUTRAL_BOB * NEUTRAL_BOB_SPEED * Math.cos(clientTick * NEUTRAL_BOB_SPEED);
 				}
-				player.setDeltaMovement(v.x, v.y + (target - v.y) * 0.2, v.z);
+				player.setDeltaMovement(v.x, v.y + (target - v.y) * 0.35, v.z);
 			} else if (!DiveClientState.neutral) {
 				// While finning, buoyancy still pulls up or down on top of the swimming motion.
 				player.addDeltaMovement(new Vec3(0.0, Buoyancy.ACCEL * net, 0.0));
