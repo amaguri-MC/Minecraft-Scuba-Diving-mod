@@ -33,7 +33,7 @@ public class DiveCenterStructure extends Structure {
 	public static final StructurePieceType.ContextlessType PIECE = DiveCenterPiece::new;
 
 	/** Candidate origins: offsets from the start chunk's middle. */
-	private static final int[] OFFSETS = {-12, -6, 0, 6, 12};
+	private static final int[] OFFSETS = {-24, -18, -12, -6, 0, 6, 12, 18, 24};
 
 	public DiveCenterStructure(StructureSettings settings) {
 		super(settings);
@@ -104,7 +104,7 @@ public class DiveCenterStructure extends Structure {
 				continue;
 			}
 			int y0 = t.dryGround(x, z);
-			if (y0 < t.sea() || y0 > t.sea() + 3) {
+			if (y0 < t.sea() || y0 > t.sea() + 5) {
 				continue;
 			}
 			Collections.shuffle(dirs, shuffle);
@@ -123,15 +123,15 @@ public class DiveCenterStructure extends Structure {
 		return Optional.empty();
 	}
 
-	/** Distance of the first water column along the pier axis (4-8), or -1 if the spot is unsuitable. */
+	/** Distance of the first water column along the pier axis (3-9), or -1 if the spot is unsuitable. */
 	private static int findShore(Terrain t, DiveCenterPiece.Frame frame) {
-		for (int k = 1; k <= 3; k++) {
+		for (int k = 1; k <= 2; k++) {
 			BlockPos p = frame.at(0, k, 0);
 			if (t.isWater(p.getX(), p.getZ())) {
 				return -1;
 			}
 		}
-		for (int k = 4; k <= 8; k++) {
+		for (int k = 3; k <= 9; k++) {
 			BlockPos p = frame.at(0, k, 0);
 			if (t.isWater(p.getX(), p.getZ())) {
 				// Open water for a few blocks beyond the shore line.
@@ -153,7 +153,7 @@ public class DiveCenterStructure extends Structure {
 		for (int[] c : corners) {
 			BlockPos p = frame.at(c[0], c[1], 0);
 			int ground = t.dryGround(p.getX(), p.getZ());
-			if (ground < 0 || ground < y0 - 2 || ground > y0 + 2) {
+			if (ground < 0 || ground < y0 - 3 || ground > y0 + 3) {
 				return false;
 			}
 		}

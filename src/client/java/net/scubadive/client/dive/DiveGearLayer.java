@@ -52,6 +52,8 @@ public class DiveGearLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 
 	/** Undyed colour of the BCD and fins (#1E1E22). */
 	private static final int UNDYED_RGB = 0x1E1E22;
+	/** Undyed colour of the fins (gray, #6E7378). */
+	private static final int UNDYED_FINS_RGB = 0x6E7378;
 	/** Vest width/thickness scale at full BCD air (empty = 1.0). */
 	private static final float MAX_INFLATE = 1.35f;
 	/** Smoothed BCD air per entity id, so the vest swells and shrinks gradually. */
@@ -87,14 +89,18 @@ public class DiveGearLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
 			for (ModelPart leg : new ModelPart[] {model.leftLeg, model.rightLeg}) {
 				poseStack.pushPose();
 				leg.translateAndRotate(poseStack);
-				draw(FIN, poseStack, nodes, light, state, tint(state.feetEquipment));
+				draw(FIN, poseStack, nodes, light, state, tint(state.feetEquipment, UNDYED_FINS_RGB));
 				poseStack.popPose();
 			}
 		}
 	}
 
 	private static int tint(ItemStack stack) {
-		return 0xFF000000 | DyedItemColor.getOrDefault(stack, UNDYED_RGB);
+		return tint(stack, UNDYED_RGB);
+	}
+
+	private static int tint(ItemStack stack, int undyed) {
+		return 0xFF000000 | DyedItemColor.getOrDefault(stack, undyed);
 	}
 
 	/** BCD air of the rendered player (own prediction for the local player, synced value for others), eased over time. */

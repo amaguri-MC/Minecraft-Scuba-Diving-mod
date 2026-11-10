@@ -29,6 +29,7 @@ final class GuideCreatures {
 	private static final float TILT = (float) Math.toRadians(-12.0);
 
 	private final Map<String, Optional<LivingEntity>> cache = new HashMap<>();
+	private static int NEXT_ID = -1_000_000;
 
 	LivingEntity get(String id) {
 		return this.cache.computeIfAbsent(id, k -> Optional.ofNullable(create(k))).orElse(null);
@@ -45,6 +46,11 @@ final class GuideCreatures {
 			return null;
 		}
 		Entity entity = type.create(mc.level, EntitySpawnReason.LOAD);
+		if (entity == null) {
+			return null;
+		}
+		// Display-only entity: give it an id (never added to the level) so renderers may call getId().
+		entity.setId(NEXT_ID--);
 		return entity instanceof LivingEntity living ? living : null;
 	}
 
@@ -55,6 +61,15 @@ final class GuideCreatures {
 
 	/** Draws the entity centred in the box, turned by spinDeg around the vertical axis. */
 	static void draw(GuiGraphicsExtractor graphics, LivingEntity entity, int x0, int y0, int x1, int y1, float spinDeg, float ageTicks) {
+		try {
+			drawUnsafe(graphics, entity, x0, y0, x1, y1, spinDeg, ageTicks);
+		} catch (RuntimeException e) {
+			// An illustration must never take the whole book down.
+			net.scubadive.ScubaDive.LOGGER.warn("Guide book could not draw {}", entity.getType(), e);
+		}
+	}
+
+	private static void drawUnsafe(GuiGraphicsExtractor graphics, LivingEntity entity, int x0, int y0, int x1, int y1, float spinDeg, float ageTicks) {
 		EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		EntityRenderer<? super LivingEntity, ?> renderer = dispatcher.getRenderer(entity);
 		EntityRenderState state = renderer.createRenderState(entity, 1.0f);
