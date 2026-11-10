@@ -34,5 +34,13 @@
  "species.scubadive.elder_guardian": "Elder Guardian",
  "species.scubadive.sea_anemone": "Sea Anemone",
  "species.scubadive.nudibranch": "Nudibranch",
- "species.scubadive.pygmy_seahorse": "Pygmy Seahorse"
+ "species.scubadive.pygmy_seahorse": "Pygmy Seahorse",
+ "item.scubadive.dive_computer": "Dive Computer",
+ "hud.scubadive.dc.time": "Dive time %s",
+ "hud.scubadive.dc.pressure": "Tank %s bar",
+ "hud.scubadive.dc.depth": "Depth %s m",
+ "hud.scubadive.dc.max": "Max %s m",
+ "hud.scubadive.dc.low": "Low air! Ascend",
+ "hud.scubadive.dc.empty": "Out of air!",
+ "hud.scubadive.camera.zoom": "Zoom x%s"
 }

@@ -26,17 +26,17 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: probe apis
-        if: always()
+      - name: collect jars
         run: |
-          MC=$(find ~/.gradle .gradle -name "*.jar" 2>/dev/null | grep -i minecraft | grep -iv sources | sort)
-          echo "$MC"
-          CP=$(echo "$MC" | tr '\n' ':')
-          FAPI=$(find ~/.gradle -name "fabric-*.jar" | grep -v sources | tr '\n' ':')
-          for c in net.minecraft.client.gui.screens.Screen net.minecraft.client.gui.GuiGraphicsExtractor net.minecraft.client.renderer.GameRenderer net.minecraft.client.MouseHandler net.minecraft.client.renderer.entity.LivingEntityRenderer net.minecraft.client.renderer.RenderPipelines net.minecraft.client.player.AbstractClientPlayer net.minecraft.client.Camera net.minecraft.client.gui.Hud net.minecraft.client.renderer.state.gui.GuiRenderState; do
-            echo "##### $c"; javap -p -cp "$CP" $c || true
-          done
-          for j in $(find ~/.gradle -name "fabric-*.jar" | grep -v sources); do unzip -l "$j" | grep -iE "fov|scroll|mouse|zoom" ; done | awk '{print $4}' | sort -u
+          mkdir -p probe
+          cp ~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/*-deobf/26.2/*.jar probe/
+          for j in $(find ~/.gradle -name "fabric-*.jar" | grep -v sources | grep -E "0\.161|26\.2|\+[0-9a-f]{10}"); do cp "$j" probe/; done
+          ls -la probe | head -80
+      - name: upload jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: probe-jars
+          path: probe/
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:

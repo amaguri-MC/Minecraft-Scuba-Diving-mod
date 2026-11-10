@@ -57,7 +57,6 @@ public final class JournalScreen extends Screen {
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-		this.extractBackground(graphics, mouseX, mouseY, delta);
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 
 		Journal journal = this.minecraft != null && this.minecraft.player != null

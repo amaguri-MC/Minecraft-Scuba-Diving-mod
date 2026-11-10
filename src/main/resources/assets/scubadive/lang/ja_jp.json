@@ -34,5 +34,13 @@
  "species.scubadive.elder_guardian": "エルダーガーディアン",
  "species.scubadive.sea_anemone": "イソギンチャク",
  "species.scubadive.nudibranch": "ウミウシ",
- "species.scubadive.pygmy_seahorse": "ピグミーシーホース"
+ "species.scubadive.pygmy_seahorse": "ピグミーシーホース",
+ "item.scubadive.dive_computer": "ダイブコンピューター",
+ "hud.scubadive.dc.time": "潜水時間 %s",
+ "hud.scubadive.dc.pressure": "残圧 %s bar",
+ "hud.scubadive.dc.depth": "水深 %s m",
+ "hud.scubadive.dc.max": "最大 %s m",
+ "hud.scubadive.dc.low": "残圧低下！浮上してください",
+ "hud.scubadive.dc.empty": "エア切れ！",
+ "hud.scubadive.camera.zoom": "ズーム x%s"
 }
