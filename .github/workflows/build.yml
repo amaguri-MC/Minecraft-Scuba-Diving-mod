@@ -26,15 +26,19 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: capture build artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: Artifacts
-          path: build/libs/
-      - name: publish jar to builds branch
-        if: github.ref == 'refs/heads/main'
+      - name: dump apis
         run: |
-          mkdir out && cp build/libs/scubadive-*[0-9].jar out/ && cd out
-          git init -q -b builds && git add -A
-          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -q -m "build ${GITHUB_SHA::7}"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}" builds
+          D=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft
+          CJ=$(ls $D/minecraft-clientonly-deobf/26.2/*.jar); MJ=$(ls $D/minecraft-common-deobf/26.2/*.jar)
+          FJ=$(find ~/.gradle -name "fabric-*.jar" | grep -v sources | grep -v loader | sort -u)
+          CP="$CJ:$MJ:$(echo $FJ | tr ' ' ':')"
+          mkdir -p out/mc out/fabric out/data
+          dumpjar() { unzip -Z1 "$1" | grep '\.class$' | grep -v 'module-info' | sed 's/\.class$//; s#/#.#g' > /tmp/cls.txt; split -l 400 /tmp/cls.txt /tmp/chunk_; for f in /tmp/chunk_*; do javap -p -cp "$CP" $(cat $f) 2>/dev/null; done; rm -f /tmp/chunk_*; }
+          dumpjar "$CJ" > out/mc/client.txt
+          dumpjar "$MJ" > out/mc/common.txt
+          for j in $FJ; do dumpjar "$j"; done > out/fabric/fabric.txt
+          (cd out/data && unzip -qo "$MJ" 'data/minecraft/worldgen/*' 'data/minecraft/tags/*' 'data/minecraft/dimension_type/*' -x '*.nbt' || true)
+          (cd out/data && unzip -qo "$CJ" 'assets/minecraft/models/*' 'assets/minecraft/items/*' 'assets/minecraft/equipment/*' 'assets/minecraft/blockstates/*' 'assets/minecraft/particles/*' || true)
+          du -sh out/*
+          cd out && git init -q -b apidump && git add -A && git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm dump
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}" apidump
