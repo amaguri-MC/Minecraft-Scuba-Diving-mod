@@ -40,16 +40,18 @@ public class AnemonePatchFeature extends Feature<NoneFeatureConfiguration> {
 
 		int placed = 0;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-		for (int i = 0; i < 24; i++) {
-			int x = origin.getX() + random.nextInt(11) - 5;
-			int z = origin.getZ() + random.nextInt(11) - 5;
+		for (int i = 0; i < 56; i++) {
+			// sum of two uniform offsets (triangular distribution): densest at the centre, radius up to 4
+			int x = origin.getX() + random.nextInt(5) + random.nextInt(5) - 4;
+			int z = origin.getZ() + random.nextInt(5) + random.nextInt(5) - 4;
 			int y = level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
 			pos.set(x, y, z);
 			if (!level.getFluidState(pos).is(FluidTags.WATER) || !level.getFluidState(pos).isSource() || !level.getBlockState(pos).is(Blocks.WATER)) {
 				continue;
 			}
 			BlockState below = level.getBlockState(pos.below());
-			if (!below.is(Blocks.SAND) && !below.is(Blocks.GRAVEL)) {
+			if (!below.is(Blocks.SAND) && !below.is(Blocks.GRAVEL) && !below.is(Blocks.CLAY)
+					&& !below.is(Blocks.DIRT) && !below.is(Blocks.MOSS_BLOCK)) {
 				continue;
 			}
 			level.setBlock(pos, state, 2);

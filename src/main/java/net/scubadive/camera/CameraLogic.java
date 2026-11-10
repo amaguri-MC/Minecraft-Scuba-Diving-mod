@@ -67,7 +67,7 @@ public final class CameraLogic {
 
 	/** Server: recompute the score of the claimed subject. Returns -1 if the claim is invalid. */
 	public static int verify(Player player, Species species, int entityId, BlockPos pos, double fovClaim) {
-		double fov = Math.max(30.0, Math.min(110.0, fovClaim));
+		double fov = Math.max(5.0, Math.min(110.0, fovClaim));
 		Level level = player.level();
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);

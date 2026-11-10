@@ -28,6 +28,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -47,6 +48,11 @@ public final class ScubaCameraClient {
 	private static long flashStart = -100000L;
 	private static long lastShotMs = -100000L;
 
+	public static final double ZOOM_MIN = 1.0;
+	public static final double ZOOM_MAX = 8.0;
+	private static final double ZOOM_STEP = 1.25;
+	private static double zoom = ZOOM_MIN;
+
 	private ScubaCameraClient() { }
 
 	public static void init() {
@@ -54,12 +60,26 @@ public final class ScubaCameraClient {
 		openJournal = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.journal", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, category));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (client.player == null || !holdingCamera(client.player)) {
+				zoom = ZOOM_MIN;
+			}
 			if (client.player == null) return;
 			while (openJournal.consumeClick()) {
 				if (client.gui.screen() == null) {
 					client.gui.setScreen(new JournalScreen());
 				}
 			}
+		});
+
+		ClientHotbarScrollEvents.ALLOW.register((inventory, currentSlot, selected, xOffset, yOffset) -> {
+			Player player = Minecraft.getInstance().player;
+			if (player == null || !holdingCamera(player)) return true;
+			if (yOffset > 0) {
+				zoom = Math.min(ZOOM_MAX, zoom * ZOOM_STEP);
+			} else if (yOffset < 0) {
+				zoom = Math.max(ZOOM_MIN, zoom / ZOOM_STEP);
+			}
+			return false;
 		});
 
 		UseItemCallback.EVENT.register((player, level, hand) -> {
@@ -72,6 +92,24 @@ public final class ScubaCameraClient {
 		ClientPlayNetworking.registerGlobalReceiver(CaptureResultPayload.TYPE, (payload, context) -> onResult(context.client(), payload));
 
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_flash"), ScubaCameraClient::extractFlash);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_zoom"), ScubaCameraClient::extractZoom);
+	}
+
+	/** Current zoom factor (1.0 = none). Read by CameraFovMixin. */
+	public static double getZoom() {
+		return zoom;
+	}
+
+	private static boolean holdingCamera(Player player) {
+		return player.getMainHandItem().is(ScubaCamera.CAMERA) || player.getOffhandItem().is(ScubaCamera.CAMERA);
+	}
+
+	private static void extractZoom(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		if (zoom <= 1.0) return;
+		Minecraft client = Minecraft.getInstance();
+		if (client.player == null || !holdingCamera(client.player)) return;
+		Component text = Component.translatable("hud.scubadive.camera.zoom", String.format(Locale.ROOT, "%.1f", zoom));
+		graphics.centeredText(client.font, text, graphics.guiWidth() / 2, 10, 0xFFFFFFFF);
 	}
 
 	private static void takePhoto(Minecraft client, Player player) {
@@ -79,7 +117,7 @@ public final class ScubaCameraClient {
 		if (now - lastShotMs < SHOT_INTERVAL_MS) return;
 		lastShotMs = now;
 
-		double fov = client.options.fov().get();
+		double fov = client.options.fov().get() / zoom;
 		CameraLogic.Shot shot = CameraLogic.pickBest(player, fov);
 
 		client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GLASS_PLACE, 1.6F, 1.0F));

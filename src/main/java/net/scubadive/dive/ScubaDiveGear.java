@@ -36,6 +36,8 @@ import net.scubadive.ScubaDive;
  */
 public final class ScubaDiveGear {
 	public static Item DIVE_LIGHT;
+	/** Dive computer: purely informational, its HUD is drawn client-side while it is held. */
+	public static Item DIVE_COMPUTER;
 
 	private static final int UPDATE_INTERVAL = 2;
 	private static final int MAX_DISTANCE = 5;
@@ -52,6 +54,8 @@ public final class ScubaDiveGear {
 	public static void init() {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, ScubaDive.id("dive_light"));
 		DIVE_LIGHT = Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(1)));
+		ResourceKey<Item> dcKey = ResourceKey.create(Registries.ITEM, ScubaDive.id("dive_computer"));
+		DIVE_COMPUTER = Registry.register(BuiltInRegistries.ITEM, dcKey, new Item(new Item.Properties().setId(dcKey).stacksTo(1)));
 
 		ServerTickEvents.END_SERVER_TICK.register(ScubaDiveGear::onServerTick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> removeLight(server, handler.getPlayer().getUUID()));
@@ -65,6 +69,11 @@ public final class ScubaDiveGear {
 	public static boolean isHoldingLight(net.minecraft.world.entity.player.Player player) {
 		return player.getItemInHand(InteractionHand.MAIN_HAND).is(DIVE_LIGHT)
 				|| player.getItemInHand(InteractionHand.OFF_HAND).is(DIVE_LIGHT);
+	}
+
+	public static boolean isHoldingDiveComputer(net.minecraft.world.entity.player.Player player) {
+		return player.getItemInHand(InteractionHand.MAIN_HAND).is(DIVE_COMPUTER)
+				|| player.getItemInHand(InteractionHand.OFF_HAND).is(DIVE_COMPUTER);
 	}
 
 	private static void onServerTick(MinecraftServer server) {

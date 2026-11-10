@@ -2,7 +2,7 @@
 	"required": true,
 	"package": "net.scubadive.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": ["CameraFovMixin"],
 	"injectors": { "defaultRequire": 1 },
 	"overwrites": { "requireAnnotations": true }
 }

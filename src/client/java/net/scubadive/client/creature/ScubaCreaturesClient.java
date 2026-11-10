@@ -14,5 +14,6 @@ public final class ScubaCreaturesClient {
 		ModelLayerRegistry.registerModelLayer(PygmySeahorseModel.LAYER, PygmySeahorseModel::createBodyLayer);
 		EntityRenderers.register(ScubaCreatures.NUDIBRANCH, NudibranchRenderer::new);
 		EntityRenderers.register(ScubaCreatures.PYGMY_SEAHORSE, PygmySeahorseRenderer::new);
+		AnemoneTint.init();
 	}
 }

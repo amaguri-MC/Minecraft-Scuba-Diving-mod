@@ -1,6 +1,12 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "scubadive:item/sea_anemone"
+    "model": "scubadive:item/sea_anemone",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -4957486
+      }
+    ]
   }
 }

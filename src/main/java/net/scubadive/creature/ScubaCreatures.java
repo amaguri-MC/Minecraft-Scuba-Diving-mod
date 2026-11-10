@@ -50,7 +50,7 @@ public final class ScubaCreatures {
 							level.getFluidState(pos).is(FluidTags.WATER)
 									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
 									&& level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP)))
-			.sized(0.3f, 0.15f)
+			.sized(0.12f, 0.06f)
 			.clientTrackingRange(8)
 			.build(NUDIBRANCH_KEY);
 
@@ -62,7 +62,7 @@ public final class ScubaCreatures {
 							level.getFluidState(pos).is(FluidTags.WATER)
 									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
 									&& level.getFluidState(pos.below()).is(FluidTags.WATER)))
-			.sized(0.15f, 0.2f)
+			.sized(0.12f, 0.32f)
 			.clientTrackingRange(6)
 			.build(PYGMY_SEAHORSE_KEY);
 
