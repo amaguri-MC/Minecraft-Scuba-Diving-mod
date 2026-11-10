@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "net.scubadive.client.mixin.equipment",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"AbstractContainerScreenWristMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

@@ -61,18 +61,31 @@ public final class ScubaDiveGear {
 	public static Item DIVE_MASK;
 	public static Item BCD;
 	public static Item DIVE_FINS;
+	/** Wetsuit (legs). */
+	public static Item WETSUIT;
 	public static Item DIVE_LIGHT;
 	/** Dive computer: purely informational, its HUD is drawn client-side while it is held. */
 	public static Item DIVE_COMPUTER;
 
 	private static final int UPDATE_INTERVAL = 2;
-	private static final int MAX_DISTANCE = 5;
-	private static final int MOVE_THRESHOLD_SQ = 4;
+	/** Update steps (of UPDATE_INTERVAL ticks) an old light stays after the new one is placed. */
+	private static final int PENDING_TICKS = 3;
 
 	private record LightPos(ResourceKey<Level> dimension, BlockPos pos) {
 	}
 
+	private static final class Pending {
+		final LightPos pos;
+		int ticksLeft;
+
+		Pending(LightPos pos, int ticksLeft) {
+			this.pos = pos;
+			this.ticksLeft = ticksLeft;
+		}
+	}
+
 	private static final Map<UUID, LightPos> ACTIVE = new HashMap<>();
+	private static final Map<UUID, Pending> PENDING = new HashMap<>();
 	private static int tickCounter;
 
 	private ScubaDiveGear() {
@@ -86,9 +99,10 @@ public final class ScubaDiveGear {
 
 		DIVE_MASK = registerWearable("dive_mask", EquipmentSlot.HEAD, null);
 		BCD = registerWearable("bcd", EquipmentSlot.CHEST, null);
+		WETSUIT = registerWearable("wetsuit", EquipmentSlot.LEGS, null);
 		DIVE_FINS = registerWearable("dive_fins", EquipmentSlot.FEET, ItemAttributeModifiers.builder()
 				.add(Attributes.WATER_MOVEMENT_EFFICIENCY,
-						new AttributeModifier(ScubaDive.id("dive_fins_water_movement"), 0.33, AttributeModifier.Operation.ADD_VALUE),
+						new AttributeModifier(ScubaDive.id("dive_fins_water_movement"), 0.5, AttributeModifier.Operation.ADD_VALUE),
 						EquipmentSlotGroup.FEET)
 				.build());
 		DiveServer.init();
@@ -97,6 +111,9 @@ public final class ScubaDiveGear {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> removeLight(server, handler.getPlayer().getUUID()));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			for (UUID id : new java.util.ArrayList<>(ACTIVE.keySet())) {
+				removeLight(server, id);
+			}
+			for (UUID id : new java.util.ArrayList<>(PENDING.keySet())) {
 				removeLight(server, id);
 			}
 		});
@@ -136,6 +153,14 @@ public final class ScubaDiveGear {
 				|| player.getItemInHand(InteractionHand.OFF_HAND).is(DIVE_COMPUTER);
 	}
 
+	/** True if the player wears mask, BCD, wetsuit and fins. Hostile mobs ignore such players unless provoked. */
+	public static boolean hasFullSet(net.minecraft.world.entity.player.Player player) {
+		return isWearing(player, EquipmentSlot.HEAD, DIVE_MASK)
+				&& isWearing(player, EquipmentSlot.CHEST, BCD)
+				&& isWearing(player, EquipmentSlot.LEGS, WETSUIT)
+				&& isWearing(player, EquipmentSlot.FEET, DIVE_FINS);
+	}
+
 	private static void onServerTick(MinecraftServer server) {
 		tickCounter++;
 		if (tickCounter % UPDATE_INTERVAL != 0) {
@@ -143,12 +168,20 @@ public final class ScubaDiveGear {
 		}
 
 		// Clean up entries whose player is gone or no longer eligible.
-		Iterator<UUID> it = new java.util.ArrayList<>(ACTIVE.keySet()).iterator();
-		while (it.hasNext()) {
-			UUID id = it.next();
+		for (UUID id : new java.util.ArrayList<>(ACTIVE.keySet())) {
 			ServerPlayer p = server.getPlayerList().getPlayer(id);
 			if (p == null || !p.isAlive() || p.isRemoved() || !isHoldingLight(p) || !p.isEyeInFluid(FluidTags.WATER)) {
 				removeLight(server, id);
+			}
+		}
+		// Fade out old lights a few ticks after the new one is in place.
+		for (UUID id : new java.util.ArrayList<>(PENDING.keySet())) {
+			Pending pd = PENDING.get(id);
+			if (--pd.ticksLeft <= 0) {
+				PENDING.remove(id);
+				if (!pd.pos.equals(ACTIVE.get(id))) {
+					restore(server, pd.pos);
+				}
 			}
 		}
 
@@ -160,34 +193,33 @@ public final class ScubaDiveGear {
 				continue;
 			}
 
-			BlockPos target = findTarget(level, player);
+			// The light lives in the water block at the head; it only moves when the head crosses a block boundary.
+			BlockPos target = BlockPos.containing(player.getEyePosition());
 			LightPos current = ACTIVE.get(player.getUUID());
-			if (target == null) {
-				if (current != null) {
-					removeLight(server, player.getUUID());
-				}
-				continue;
-			}
 			if (current != null) {
 				if (current.dimension().equals(level.dimension()) && level.getBlockState(current.pos()).is(Blocks.LIGHT)) {
-					// Hysteresis: only move the light when the new target is 2+ blocks away.
-					if (current.pos().distSqr(target) < MOVE_THRESHOLD_SQ) {
+					if (current.pos().equals(target)) {
 						continue;
 					}
 				} else {
-					removeLight(server, player.getUUID());
+					ACTIVE.remove(player.getUUID());
 					current = null;
 				}
 			}
-			if (isSourceWater(level, target) && !isTargetedByOther(player.getUUID(), level, target)) {
-				BlockState light = Blocks.LIGHT.defaultBlockState()
-						.setValue(BlockStateProperties.LEVEL, 15)
-						.setValue(BlockStateProperties.WATERLOGGED, true);
-				// Place the new light first, then remove the old one, so the area is never dark in between.
-				level.setBlock(target, light, Block.UPDATE_ALL);
-				LightPos old = ACTIVE.put(player.getUUID(), new LightPos(level.dimension(), target));
-				if (old != null) {
-					restore(server, old);
+			// No source water here: keep the current light instead of re-placing.
+			if (!isSourceWater(level, target) || isTargetedByOther(player.getUUID(), level, target)) {
+				continue;
+			}
+			BlockState light = Blocks.LIGHT.defaultBlockState()
+					.setValue(BlockStateProperties.LEVEL, 15)
+					.setValue(BlockStateProperties.WATERLOGGED, true);
+			// Place the new light first; the old one stays a few ticks (at most 2 lights per player).
+			level.setBlock(target, light, Block.UPDATE_ALL);
+			ACTIVE.put(player.getUUID(), new LightPos(level.dimension(), target));
+			if (current != null) {
+				Pending older = PENDING.put(player.getUUID(), new Pending(current, PENDING_TICKS));
+				if (older != null && !older.pos.equals(ACTIVE.get(player.getUUID()))) {
+					restore(server, older.pos);
 				}
 			}
 		}
@@ -202,36 +234,24 @@ public final class ScubaDiveGear {
 		return false;
 	}
 
-	/** Walks along the view ray and returns the farthest water source block before the ray leaves the water. */
-	private static BlockPos findTarget(ServerLevel level, ServerPlayer player) {
-		Vec3 eye = player.getEyePosition();
-		Vec3 look = player.getLookAngle();
-		BlockPos best = null;
-		for (int d = 1; d <= MAX_DISTANCE; d++) {
-			BlockPos p = BlockPos.containing(eye.x + look.x * d, eye.y + look.y * d, eye.z + look.z * d);
-			if (!level.getFluidState(p).is(FluidTags.WATER)) {
-				break;
-			}
-			if (isSourceWater(level, p)) {
-				best = p;
-			}
-		}
-		return best;
-	}
-
 	private static boolean isSourceWater(ServerLevel level, BlockPos pos) {
 		BlockState state = level.getBlockState(pos);
 		return state.is(Blocks.WATER) && level.getFluidState(pos).isSource();
 	}
 
-	/** Restores the tracked block to water, but only if it is still our light block. */
+	/** Restores the tracked light (and a pending old one) to water. */
 	private static void removeLight(MinecraftServer server, UUID id) {
 		LightPos lp = ACTIVE.remove(id);
 		if (lp != null) {
 			restore(server, lp);
 		}
+		Pending pd = PENDING.remove(id);
+		if (pd != null) {
+			restore(server, pd.pos);
+		}
 	}
 
+	/** Restores the block to water, but only if it is still our light block. */
 	private static void restore(MinecraftServer server, LightPos lp) {
 		ServerLevel level = server.getLevel(lp.dimension());
 		if (level == null) {

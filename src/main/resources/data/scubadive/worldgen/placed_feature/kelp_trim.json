@@ -1,0 +1,9 @@
+{
+  "feature": "scubadive:kelp_trim",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 1
+    }
+  ]
+}

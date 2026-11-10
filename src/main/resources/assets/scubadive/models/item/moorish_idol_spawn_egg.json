@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "scubadive:item/moorish_idol_spawn_egg"
+  }
+}

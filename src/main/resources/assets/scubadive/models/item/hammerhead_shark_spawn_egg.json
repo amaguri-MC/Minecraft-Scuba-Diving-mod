@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "scubadive:item/hammerhead_shark_spawn_egg" }
+}

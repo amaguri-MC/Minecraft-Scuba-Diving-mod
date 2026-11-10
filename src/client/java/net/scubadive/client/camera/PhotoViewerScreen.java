@@ -41,6 +41,8 @@ public final class PhotoViewerScreen extends Screen {
 
 	private Button prev;
 	private Button next;
+	private Button delete;
+	private boolean confirmDelete;
 
 	public PhotoViewerScreen(Screen parent, Species species) {
 		super(Component.translatable("screen.scubadive.photos.title", Component.translatable(species.langKey())));
@@ -57,6 +59,8 @@ public final class PhotoViewerScreen extends Screen {
 				.pos(this.width / 2 - 40, this.height - 26).size(80, 20).build());
 		this.next = this.addRenderableWidget(Button.builder(Component.literal("▶"), b -> go(1))
 				.pos(this.width / 2 + 80, this.height - 26).size(30, 20).build());
+		this.delete = this.addRenderableWidget(Button.builder(Component.translatable("screen.scubadive.photos.delete"), b -> onDelete())
+				.pos(this.width / 2 + 116, this.height - 26).size(70, 20).build());
 		if (this.textureId == null && !this.photos.isEmpty()) loadCurrent();
 		updateButtons();
 	}
@@ -64,12 +68,37 @@ public final class PhotoViewerScreen extends Screen {
 	private void go(int delta) {
 		int n = Math.max(0, Math.min(this.photos.size() - 1, this.index + delta));
 		if (n == this.index) return;
+		this.confirmDelete = false;
 		this.index = n;
 		loadCurrent();
 		updateButtons();
 	}
 
+	private void onDelete() {
+		if (this.photos.isEmpty()) return;
+		if (!this.confirmDelete) {
+			this.confirmDelete = true;
+			updateButtons();
+			return;
+		}
+		releaseTexture();
+		PhotoLog.Photo photo = this.photos.get(this.index);
+		if (PhotoLog.remove(photo.file())) {
+			this.photos.remove(this.index);
+		}
+		this.confirmDelete = false;
+		if (this.photos.isEmpty()) {
+			this.onClose();
+			return;
+		}
+		this.index = Math.min(this.index, this.photos.size() - 1);
+		loadCurrent();
+		updateButtons();
+	}
+
 	private void updateButtons() {
+		this.delete.active = !this.photos.isEmpty();
+		this.delete.setMessage(Component.translatable(this.confirmDelete ? "screen.scubadive.photos.delete_confirm" : "screen.scubadive.photos.delete"));
 		this.prev.active = this.index > 0;
 		this.next.active = this.index < this.photos.size() - 1;
 	}

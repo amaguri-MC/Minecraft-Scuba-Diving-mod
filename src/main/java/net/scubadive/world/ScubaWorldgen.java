@@ -16,6 +16,7 @@ import net.scubadive.ScubaDive;
 public final class ScubaWorldgen {
 	public static final Feature<NoneFeatureConfiguration> DEEP_TRENCH = new DeepTrenchFeature(NoneFeatureConfiguration.CODEC);
 	public static final Feature<NoneFeatureConfiguration> ANEMONE_PATCH = new AnemonePatchFeature(NoneFeatureConfiguration.CODEC);
+	public static final Feature<NoneFeatureConfiguration> KELP_TRIM = new KelpTrimFeature(NoneFeatureConfiguration.CODEC);
 	public static final Feature<NoneFeatureConfiguration> SHIPWRECK = new ShipwreckFeature(NoneFeatureConfiguration.CODEC);
 
 	private static ResourceKey<PlacedFeature> placed(String path) {
@@ -27,6 +28,11 @@ public final class ScubaWorldgen {
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("deep_trench"), DEEP_TRENCH);
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("shipwreck"), SHIPWRECK);
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("anemone_patch"), ANEMONE_PATCH);
+		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("kelp_trim"), KELP_TRIM);
+		// Kelp grows at most 3 blocks tall: trimmed after vegetation in every ocean that has kelp.
+		BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.OCEAN, Biomes.DEEP_OCEAN, Biomes.COLD_OCEAN,
+				Biomes.DEEP_COLD_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN),
+				GenerationStep.Decoration.TOP_LAYER_MODIFICATION, placed("kelp_trim"));
 
 		// Deep trenches (with basalt columns on their floor) in every deep ocean variant; runs first, before other decoration.
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.DEEP_OCEAN, Biomes.DEEP_COLD_OCEAN,

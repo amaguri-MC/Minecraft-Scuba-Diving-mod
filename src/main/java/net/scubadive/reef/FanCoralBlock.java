@@ -87,4 +87,17 @@ public class FanCoralBlock extends Block implements SimpleWaterloggedBlock {
 		}
 		return super.updateShape(state, level, ticks, pos, directionToNeighbour, neighbourPos, neighbourState, random);
 	}
+
+	@Override
+	protected void entityInside(BlockState state, net.minecraft.world.level.Level level, BlockPos pos, net.minecraft.world.entity.Entity entity,
+			net.minecraft.world.entity.InsideBlockEffectApplier effects, boolean intersects) {
+		super.entityInside(state, level, pos, entity, effects, intersects);
+		CoralBreak.onPassThrough(level, pos, entity);
+	}
+
+	@Override
+	public void fallOn(net.minecraft.world.level.Level level, BlockState state, BlockPos pos, net.minecraft.world.entity.Entity entity, double fallDistance) {
+		super.fallOn(level, state, pos, entity, fallDistance);
+		CoralBreak.onLand(level, pos, entity, fallDistance);
+	}
 }

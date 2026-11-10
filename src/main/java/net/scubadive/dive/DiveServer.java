@@ -8,7 +8,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +26,8 @@ public final class DiveServer {
 	private static final int SURFACE_GUARD_TICKS = 20;
 	private static final int INPUT_TIMEOUT = 30;
 	private static final int SYNC_INTERVAL = 10;
+	/** Ticks between BCD hiss/gurgle sounds while a key is held. */
+	private static final int SOUND_INTERVAL = 8;
 
 	/** Live (unsynced) state of one player. */
 	static final class Live {
@@ -35,6 +41,7 @@ public final class DiveServer {
 		double lastY;
 		float speed;
 		boolean neutral;
+		long lastSound = -1000;
 
 		DiveData toData() {
 			return new DiveData(pressure, air, diveTicks, maxDepth);
@@ -115,7 +122,11 @@ public final class DiveServer {
 
 		// BCD input (held keys are refreshed by the client).
 		if (bcd && l.dir != 0 && now - l.dirTick <= INPUT_TIMEOUT) {
+			float before = l.air;
 			l.air = Math.max(0f, Math.min(1f, l.air + l.dir * Buoyancy.AIR_STEP));
+			if (l.air != before) {
+				bcdEffects(p, l.dir);
+			}
 		}
 
 		double y = p.getY();
@@ -147,6 +158,26 @@ public final class DiveServer {
 		// Safety net: the mixin already keeps breath up; this covers any path that bypasses it.
 		if (eyeInWater && ScubaDiveGear.canBreathe(p, l.pressure) && p.getAirSupply() < p.getMaxAirSupply()) {
 			p.setAirSupply(p.getMaxAirSupply());
+		}
+	}
+
+	/** Hiss on inflate, gurgle + rising bubbles on deflate; only while the air level actually changes. */
+	private static void bcdEffects(ServerPlayer p, int dir) {
+		Live l = live(p);
+		if (now - l.lastSound >= SOUND_INTERVAL) {
+			l.lastSound = now;
+			if (dir > 0) {
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.PLAYERS, 0.7f, 1.7f);
+			} else {
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.PLAYERS, 0.8f, 0.7f);
+			}
+		}
+		if (dir < 0 && now % 2 == 0 && p.level() instanceof ServerLevel level) {
+			// Shoulder height, slightly behind the diver (where the cylinder valve sits).
+			double yaw = Math.toRadians(p.getYRot());
+			double x = p.getX() + Math.sin(yaw) * 0.3;
+			double z = p.getZ() - Math.cos(yaw) * 0.3;
+			level.sendParticles(ParticleTypes.BUBBLE, x, p.getY() + 1.3, z, 3, 0.12, 0.05, 0.12, 0.08);
 		}
 	}
 

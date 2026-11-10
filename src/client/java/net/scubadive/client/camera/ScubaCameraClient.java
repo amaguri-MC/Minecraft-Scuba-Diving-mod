@@ -24,16 +24,16 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
 
 import net.scubadive.ScubaDive;
 import net.scubadive.camera.Breakdown;
@@ -56,6 +56,15 @@ public final class ScubaCameraClient {
 	public static final double ZOOM_MAX = 8.0;
 	private static final double ZOOM_STEP = 1.25;
 	private static double zoom = ZOOM_MIN;
+
+	/** Shooting mode: entered/left with left click while holding the camera in either hand. */
+	private static boolean shooting;
+	/** True from the shutter press until the clean frame has been grabbed (HUD and hand are hidden). */
+	private static boolean capturing;
+	private static int hiddenFrames;
+	private static int captureWaitTicks;
+	private static Pending capturePending;
+	private static final int CAPTURE_TIMEOUT_TICKS = 20;
 
 	/** Photos waiting for the server verdict (FIFO: results come back in the order captures were sent). */
 	private static final ArrayDeque<Pending> PENDING = new ArrayDeque<>();
@@ -88,10 +97,24 @@ public final class ScubaCameraClient {
 		openJournal = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.journal", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, category));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (client.player == null || !zoomActive(client.player)) {
+			if (client.player == null || !holdingCamera(client.player)) {
+				shooting = false;
+			}
+			if (!shooting) {
 				zoom = ZOOM_MIN;
 			}
-			if (client.player == null) return;
+			if (client.player == null) {
+				capturing = false;
+				capturePending = null;
+				return;
+			}
+			if (capturing) {
+				captureWaitTicks++;
+				// Two hidden frames rendered means the main target holds a clean frame.
+				if (hiddenFrames >= 2 || captureWaitTicks > CAPTURE_TIMEOUT_TICKS) {
+					grabFrame(client);
+				}
+			}
 			while (openJournal.consumeClick()) {
 				if (client.gui.screen() == null) {
 					client.gui.setScreen(new JournalScreen());
@@ -101,8 +124,8 @@ public final class ScubaCameraClient {
 
 		ClientHotbarScrollEvents.ALLOW.register((inventory, currentSlot, selected, xOffset, yOffset) -> {
 			Player player = Minecraft.getInstance().player;
-			// Wheel zooms only while the camera is in the off hand; otherwise it is the normal hotbar scroll.
-			if (player == null || !zoomActive(player)) return true;
+			// In shooting mode the wheel zooms instead of switching the hotbar slot.
+			if (player == null || !shooting || !holdingCamera(player)) return true;
 			if (yOffset > 0) {
 				zoom = Math.min(ZOOM_MAX, zoom * ZOOM_STEP);
 			} else if (yOffset < 0) {
@@ -111,39 +134,102 @@ public final class ScubaCameraClient {
 			return false;
 		});
 
-		UseItemCallback.EVENT.register((player, level, hand) -> {
-			if (!level.isClientSide()) return InteractionResult.PASS;
-			if (!player.getItemInHand(hand).is(ScubaCamera.CAMERA)) return InteractionResult.PASS;
-			takePhoto(Minecraft.getInstance(), player);
-			return InteractionResult.SUCCESS;
-		});
+		// Hide every vanilla HUD element (and the dive computer) while the clean frame is rendered.
+		// The depth tint and silt haze are not wrapped, so they stay in the photo.
+		for (Identifier id : HIDDEN_ON_CAPTURE) {
+			HudElementRegistry.replaceElement(id, original -> (HudElement) (graphics, delta) -> {
+				if (!capturing) original.extractRenderState(graphics, delta);
+			});
+		}
 
 		ClientPlayNetworking.registerGlobalReceiver(CaptureResultPayload.TYPE, (payload, context) -> onResult(context.client(), payload));
 
 		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_flash"), ScubaCameraClient::extractFlash);
-		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_zoom"), ScubaCameraClient::extractZoom);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_finder"), ScubaCameraClient::extractFinder);
 	}
+
+	private static final Identifier[] HIDDEN_ON_CAPTURE = {
+			VanillaHudElements.MISC_OVERLAYS, VanillaHudElements.CROSSHAIR, VanillaHudElements.SPECTATOR_MENU,
+			VanillaHudElements.HOTBAR, VanillaHudElements.ARMOR_BAR, VanillaHudElements.HEALTH_BAR,
+			VanillaHudElements.FOOD_BAR, VanillaHudElements.AIR_BAR, VanillaHudElements.MOUNT_HEALTH,
+			VanillaHudElements.INFO_BAR, VanillaHudElements.EXPERIENCE_LEVEL, VanillaHudElements.HELD_ITEM_TOOLTIP,
+			VanillaHudElements.SPECTATOR_TOOLTIP, VanillaHudElements.MOB_EFFECTS, VanillaHudElements.BOSS_BAR,
+			VanillaHudElements.SLEEP, VanillaHudElements.DEMO_TIMER, VanillaHudElements.SCOREBOARD,
+			VanillaHudElements.OVERLAY_MESSAGE, VanillaHudElements.TITLE_AND_SUBTITLE, VanillaHudElements.CHAT,
+			VanillaHudElements.PLAYER_LIST, VanillaHudElements.SUBTITLES, ScubaDive.id("dive_computer")
+	};
 
 	/** Current zoom factor (1.0 = none). Read by CameraFovMixin. */
 	public static double getZoom() {
 		return zoom;
 	}
 
-	private static boolean zoomActive(Player player) {
-		return player.getOffhandItem().is(ScubaCamera.CAMERA);
+	/** True while the clean frame is being produced; read by the hand mixin. */
+	public static boolean isCapturing() {
+		return capturing;
 	}
 
-	private static void extractZoom(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (zoom <= 1.0) return;
+	private static boolean holdingCamera(Player player) {
+		return player.getMainHandItem().is(ScubaCamera.CAMERA) || player.getOffhandItem().is(ScubaCamera.CAMERA);
+	}
+
+	/** Left click (called from the mixin). Returns true when the click is consumed (no attack). */
+	public static boolean onAttackKey(Minecraft client) {
+		Player player = client.player;
+		if (player == null || client.gui.screen() != null || !holdingCamera(player)) return false;
+		if (!capturing) {
+			shooting = !shooting;
+			if (!shooting) zoom = ZOOM_MIN;
+		}
+		return true;
+	}
+
+	/** True while a held left button must not mine (camera in hand). */
+	public static boolean blocksMining(Minecraft client) {
+		return client.player != null && holdingCamera(client.player);
+	}
+
+	/** Right click (called from the mixin). Returns true when consumed: shooting mode takes the photo. */
+	public static boolean onUseKey(Minecraft client) {
+		Player player = client.player;
+		if (player == null || !shooting || client.gui.screen() != null || !holdingCamera(player)) return false;
+		takePhoto(client, player);
+		return true;
+	}
+
+	private static void extractFinder(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		if (capturing) {
+			hiddenFrames++;
+			return;
+		}
 		Minecraft client = Minecraft.getInstance();
-		if (client.player == null || !zoomActive(client.player)) return;
-		Component text = Component.translatable("hud.scubadive.camera.zoom", String.format(Locale.ROOT, "%.1f", zoom));
-		graphics.centeredText(client.font, text, graphics.guiWidth() / 2, 10, 0xFFFFFFFF);
+		if (!shooting || client.player == null || !holdingCamera(client.player)) return;
+		int w = graphics.guiWidth();
+		int h = graphics.guiHeight();
+		int color = 0xE0FFFFFF;
+		int mx = w / 8;
+		int my = h / 8;
+		int len = Math.max(10, h / 14);
+		// Corner brackets.
+		for (int i = 0; i < 4; i++) {
+			int x0 = (i & 1) == 0 ? mx : w - mx;
+			int y0 = (i & 2) == 0 ? my : h - my;
+			int dx = (i & 1) == 0 ? 1 : -1;
+			int dy = (i & 2) == 0 ? 1 : -1;
+			graphics.fill(Math.min(x0, x0 + dx * len), Math.min(y0, y0 + dy), Math.max(x0, x0 + dx * len), Math.max(y0, y0 + dy) + 1, color);
+			graphics.fill(Math.min(x0, x0 + dx), Math.min(y0, y0 + dy * len), Math.max(x0, x0 + dx) + 1, Math.max(y0, y0 + dy * len), color);
+		}
+		// Centre cross.
+		graphics.fill(w / 2 - 6, h / 2, w / 2 + 7, h / 2 + 1, color);
+		graphics.fill(w / 2, h / 2 - 6, w / 2 + 1, h / 2 + 7, color);
+		Component zoomText = Component.translatable("hud.scubadive.camera.zoom", String.format(Locale.ROOT, "%.1f", zoom));
+		graphics.centeredText(client.font, zoomText, w / 2, my + 6, 0xFFFFFFFF);
+		graphics.centeredText(client.font, Component.translatable("hud.scubadive.camera.guide"), w / 2, h - my - 14, 0xFFFFFFFF);
 	}
 
 	private static void takePhoto(Minecraft client, Player player) {
 		long now = System.currentTimeMillis();
-		if (now - lastShotMs < SHOT_INTERVAL_MS) return;
+		if (capturing || now - lastShotMs < SHOT_INTERVAL_MS) return;
 		lastShotMs = now;
 
 		double fov = client.options.fov().get() / zoom;
@@ -157,22 +243,29 @@ public final class ScubaCameraClient {
 			return;
 		}
 
-		Pending pending = requestScreenshot(shot.species());
-		flashStart = now;
+		LocalDateTime time = LocalDateTime.now();
+		String name = FILE_TIME.format(time) + "_" + shot.species().id + ".png";
+		Pending pending = new Pending(shot.species(), time.toString(), PhotoLog.dir().resolve(name));
 		ClientPlayNetworking.send(new CapturePayload(shot.species().id, shot.entityId(),
 				shot.pos().getX(), shot.pos().getY(), shot.pos().getZ(), (float) fov));
 		synchronized (PENDING) {
 			PENDING.add(pending);
 		}
+		// Hide HUD and hand; the frame is grabbed from the tick handler two rendered frames later.
+		capturePending = pending;
+		capturing = true;
+		hiddenFrames = 0;
+		captureWaitTicks = 0;
 	}
 
-	/** Grabs the current frame; it is processed and saved once the server verdict has arrived. */
-	private static Pending requestScreenshot(Species species) {
-		LocalDateTime now = LocalDateTime.now();
-		String name = FILE_TIME.format(now) + "_" + species.id + ".png";
-		Pending pending = new Pending(species, now.toString(), PhotoLog.dir().resolve(name));
+	/** Grabs the clean frame; it is processed and saved once the server verdict has arrived. */
+	private static void grabFrame(Minecraft client) {
+		Pending pending = capturePending;
+		capturing = false;
+		capturePending = null;
+		flashStart = System.currentTimeMillis();
+		if (pending == null) return;
 		try {
-			Minecraft client = Minecraft.getInstance();
 			Screenshot.takeScreenshot(client.gameRenderer.mainRenderTarget(), image -> {
 				NativeImage copy;
 				synchronized (pending) {
@@ -187,7 +280,6 @@ public final class ScubaCameraClient {
 			ScubaDive.LOGGER.warn("Failed to prepare camera screenshot", e);
 			pending.discarded = true;
 		}
-		return pending;
 	}
 
 	/** Once both the frame and the verdict are here: apply blur/haze, save the PNG, append photos.json. */
@@ -255,7 +347,7 @@ public final class ScubaCameraClient {
 
 	private static void extractFlash(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		long elapsed = System.currentTimeMillis() - flashStart;
-		if (elapsed < 0 || elapsed >= FLASH_MS) return;
+		if (capturing || elapsed < 0 || elapsed >= FLASH_MS) return;
 		int alpha = (int) (255.0 * (1.0 - (double) elapsed / FLASH_MS));
 		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (alpha << 24) | 0xFFFFFF);
 	}

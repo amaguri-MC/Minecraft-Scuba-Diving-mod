@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFW;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.minecraft.client.DeltaTracker;
@@ -14,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
@@ -27,6 +29,7 @@ import net.scubadive.dive.DiveClientState;
 import net.scubadive.dive.DiveData;
 import net.scubadive.dive.DiveInputPayload;
 import net.scubadive.dive.ScubaDiveGear;
+import net.scubadive.equipment.WristSlot;
 
 /**
  * Client-side dive visuals:
@@ -51,6 +54,9 @@ public final class ScubaDiveGearClient {
 	private static final float[] B = {140f, 150f, 150f, 130f, 95f, 55f, 24f, 14f};
 
 	private static final int KEEPALIVE_TICKS = 10;
+	/** Neutral-buoyancy bob: amplitude in blocks, angular speed in rad/tick. */
+	private static final double NEUTRAL_BOB = 0.02;
+	private static final double NEUTRAL_BOB_SPEED = 0.07;
 
 	private static KeyMapping inflateKey;
 	private static KeyMapping deflateKey;
@@ -71,6 +77,11 @@ public final class ScubaDiveGearClient {
 		inflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_inflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, category));
 		deflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_deflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, category));
 		ClientTickEvents.END_CLIENT_TICK.register(ScubaDiveGearClient::tick);
+		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
+			if (renderer instanceof AvatarRenderer<?> avatarRenderer) {
+				helper.register(new DiveGearLayer(avatarRenderer));
+			}
+		});
 		HudElementRegistry.attachElementBefore(VanillaHudElements.MISC_OVERLAYS, ScubaDive.id("depth_tint"), ScubaDiveGearClient::renderTint);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS, ScubaDive.id("dive_computer"), ScubaDiveGearClient::renderComputer);
 	}
@@ -131,7 +142,17 @@ public final class ScubaDiveGearClient {
 		double speed = Math.abs(player.getY() - player.yo);
 		DiveClientState.neutral = swimming && Buoyancy.isNeutral(net, (float) speed);
 		if (swimming && !player.getAbilities().flying && !player.isPassenger()) {
-			player.addDeltaMovement(new Vec3(0.0, Buoyancy.ACCEL * net, 0.0));
+			Vec3 v = player.getDeltaMovement();
+			if (DiveClientState.neutral) {
+				// Hold height: cancel vanilla's underwater sinking, leave only a slow +-0.02 block bob.
+				double bob = NEUTRAL_BOB * NEUTRAL_BOB_SPEED * Math.cos(clientTick * NEUTRAL_BOB_SPEED);
+				player.setDeltaMovement(v.x, bob, v.z);
+			} else if (Math.abs(net) < Buoyancy.NEUTRAL_NET) {
+				// Almost neutral: damp vertical motion so the diver can settle into neutral.
+				player.setDeltaMovement(v.x, v.y * 0.5, v.z);
+			} else {
+				player.addDeltaMovement(new Vec3(0.0, Buoyancy.ACCEL * net, 0.0));
+			}
 		}
 	}
 
@@ -177,7 +198,7 @@ public final class ScubaDiveGearClient {
 	private static void renderComputer(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft client = Minecraft.getInstance();
 		Player player = client.player;
-		if (player == null || !ScubaDiveGear.isHoldingDiveComputer(player)) {
+		if (player == null || !(WristSlot.hasDiveComputer(player) || ScubaDiveGear.isHoldingDiveComputer(player))) {
 			return;
 		}
 		Font font = client.font;

@@ -52,6 +52,32 @@ public final class PhotoLog {
 		}
 	}
 
+	/** Removes the entry for this file from photos.json and deletes the PNG. Returns false on failure. */
+	public static synchronized boolean remove(String file) {
+		try {
+			JsonArray array = readArray();
+			JsonArray kept = new JsonArray();
+			for (JsonElement el : array) {
+				boolean match = false;
+				try {
+					match = el.getAsJsonObject().get("file").getAsString().equals(file);
+				} catch (RuntimeException ignored) {
+					// keep unreadable entries untouched
+				}
+				if (!match) kept.add(el);
+			}
+			Files.createDirectories(dir());
+			try (Writer w = Files.newBufferedWriter(indexFile(), StandardCharsets.UTF_8)) {
+				GSON.toJson(kept, w);
+			}
+			Files.deleteIfExists(dir().resolve(file));
+			return true;
+		} catch (IOException | RuntimeException e) {
+			ScubaDive.LOGGER.warn("Failed to delete photo {}", file, e);
+			return false;
+		}
+	}
+
 	/** All photos of a species, newest first. */
 	public static synchronized List<Photo> load(String speciesId) {
 		List<Photo> out = new ArrayList<>();

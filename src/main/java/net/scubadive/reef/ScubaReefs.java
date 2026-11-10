@@ -34,7 +34,7 @@ public final class ScubaReefs {
 					.sound(SoundType.CORAL_BLOCK)
 					.pushReaction(PushReaction.DESTROY));
 
-	public static final Block BRAIN_CORAL = block("brain_coral", Block::new,
+	public static final Block BRAIN_CORAL = block("brain_coral", SolidCoralBlock::new,
 			BlockBehaviour.Properties.of()
 					.mapColor(MapColor.COLOR_PINK)
 					.strength(1.5F, 3.0F)
