@@ -213,6 +213,17 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.getInput().lookAt(0, 20);
 		context.waitTicks(40);
 		context.takeScreenshot("10_showcase_coral_barracuda");
+		context.runOnClient(mc -> {
+			var state = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("scubadive", "brain_coral")).defaultBlockState();
+			var model = mc.getModelManager().getBlockStateModelSet().get(state);
+			List<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart> parts = new ArrayList<>();
+			model.collectParts(net.minecraft.util.RandomSource.create(1), parts);
+			for (var part : parts) {
+				for (var quad : part.getQuads(net.minecraft.core.Direction.NORTH)) {
+					log("brain coral north quad: %s", quad.materialInfo());
+				}
+			}
+		});
 		server.runCommand("tp @p " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 1) + ".5");
 		context.getInput().lookAt(0, 25);
 		context.waitTicks(40);
