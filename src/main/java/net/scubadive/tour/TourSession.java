@@ -53,6 +53,8 @@ final class TourSession {
 		int coralsBroken;
 		/** Ran the tank dry underwater: the dive total is halved. */
 		boolean emptyTank;
+		/** Surfaced with decompression sickness: the dive total is cut by a quarter. */
+		boolean bent;
 
 		Stat(String name) {
 			this.name = name;
@@ -66,6 +68,9 @@ final class TourSession {
 			sum = Math.max(0, sum);
 			if (emptyTank) {
 				sum /= 2;
+			}
+			if (bent) {
+				sum = sum * 3 / 4;
 			}
 			return sum;
 		}
@@ -368,6 +373,15 @@ final class TourSession {
 
 	private static final int CORAL_PENALTY = 20;
 
+	/** Decompression sickness during the tour: a milder penalty than running out of air. */
+	void bent(ServerPlayer p) {
+		if (phase != Phase.DIVING) {
+			return;
+		}
+		stats.computeIfAbsent(p.getUUID(), k -> new Stat(p.getName().getString())).bent = true;
+		p.sendSystemMessage(Component.translatable("tour.scubadive.bent_penalty").withStyle(net.minecraft.ChatFormatting.RED));
+	}
+
 	/** The diver's tank is empty under water: big penalty, back to the boat. */
 	void outOfAir(ServerPlayer p) {
 		if (phase != Phase.DIVING || !waiting.add(p.getUUID())) {
@@ -461,6 +475,9 @@ final class TourSession {
 			}
 			if (s.emptyTank) {
 				lines.add(Component.translatable("tour.scubadive.result.empty_line", s.name));
+			}
+			if (s.bent) {
+				lines.add(Component.translatable("tour.scubadive.result.bent_line", s.name));
 			}
 		}
 		forEachMember(p -> {

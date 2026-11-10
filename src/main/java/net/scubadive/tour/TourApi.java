@@ -35,6 +35,11 @@ public final class TourApi {
 	/** Tank pressure (bar) every diver starts a tour with. */
 	public static final float TOUR_TANK = 100f;
 
+	/** Called when a tour diver surfaces with decompression sickness. */
+	public static void onBent(ServerPlayer player) {
+		TourManager.bent(player);
+	}
+
 	/** Called when a tour diver breaks a coral by bumping into it. */
 	public static void onCoralBroken(ServerPlayer player) {
 		TourManager.coralBroken(player);

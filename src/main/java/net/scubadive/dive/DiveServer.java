@@ -148,6 +148,9 @@ public final class DiveServer {
 			p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 400, 0));
 			p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.scubadive.bent")
 					.withStyle(net.minecraft.ChatFormatting.RED));
+			if (net.scubadive.tour.TourApi.isInTour(p)) {
+				net.scubadive.tour.TourApi.onBent(p);
+			}
 		}
 	}
 

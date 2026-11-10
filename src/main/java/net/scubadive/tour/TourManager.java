@@ -116,6 +116,13 @@ public final class TourManager {
 		}
 	}
 
+	static void bent(ServerPlayer player) {
+		TourSession s = DIVERS.get(player.getUUID());
+		if (s != null) {
+			s.bent(player);
+		}
+	}
+
 	static void coralBroken(ServerPlayer player) {
 		TourSession s = DIVERS.get(player.getUUID());
 		if (s != null) {

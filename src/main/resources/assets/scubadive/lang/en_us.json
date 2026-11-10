@@ -254,5 +254,7 @@
  "tour.scubadive.coral_penalty": "Coral broken! Reef damage -%s",
  "tour.scubadive.end.boat": "Back on the boat: your dive is over.",
  "tour.scubadive.end.reserve": "Surfaced on reserve: your dive is over.",
- "tour.scubadive.end.empty": "Out of air underwater! Your total is halved."
+ "tour.scubadive.end.empty": "Out of air underwater! Your total is halved.",
+ "tour.scubadive.bent_penalty": "Decompression sickness! Your total is cut by a quarter.",
+ "tour.scubadive.result.bent_line": "  %1$s: decompression sickness (total x3/4)"
 }
