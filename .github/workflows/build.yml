@@ -26,17 +26,17 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
-      - name: collect jars
+      - name: probe apis
         run: |
-          mkdir -p probe
-          cp ~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/*-deobf/26.2/*.jar probe/
-          for j in $(find ~/.gradle -name "fabric-*.jar" | grep -v sources | grep -E "0\.161|26\.2|\+[0-9a-f]{10}"); do cp "$j" probe/; done
-          ls -la probe | head -80
-      - name: upload jars
-        uses: actions/upload-artifact@v7
-        with:
-          name: probe-jars
-          path: probe/
+          D=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft
+          CJ=$(ls $D/minecraft-clientonly-deobf/26.2/*.jar); MJ=$(ls $D/minecraft-common-deobf/26.2/*.jar)
+          FJ=$(find ~/.gradle -name "fabric-*.jar" | grep -v sources | tr '\n' ':')
+          CP="$CJ:$MJ:$FJ"
+          echo "##### color classes"; unzip -l "$CJ" | awk '{print $4}' | grep -iE "color|tint" | grep -v '\$' 
+          echo "##### fabric color classes"; for j in $(echo $FJ | tr ':' ' '); do unzip -l "$j" | awk '{print $4}' | grep -iE "color|tint" ; done | sort -u
+          for c in net.minecraft.client.color.block.BlockColors net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents 'net.fabricmc.fabric.api.event.client.player.ClientHotbarScrollEvents$Allow' net.minecraft.client.gui.GuiGraphicsExtractor; do echo "##### $c"; javap -cp "$CP" "$c" || true; done
+          echo "##### RenderPipelines GUI"; javap -cp "$CP" net.minecraft.client.renderer.RenderPipelines | grep -i gui
+          echo "##### Camera code"; javap -p -c -cp "$CP" net.minecraft.client.Camera | sed -n '/getFov()/,/^$/p;/calculateFov(float)/,/^$/p;/void tickFov()/,/^$/p'
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:
