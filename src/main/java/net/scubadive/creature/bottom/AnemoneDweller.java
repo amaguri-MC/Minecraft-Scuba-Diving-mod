@@ -68,7 +68,7 @@ public abstract class AnemoneDweller extends Mob {
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		// Older saves lack the flags: treat them as wild and check once, which clears strays left by earlier versions.
-		this.deliberate = input.getBooleanOr("Deliberate", false);
+		this.deliberate = input.getBooleanOr("Deliberate", true);
 		this.anemoneChecked = input.getBooleanOr("AnemoneChecked", false);
 	}
 

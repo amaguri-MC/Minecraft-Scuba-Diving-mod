@@ -21,6 +21,8 @@ public abstract class ServerPlayerTourDropMixin {
 			if (!self.getInventory().add(stack.copy())) {
 				return;
 			}
+			// Empty the original so callers that loop "while the stack is not empty" stop.
+			stack.setCount(0);
 			self.containerMenu.broadcastChanges();
 			cir.setReturnValue(null);
 		}
