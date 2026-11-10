@@ -37,6 +37,11 @@
 		{
 			"config": "scubadive.camera.client.mixins.json",
 			"environment": "client"
+		},
+		"scubadive.equipment.mixins.json",
+		{
+			"config": "scubadive.equipment.client.mixins.json",
+			"environment": "client"
 		}
 	],
 	"depends": {

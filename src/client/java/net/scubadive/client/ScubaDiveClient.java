@@ -13,5 +13,6 @@ public class ScubaDiveClient implements ClientModInitializer {
 		net.scubadive.client.creature.big.BigFishClient.init();
 		net.scubadive.client.creature.reef.ReefFishClient.init();
 		net.scubadive.client.creature.bottom.BottomDwellersClient.init();
+		net.scubadive.client.equipment.WristSlotClient.init();
 	}
 }
