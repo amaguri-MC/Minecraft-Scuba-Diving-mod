@@ -49,7 +49,7 @@ public final class ScubaCreatures {
 					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
 							level.getFluidState(pos).is(FluidTags.WATER)
 									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
-									&& level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP)))
+									&& Nudibranch.isReefFloor(level.getBlockState(pos.below()))))
 			.sized(0.12f, 0.06f)
 			.clientTrackingRange(8)
 			.build(NUDIBRANCH_KEY);
