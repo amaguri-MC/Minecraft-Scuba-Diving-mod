@@ -20,6 +20,8 @@ import net.minecraft.world.entity.player.Player;
 /** Server-authoritative dive state: tank, BCD air, dive log, neutral buoyancy. Synced to the owner every SYNC_INTERVAL ticks. */
 public final class DiveServer {
 	private static final float USE_PER_TICK_PER_BAR = DiveData.FULL_TANK / (20f * 600f * 2f);
+	/** Air use multiplier while not neutrally buoyant. */
+	private static final float NOT_NEUTRAL_FACTOR = 1.35f;
 	private static final float REFILL_PER_TICK = DiveData.FULL_TANK / (20f * 10f);
 	private static final int SURFACE_RESET_TICKS = 20 * 10;
 	/** Minimum time at the surface before a full tank resets the log (avoids resets while bobbing). */
@@ -85,6 +87,13 @@ public final class DiveServer {
 		});
 	}
 
+	/** Fills the tank and clears the dive log (tour start). */
+	static void refill(Player player) {
+		Live l = live(player);
+		l.pressure = DiveData.FULL_TANK;
+		resetLog(l);
+	}
+
 	/** Live state if the player has one (server only), else null. */
 	static Live peek(Player player) {
 		return LIVE.get(player.getUUID());
@@ -143,16 +152,22 @@ public final class DiveServer {
 			l.diveTicks++;
 			l.maxDepth = Math.max(l.maxDepth, depth);
 			if (bcd) {
-				l.pressure = Math.max(0f, l.pressure - USE_PER_TICK_PER_BAR * (1f + depth / 10f));
+				// Deeper = denser air; poor buoyancy control (constant finning) burns air faster.
+				float effort = l.neutral ? 1f : NOT_NEUTRAL_FACTOR;
+				float before = l.pressure;
+				l.pressure = Math.max(0f, l.pressure - USE_PER_TICK_PER_BAR * (1f + depth / 10f) * effort);
+				if (before > 0f && l.pressure <= 0f && net.scubadive.tour.TourApi.isInTour(p)) {
+					net.scubadive.tour.TourApi.onOutOfAir(p);
+				}
 			}
 		} else {
 			l.surfaceTicks = Math.min(l.surfaceTicks + 1, SURFACE_RESET_TICKS);
-			if (bcd) {
+			if (bcd && !net.scubadive.tour.TourApi.noRefill(p)) {
 				l.pressure = Math.min(DiveData.FULL_TANK, l.pressure + REFILL_PER_TICK);
 				if (l.pressure >= DiveData.FULL_TANK && l.surfaceTicks >= SURFACE_GUARD_TICKS) {
 					resetLog(l);
 				}
-			} else if (l.surfaceTicks >= SURFACE_RESET_TICKS) {
+			} else if (l.surfaceTicks >= SURFACE_RESET_TICKS && !net.scubadive.tour.TourApi.noRefill(p)) {
 				resetLog(l);
 			}
 		}

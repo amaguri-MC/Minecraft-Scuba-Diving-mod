@@ -65,4 +65,9 @@ public final class DiveApi {
 		DiveServer.Live live = DiveServer.peek(player);
 		return live != null && live.neutral;
 	}
+
+	/** Server: fills the player's tank to 200 bar and resets dive time / max depth. */
+	public static void refill(Player player) {
+		DiveServer.refill(player);
+	}
 }

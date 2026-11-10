@@ -32,6 +32,8 @@ public class ScubaDive implements ModInitializer {
 		net.scubadive.creature.bottom.BottomDwellers.init();
 		net.scubadive.equipment.WristSlot.init();
 		net.scubadive.creature.spawn.HotspotSpawner.init();
+		net.scubadive.tour.TourManager.init();
+		net.scubadive.tour.center.DiveCenter.init();
 
 		// All items in the scubadive namespace are listed in this tab automatically.
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_KEY, FabricCreativeModeTab.builder()
