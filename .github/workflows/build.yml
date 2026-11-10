@@ -26,6 +26,15 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew build
+      - name: probe data (temporary)
+        if: always()
+        run: |
+          MJ=$(ls ~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-common-deobf/26.2/*.jar)
+          for f in data/minecraft/advancement/recipes/combat/leather_boots.json data/minecraft/advancement/recipes/tools/clock.json; do echo "### $f"; unzip -p "$MJ" "$f"; echo; done
+          unzip -Z1 "$MJ" | grep -E "^data/minecraft/(dimension|worldgen/world_preset|worldgen/flat_level_generator_preset)/" | head -20
+          for f in data/minecraft/worldgen/flat_level_generator_preset/water_world.json data/minecraft/worldgen/world_preset/flat.json data/minecraft/dimension_type/overworld.json; do echo "### $f"; unzip -p "$MJ" "$f"; echo; done
+          unzip -Z1 "$MJ" | grep -E "^data/minecraft/(structure|worldgen/structure|worldgen/template_pool|worldgen/structure_set)/" | grep -i "village/plains/houses\|shipwreck\|igloo" | head -8
+          for f in data/minecraft/worldgen/structure/igloo.json data/minecraft/worldgen/structure_set/igloos.json; do echo "### $f"; unzip -p "$MJ" "$f"; echo; done
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:
