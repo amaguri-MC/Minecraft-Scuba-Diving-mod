@@ -143,8 +143,11 @@ public final class ScubaDiveGearClient {
 		DiveClientState.neutral = swimming && Buoyancy.isNeutral(net, (float) speed);
 		if (swimming && !player.getAbilities().flying && !player.isPassenger()) {
 			Vec3 v = player.getDeltaMovement();
-			var keys = player.input.keyPresses;
-			boolean finning = keys.forward() || keys.backward() || keys.left() || keys.right() || keys.jump() || keys.shift();
+			boolean finning = false;
+			if (player instanceof net.minecraft.client.player.LocalPlayer local) {
+				var keys = local.input.keyPresses;
+				finning = keys.forward() || keys.backward() || keys.left() || keys.right() || keys.jump() || keys.shift();
+			}
 			if (!finning) {
 				// Left alone the diver drifts purely by buoyancy (vanilla's underwater sinking is replaced):
 				// positive rises, negative sinks, neutral holds height with a slow sine bob.
