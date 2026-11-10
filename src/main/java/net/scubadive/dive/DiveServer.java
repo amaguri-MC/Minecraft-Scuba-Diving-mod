@@ -22,6 +22,12 @@ public final class DiveServer {
 	private static final float USE_PER_TICK_PER_BAR = DiveData.FULL_TANK / (20f * 600f * 2f);
 	/** Air use multiplier while not neutrally buoyant. */
 	private static final float NOT_NEUTRAL_FACTOR = 1.25f;
+	/** Blocks per tick (smoothed). Gentle finning upward stays below it; a full BCD or sprint-swimming up exceeds it. */
+	private static final float ASCENT_LIMIT = 0.09f;
+	/** Ticks of ignored warning before decompression sickness is certain. */
+	private static final int RAPID_LIMIT = 40;
+	/** Only dives that went this deep (m) can cause it. */
+	private static final float ASCENT_MIN_DEPTH = 8f;
 	private static final float REFILL_PER_TICK = DiveData.FULL_TANK / (20f * 10f);
 	private static final int SURFACE_RESET_TICKS = 20 * 10;
 	/** Minimum time at the surface before a full tank resets the log (avoids resets while bobbing). */
@@ -45,6 +51,12 @@ public final class DiveServer {
 		double lastZ;
 		float speed;
 		float hSpeed;
+		/** Smoothed ascent rate (blocks/tick, up positive). */
+		float ascent;
+		/** Ticks spent ascending too fast during the current ascent. */
+		int rapidTicks;
+		/** Ignored the rapid-ascent warning: decompression sickness hits at the surface. */
+		boolean bent;
 		boolean neutral;
 		long lastSound = -1000;
 
@@ -107,9 +119,40 @@ public final class DiveServer {
 		return NOT_NEUTRAL_FACTOR + swim;
 	}
 
+	/**
+	 * Rapid-ascent warning: rising faster than ASCENT_LIMIT while breathing from the tank shows a warning.
+	 * Keeping it up for RAPID_LIMIT ticks means the diver is "bent" and gets decompression sickness on surfacing.
+	 */
+	private static void checkAscent(ServerPlayer p, Live l, boolean bcd, boolean eyeInWater) {
+		if (bcd && eyeInWater && l.ascent > ASCENT_LIMIT && l.maxDepth >= ASCENT_MIN_DEPTH) {
+			l.rapidTicks++;
+			if (l.rapidTicks % 10 == 1) {
+				p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("hud.scubadive.dc.rapid_ascent")
+						.withStyle(net.minecraft.ChatFormatting.RED));
+				p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.PLAYERS, 0.8f, 1.6f);
+			}
+			if (l.rapidTicks >= RAPID_LIMIT) {
+				l.bent = true;
+			}
+		} else if (l.rapidTicks > 0) {
+			l.rapidTicks = Math.max(0, l.rapidTicks - 2);
+		}
+		if (!eyeInWater && l.bent) {
+			l.bent = false;
+			l.rapidTicks = 0;
+			p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, 300, 0));
+			p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, 400, 1));
+			p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS, 400, 0));
+			p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.scubadive.bent")
+					.withStyle(net.minecraft.ChatFormatting.RED));
+		}
+	}
+
 	/** Fills the tank and clears the dive log (tour start). */
 	static void refill(Player player) {
 		Live l = live(player);
+		l.bent = false;
+		l.rapidTicks = 0;
 		l.pressure = DiveData.FULL_TANK;
 		resetLog(l);
 	}
@@ -164,6 +207,12 @@ public final class DiveServer {
 		}
 
 		double y = p.getY();
+		float rise = (float) (y - l.lastY);
+		if (Math.abs(rise) > 2f) {
+			rise = 0f;
+		}
+		l.ascent = l.ascent * 0.85f + rise * 0.15f;
+		checkAscent(p, l, bcd, eyeInWater);
 		l.speed = (float) Math.abs(y - l.lastY);
 		l.lastY = y;
 		double hx = p.getX() - l.lastX;

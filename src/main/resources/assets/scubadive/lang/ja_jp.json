@@ -230,5 +230,7 @@
  "item.scubadive.sea_nettle_spawn_egg": "アカクラゲのスポーンエッグ",
  "entity.scubadive.spotted_jelly": "タコクラゲ",
  "species.scubadive.spotted_jelly": "タコクラゲ",
- "item.scubadive.spotted_jelly_spawn_egg": "タコクラゲのスポーンエッグ"
+ "item.scubadive.spotted_jelly_spawn_egg": "タコクラゲのスポーンエッグ",
+ "hud.scubadive.dc.rapid_ascent": "急浮上！ ゆっくり上がって、BCDの空気を抜いて",
+ "message.scubadive.bent": "減圧症：急に浮上しすぎた"
 }

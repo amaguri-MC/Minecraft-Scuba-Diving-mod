@@ -230,5 +230,7 @@
  "item.scubadive.sea_nettle_spawn_egg": "Sea Nettle Spawn Egg",
  "entity.scubadive.spotted_jelly": "Spotted Jelly",
  "species.scubadive.spotted_jelly": "Spotted Jelly",
- "item.scubadive.spotted_jelly_spawn_egg": "Spotted Jelly Spawn Egg"
+ "item.scubadive.spotted_jelly_spawn_egg": "Spotted Jelly Spawn Egg",
+ "hud.scubadive.dc.rapid_ascent": "RAPID ASCENT! Slow down - deflate your BCD",
+ "message.scubadive.bent": "Decompression sickness: you surfaced too fast."
 }
