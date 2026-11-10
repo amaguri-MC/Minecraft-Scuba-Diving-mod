@@ -209,11 +209,24 @@ public final class DiveLobby {
 			return;
 		}
 		List<ServerPlayer> members = new ArrayList<>();
-		for (UUID id : lobby.members) {
+		for (UUID id : new ArrayList<>(lobby.members)) {
 			ServerPlayer member = server.getPlayerList().getPlayer(id);
-			if (member != null) {
-				members.add(member);
+			if (member == null) {
+				continue;
 			}
+			if (!gearReady(member)) {
+				// Took gear off after paying: leaves the tour with a refund.
+				if (member.getUUID().equals(lobby.host)) {
+					send(player, guide.getId(), lobby, false);
+					return;
+				}
+				lobby.members.remove(id);
+				PLAYER_LOBBY.remove(id);
+				give(member, lobby.point.cost);
+				member.sendSystemMessage(Component.translatable("message.scubadive.center.refunded", lobby.point.cost));
+				continue;
+			}
+			members.add(member);
 		}
 		boolean started;
 		try {
@@ -266,7 +279,18 @@ public final class DiveLobby {
 			player.sendSystemMessage(Component.translatable("message.scubadive.center.already"));
 			return false;
 		}
-		return true;
+		return gearReady(player);
+	}
+
+	/** Tours need the full kit; tells the player what is missing. */
+	private static boolean gearReady(ServerPlayer player) {
+		List<Component> missing = net.scubadive.tour.TourGear.missing(player);
+		if (missing.isEmpty()) {
+			return true;
+		}
+		player.sendSystemMessage(Component.translatable("message.scubadive.center.missing_gear",
+				net.minecraft.network.chat.ComponentUtils.formatList(missing, Component.literal(", "))));
+		return false;
 	}
 
 	private static void warnGear(ServerPlayer player) {

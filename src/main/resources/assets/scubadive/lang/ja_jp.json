@@ -256,5 +256,6 @@
  "tour.scubadive.end.reserve": "残圧が少ないまま浮上したのでダイブ終了。",
  "tour.scubadive.end.empty": "水中でエア切れ！ 合計点が半分になる。",
  "tour.scubadive.bent_penalty": "減圧症になった！ 合計点が4分の3になる。",
- "tour.scubadive.result.bent_line": "  %1$s: 減圧症（合計点が4分の3）"
+ "tour.scubadive.result.bent_line": "  %1$s: 減圧症（合計点が4分の3）",
+ "message.scubadive.center.missing_gear": "ツアーには次の装備が必要：%s（マスク・BCD・ウェットスーツ・フィンを着て、ダイコンは手首枠、カメラとライトは持ち物に）"
 }

@@ -26,6 +26,12 @@ public final class WristEquipSlot extends Slot {
 	}
 
 	@Override
+	public boolean mayPickup(net.minecraft.world.entity.player.Player player) {
+		// The dive computer stays on the wrist during a tour.
+		return !net.scubadive.tour.TourGear.locked(player) && super.mayPickup(player);
+	}
+
+	@Override
 	public boolean mayPlace(ItemStack stack) {
 		return !this.player.hasInfiniteMaterials()
 				&& ScubaDiveGear.DIVE_COMPUTER != null

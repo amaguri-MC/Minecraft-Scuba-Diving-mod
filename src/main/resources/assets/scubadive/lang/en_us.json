@@ -256,5 +256,6 @@
  "tour.scubadive.end.reserve": "Surfaced on reserve: your dive is over.",
  "tour.scubadive.end.empty": "Out of air underwater! Your total is halved.",
  "tour.scubadive.bent_penalty": "Decompression sickness! Your total is cut by a quarter.",
- "tour.scubadive.result.bent_line": "  %1$s: decompression sickness (total x3/4)"
+ "tour.scubadive.result.bent_line": "  %1$s: decompression sickness (total x3/4)",
+ "message.scubadive.center.missing_gear": "Tours need: %s (wear mask, BCD, wetsuit and fins, dive computer on the wrist slot, camera and light in your inventory)"
 }

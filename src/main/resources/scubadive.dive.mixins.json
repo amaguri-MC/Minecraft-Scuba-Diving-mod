@@ -6,7 +6,9 @@
 		"LivingEntityBreathMixin",
 		"MobFullSetMixin",
 		"PlayerSwimPoseMixin",
-		"PlayerIdleSwimPitchMixin"
+		"PlayerIdleSwimPitchMixin",
+		"ArmorSlotTourLockMixin",
+		"ServerPlayerTourDropMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
