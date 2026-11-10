@@ -126,7 +126,17 @@ public final class CameraLogic {
 			same++;
 		}
 		double size = Math.max(e.getBbWidth(), e.getBbHeight());
-		return computeScore(player, level, s.basePoints, r, dist, size, fov, same, eye, center);
+		// Shots from behind the subject score a little less (smoothly from side-on to straight behind).
+		double angle = 1.0;
+		if (e instanceof net.minecraft.world.entity.LivingEntity living) {
+			Vec3 facing = Vec3.directionFromRotation(0.0f, living.yBodyRot);
+			Vec3 toEye = new Vec3(eye.x - center.x, 0.0, eye.z - center.z);
+			if (toEye.lengthSqr() > 1.0E-6) {
+				double dot = facing.dot(toEye.normalize());
+				angle = 0.8 + 0.2 * clamp((dot + 0.7) / 0.7, 0.0, 1.0);
+			}
+		}
+		return computeScore(player, level, s.basePoints, r, dist, size, fov, same, eye, center, angle);
 	}
 
 	private static Scored scoreBlock(Player player, Level level, BlockPos pos, Species s, double fov,
@@ -141,7 +151,7 @@ public final class CameraLogic {
 			return REJECT;
 		}
 		// A block subject is aimed at directly: treat it as dead centre, 1 block in size.
-		return computeScore(player, level, s.basePoints, 0.0, dist, 1.0, fov, 1, eye, center);
+		return computeScore(player, level, s.basePoints, 0.0, dist, 1.0, fov, 1, eye, center, 1.0);
 	}
 
 	/**
@@ -149,7 +159,7 @@ public final class CameraLogic {
 	 * * distance/turbidity(0.2-1.0) * buoyancy(1.2 neutral / 0.9 not) * brightness(0.85-1.25) * silt(0.3-1.0).
 	 */
 	private static Scored computeScore(Player player, Level level, int basePoints, double r, double dist, double size,
-			double fov, int sameOnScreen, Vec3 eye, Vec3 subject) {
+			double fov, int sameOnScreen, Vec3 eye, Vec3 subject, double angle) {
 		double center = 1.0 + (1.0 - clamp(r / CENTER_LIMIT, 0.0, 1.0));
 		double angular = 2.0 * Math.atan(size / (2.0 * Math.max(dist, 0.5)));
 		double frac = angular / Math.toRadians(fov);
@@ -173,7 +183,7 @@ public final class CameraLogic {
 		double silt = 1.0 - 0.7 * clamp(SiltApi.siltAlong(level, eye, subject), 0.0, 1.0);
 
 		Breakdown b = new Breakdown((float) distance, (float) neutral, (float) brightness, (float) silt,
-				(float) center, (float) sizeFactor, (float) group);
+				(float) center, (float) sizeFactor, (float) group, (float) angle);
 		return new Scored(Math.max(1, (int) Math.round(basePoints * b.product())), b);
 	}
 

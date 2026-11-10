@@ -7,8 +7,8 @@ import net.minecraft.network.codec.StreamCodec;
 
 /** Score multipliers of one shot (each 1.0 = neutral). score = round(base * product of all). */
 public record Breakdown(float distance, float neutral, float brightness, float silt,
-		float center, float size, float group) {
-	public static final Breakdown NONE = new Breakdown(1f, 1f, 1f, 1f, 1f, 1f, 1f);
+		float center, float size, float group, float angle) {
+	public static final Breakdown NONE = new Breakdown(1f, 1f, 1f, 1f, 1f, 1f, 1f, 1f);
 
 	public static final StreamCodec<ByteBuf, Breakdown> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.FLOAT, Breakdown::distance,
@@ -18,10 +18,11 @@ public record Breakdown(float distance, float neutral, float brightness, float s
 			ByteBufCodecs.FLOAT, Breakdown::center,
 			ByteBufCodecs.FLOAT, Breakdown::size,
 			ByteBufCodecs.FLOAT, Breakdown::group,
+			ByteBufCodecs.FLOAT, Breakdown::angle,
 			Breakdown::new
 	);
 
 	public double product() {
-		return (double) distance * neutral * brightness * silt * center * size * group;
+		return (double) distance * neutral * brightness * silt * center * size * group * angle;
 	}
 }

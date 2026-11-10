@@ -122,6 +122,7 @@ public final class PhotoLog {
 		bo.addProperty("center", b.center());
 		bo.addProperty("size", b.size());
 		bo.addProperty("group", b.group());
+		bo.addProperty("angle", b.angle());
 		o.add("breakdown", bo);
 		return o;
 	}
@@ -129,7 +130,7 @@ public final class PhotoLog {
 	private static Photo fromJson(JsonObject o) {
 		JsonObject bo = o.getAsJsonObject("breakdown");
 		Breakdown b = new Breakdown(f(bo, "distance"), f(bo, "neutral"), f(bo, "brightness"), f(bo, "silt"),
-				f(bo, "center"), f(bo, "size"), f(bo, "group"));
+				f(bo, "center"), f(bo, "size"), f(bo, "group"), bo.has("angle") ? f(bo, "angle") : 1f);
 		return new Photo(o.get("species").getAsString(), o.get("score").getAsInt(), b,
 				o.get("time").getAsString(), o.get("file").getAsString(),
 				o.has("tour") && o.get("tour").getAsBoolean());

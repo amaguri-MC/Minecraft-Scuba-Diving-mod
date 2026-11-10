@@ -171,7 +171,7 @@ public final class PhotoViewerScreen extends Screen {
 			Breakdown b = photo.breakdown();
 			String line1 = factor("distance", b.distance()) + "   " + factor("neutral", b.neutral())
 					+ "   " + factor("brightness", b.brightness()) + "   " + factor("silt", b.silt());
-			String line2 = factor("center", b.center()) + "   " + factor("size", b.size()) + "   " + factor("group", b.group());
+			String line2 = factor("center", b.center()) + "   " + factor("size", b.size()) + "   " + factor("group", b.group()) + "   " + factor("angle", b.angle());
 			graphics.centeredText(this.font, line1, this.width / 2, ty + 14, WHITE);
 			graphics.centeredText(this.font, line2, this.width / 2, ty + 26, WHITE);
 			graphics.centeredText(this.font, photo.time().replace('T', ' ').split("\\.")[0], this.width / 2, ty + 40, GRAY);

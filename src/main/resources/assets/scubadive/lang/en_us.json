@@ -208,5 +208,6 @@
  "tour.scubadive.result.species": "Species photographed (everyone): %s",
  "tour.scubadive.result.none": "  No photos were taken.",
  "screen.scubadive.journal.tab_wild": "Wild",
- "screen.scubadive.journal.tab_tour": "Tour"
+ "screen.scubadive.journal.tab_tour": "Tour",
+ "screen.scubadive.photos.b_angle": "Angle"
 }

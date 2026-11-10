@@ -21,7 +21,7 @@ import net.minecraft.world.entity.player.Player;
 public final class DiveServer {
 	private static final float USE_PER_TICK_PER_BAR = DiveData.FULL_TANK / (20f * 600f * 2f);
 	/** Air use multiplier while not neutrally buoyant. */
-	private static final float NOT_NEUTRAL_FACTOR = 1.35f;
+	private static final float NOT_NEUTRAL_FACTOR = 1.25f;
 	private static final float REFILL_PER_TICK = DiveData.FULL_TANK / (20f * 10f);
 	private static final int SURFACE_RESET_TICKS = 20 * 10;
 	/** Minimum time at the surface before a full tank resets the log (avoids resets while bobbing). */
@@ -41,7 +41,10 @@ public final class DiveServer {
 		int dir;
 		long dirTick;
 		double lastY;
+		double lastX;
+		double lastZ;
 		float speed;
+		float hSpeed;
 		boolean neutral;
 		long lastSound = -1000;
 
@@ -83,8 +86,25 @@ public final class DiveServer {
 			l.diveTicks = d.diveTicks();
 			l.maxDepth = d.maxDepth();
 			l.lastY = player.getY();
+			l.lastX = player.getX();
+			l.lastZ = player.getZ();
 			return l;
 		});
+	}
+
+	/**
+	 * Breathing rate relative to calm swimming: resting on the bottom or hovering still in neutral
+	 * buoyancy breathes least, finning fast or fighting poor buoyancy breathes most.
+	 */
+	private static float breathingEffort(Player p, Live l) {
+		float swim = Math.min(l.hSpeed, 0.3f) * 2.5f;
+		if (p.onGround()) {
+			return 0.55f + swim * 0.5f;
+		}
+		if (l.neutral) {
+			return (l.hSpeed < 0.02f ? 0.7f : 0.85f) + swim;
+		}
+		return NOT_NEUTRAL_FACTOR + swim;
 	}
 
 	/** Fills the tank and clears the dive log (tour start). */
@@ -146,6 +166,13 @@ public final class DiveServer {
 		double y = p.getY();
 		l.speed = (float) Math.abs(y - l.lastY);
 		l.lastY = y;
+		double hx = p.getX() - l.lastX;
+		double hz = p.getZ() - l.lastZ;
+		// Ignore teleports: a jump of several blocks is not swimming.
+		float h = (float) Math.sqrt(hx * hx + hz * hz);
+		l.hSpeed = h > 2f ? 0f : h;
+		l.lastX = p.getX();
+		l.lastZ = p.getZ();
 
 		if (eyeInWater) {
 			l.surfaceTicks = 0;
@@ -153,7 +180,7 @@ public final class DiveServer {
 			l.maxDepth = Math.max(l.maxDepth, depth);
 			if (bcd) {
 				// Deeper = denser air; poor buoyancy control (constant finning) burns air faster.
-				float effort = l.neutral ? 1f : NOT_NEUTRAL_FACTOR;
+				float effort = breathingEffort(p, l);
 				float before = l.pressure;
 				l.pressure = Math.max(0f, l.pressure - USE_PER_TICK_PER_BAR * (1f + depth / 10f) * effort);
 				if (before > 0f && l.pressure <= 0f && net.scubadive.tour.TourApi.isInTour(p)) {

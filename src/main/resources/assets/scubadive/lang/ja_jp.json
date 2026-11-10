@@ -208,5 +208,6 @@
  "tour.scubadive.result.species": "出会った種類数（全員分）: %s",
  "tour.scubadive.result.none": "  写真は撮られませんでした。",
  "screen.scubadive.journal.tab_wild": "野生",
- "screen.scubadive.journal.tab_tour": "ツアー"
+ "screen.scubadive.journal.tab_tour": "ツアー",
+ "screen.scubadive.photos.b_angle": "向き"
 }
