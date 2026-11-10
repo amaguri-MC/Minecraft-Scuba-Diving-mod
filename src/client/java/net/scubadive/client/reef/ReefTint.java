@@ -40,24 +40,25 @@ public final class ReefTint {
 			BlockTintSource main = new BlockTintSource() {
 				@Override
 				public int color(BlockState state) {
-					return PALETTE[0];
+					return 0xFF000000 | PALETTE[0];
 				}
 
 				@Override
 				public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-					return colorAt(pos.getX(), pos.getZ());
+					return 0xFF000000 | colorAt(pos.getX(), pos.getZ());
 				}
 			};
 			// Second colour (brain coral overlay): another part of the palette, so each block shows a mix.
 			BlockTintSource accent = new BlockTintSource() {
 				@Override
 				public int color(BlockState state) {
-					return PALETTE[3];
+					return 0xFF000000 | PALETTE[3];
 				}
 
 				@Override
 				public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
-					return accentAt(pos.getX(), pos.getY(), pos.getZ());
+					// Opaque alpha matters: the overlay is a cutout quad and a zero tint alpha discards every pixel.
+					return 0xFF000000 | accentAt(pos.getX(), pos.getY(), pos.getZ());
 				}
 			};
 			BlockColorRegistry.register(List.of(main, accent), block);
