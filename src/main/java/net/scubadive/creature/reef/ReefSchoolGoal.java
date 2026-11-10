@@ -10,18 +10,19 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Keeps schooling reef fish in a school at all times. Followers hold a fixed slot around the
- * leader (about 0.9 blocks apart) and copy its heading; a fish with no school within 12 blocks
+ * leader (about 0.9 blocks apart, no two share one) and copy its heading; a fish with no school within 12 blocks
  * swims to the nearest school of its species within 32 blocks. Searches run every 1-2 seconds.
  */
 final class ReefSchoolGoal extends Goal {
 	private static final double JOIN_RADIUS = 12.0;
 	private static final double SEEK_RADIUS = 32.0;
-	private static final double SPACING = 0.9;
+	private static final double SPACING = 1.0;
 	private final ReefSchoolFish fish;
 	private ReefSchoolFish target;
 	private int scan;
 	private int age;
 	private int repath;
+	private Vec3 lastGoal;
 
 	ReefSchoolGoal(ReefSchoolFish fish) {
 		this.fish = fish;
@@ -53,7 +54,9 @@ final class ReefSchoolGoal extends Goal {
 	@Override
 	public void start() {
 		this.age = 0;
-		this.repath = 0;
+		// Stagger path searches between fish.
+		this.repath = Math.floorMod(this.fish.getId(), 15);
+		this.lastGoal = null;
 	}
 
 	@Override
@@ -76,18 +79,26 @@ final class ReefSchoolGoal extends Goal {
 		if (leader != null) {
 			this.follow(leader);
 		} else if (this.target != null && --this.repath <= 0) {
-			this.repath = 10;
-			this.fish.getNavigation().moveTo(this.target, 1.3);
+			this.repath = this.interval();
+			Vec3 goal = this.target.position();
+			if (this.shouldRepath(goal)) {
+				this.lastGoal = goal;
+				this.fish.getNavigation().moveTo(this.target, 1.3);
+			}
 		}
 	}
 
 	private void follow(AbstractSchoolingFish leader) {
 		this.fish.setFled(false);
-		// Stable slot per fish on a lattice behind and beside the leader.
-		int cell = Math.floorMod(this.fish.getId() * 31, 90);
-		double side = (cell % 5 - 2) * SPACING;
-		double back = ((cell / 5) % 6 - 1) * SPACING;
-		double up = (cell / 30 - 1) * 0.6;
+		// Unique slot per follower: golden-angle spiral (radius grows with sqrt) in three layers.
+		int slot = this.fish.reefSlot();
+		int layer = slot % 3;
+		int m = slot / 3;
+		double r = 0.5 * Math.sqrt(m);
+		double ang = m * 2.39996323 + layer * 2.1;
+		double side = r * Math.cos(ang);
+		double back = SPACING + r * Math.sin(ang);
+		double up = (layer - 1) * 0.6;
 		double yaw = Math.toRadians(leader.getYRot());
 		double fx = -Math.sin(yaw);
 		double fz = Math.cos(yaw);
@@ -97,10 +108,14 @@ final class ReefSchoolGoal extends Goal {
 		double dist = this.fish.distanceToSqr(tx, ty, tz);
 		if (dist > 0.45 * 0.45) {
 			if (--this.repath <= 0) {
-				this.repath = 4;
-				double speed = Math.max(1.0, Math.min(2.2, 1.0 + Math.sqrt(dist) * 0.4));
-				if (!this.fish.getNavigation().moveTo(tx, ty, tz, speed)) {
-					this.fish.getNavigation().moveTo(leader, 1.2);
+				this.repath = this.interval();
+				Vec3 goal = new Vec3(tx, ty, tz);
+				if (this.shouldRepath(goal)) {
+					this.lastGoal = goal;
+					double speed = Math.max(1.0, Math.min(2.2, 1.0 + Math.sqrt(dist) * 0.4));
+					if (!this.fish.getNavigation().moveTo(tx, ty, tz, speed)) {
+						this.fish.getNavigation().moveTo(leader, 1.2);
+					}
 				}
 			}
 		} else {
@@ -110,6 +125,16 @@ final class ReefSchoolGoal extends Goal {
 			this.fish.setYBodyRot(leader.getYRot());
 			this.fish.setYHeadRot(leader.getYRot());
 		}
+	}
+
+	/** 15-20 ticks, a different value per fish. */
+	private int interval() {
+		return 15 + Math.floorMod(this.fish.getId(), 6);
+	}
+
+	/** Only search again when the goal moved a block or the last path has run out. */
+	private boolean shouldRepath(Vec3 goal) {
+		return this.lastGoal == null || this.lastGoal.distanceToSqr(goal) >= 1.0 || this.fish.getNavigation().isDone();
 	}
 
 	/** Joins a school within 12 blocks (returns false), or starts swimming to a far one (returns true). */

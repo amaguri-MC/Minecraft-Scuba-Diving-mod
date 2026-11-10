@@ -27,7 +27,7 @@ public final class DiveServer {
 	private static final int INPUT_TIMEOUT = 30;
 	private static final int SYNC_INTERVAL = 10;
 	/** Ticks between BCD hiss/gurgle sounds while a key is held. */
-	private static final int SOUND_INTERVAL = 8;
+	private static final int SOUND_INTERVAL = 5;
 
 	/** Live (unsynced) state of one player. */
 	static final class Live {
@@ -108,6 +108,11 @@ public final class DiveServer {
 		if (l == null) {
 			return;
 		}
+		// Vest swelling for other players: quantised so it only resends on visible change.
+		float shownAir = Math.round(l.air * 20f) / 20f;
+		if (p.getAttachedOrElse(ScubaDiveGear.BCD_AIR, 0.0f) != shownAir) {
+			p.setAttached(ScubaDiveGear.BCD_AIR, shownAir);
+		}
 		DiveData data = l.toData();
 		if (!data.equals(p.getAttachedOrElse(ScubaDiveGear.DIVE, DiveData.DEFAULT))) {
 			p.setAttached(ScubaDiveGear.DIVE, data);
@@ -167,9 +172,11 @@ public final class DiveServer {
 		if (now - l.lastSound >= SOUND_INTERVAL) {
 			l.lastSound = now;
 			if (dir > 0) {
-				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.PLAYERS, 0.7f, 1.7f);
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.PLAYERS, 1.5f, 1.7f);
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_UPWARDS_AMBIENT, SoundSource.PLAYERS, 1.2f, 1.3f);
 			} else {
-				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.PLAYERS, 0.8f, 0.7f);
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.PLAYERS, 1.7f, 0.7f);
+				p.level().playSound(null, p.getX(), p.getY() + 1.0, p.getZ(), SoundEvents.BUBBLE_COLUMN_BUBBLE_POP, SoundSource.PLAYERS, 1.2f, 0.9f);
 			}
 		}
 		if (dir < 0 && now % 2 == 0 && p.level() instanceof ServerLevel level) {

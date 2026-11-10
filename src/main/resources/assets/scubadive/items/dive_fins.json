@@ -1,6 +1,12 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "scubadive:item/dive_fins"
+    "model": "scubadive:item/dive_fins",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -14803422
+      }
+    ]
   }
 }

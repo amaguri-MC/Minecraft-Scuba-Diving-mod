@@ -57,6 +57,14 @@ public final class ScubaDiveGear {
 					.syncWith(DiveData.STREAM_CODEC, AttachmentSyncPredicate.targetOnly())
 	);
 
+	/** BCD air (0..1) shown on the vest, synced to every other player tracking this one (the owner uses its own DIVE data). Not persisted. */
+	public static final AttachmentType<Float> BCD_AIR = AttachmentRegistry.create(
+			ScubaDive.id("bcd_air"),
+			builder -> builder
+					.initializer(() -> 0.0f)
+					.syncWith(net.minecraft.network.codec.ByteBufCodecs.FLOAT, AttachmentSyncPredicate.allButTarget())
+	);
+
 	/** Mask (head), BCD with built-in cylinder (chest), fins (feet). */
 	public static Item DIVE_MASK;
 	public static Item BCD;

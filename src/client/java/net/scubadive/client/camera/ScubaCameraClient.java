@@ -64,7 +64,8 @@ public final class ScubaCameraClient {
 	private static int hiddenFrames;
 	private static int captureWaitTicks;
 	private static Pending capturePending;
-	private static final int CAPTURE_TIMEOUT_TICKS = 20;
+	private static final int CAPTURE_TIMEOUT_TICKS = 40;
+	private static final int CLEAN_FRAMES = 3;
 
 	/** Photos waiting for the server verdict (FIFO: results come back in the order captures were sent). */
 	private static final ArrayDeque<Pending> PENDING = new ArrayDeque<>();
@@ -110,8 +111,8 @@ public final class ScubaCameraClient {
 			}
 			if (capturing) {
 				captureWaitTicks++;
-				// Two hidden frames rendered means the main target holds a clean frame.
-				if (hiddenFrames >= 2 || captureWaitTicks > CAPTURE_TIMEOUT_TICKS) {
+				// Frames fully rendered with HUD, hand and outline hidden; wait for several so the target is clean.
+				if (hiddenFrames >= CLEAN_FRAMES || captureWaitTicks > CAPTURE_TIMEOUT_TICKS) {
 					grabFrame(client);
 				}
 			}
@@ -164,6 +165,11 @@ public final class ScubaCameraClient {
 		return zoom;
 	}
 
+	/** Called after each GameRenderer.render; counts clean frames while capturing. */
+	public static void onFrameRendered() {
+		if (capturing) hiddenFrames++;
+	}
+
 	/** True while the clean frame is being produced; read by the hand mixin. */
 	public static boolean isCapturing() {
 		return capturing;
@@ -198,10 +204,7 @@ public final class ScubaCameraClient {
 	}
 
 	private static void extractFinder(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
-		if (capturing) {
-			hiddenFrames++;
-			return;
-		}
+		if (capturing) return;
 		Minecraft client = Minecraft.getInstance();
 		if (!shooting || client.player == null || !holdingCamera(client.player)) return;
 		int w = graphics.guiWidth();

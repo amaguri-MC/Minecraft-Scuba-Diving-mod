@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "category": "equipment",
+  "target": "scubadive:bcd",
+  "dye": "#minecraft:dyes",
+  "result": {
+    "id": "scubadive:bcd"
+  }
+}

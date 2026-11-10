@@ -18,6 +18,10 @@ public class ReefSchoolFish extends AbstractSchoolingFish implements ReefCreatur
 	private BlockPos home;
 	private boolean fled;
 	private AbstractSchoolingFish reefLeader;
+	/** Slot index in the leader's school (unique per follower, lowest free number). */
+	private int slot;
+	/** Slots handed out to followers, kept on the leader. */
+	private final java.util.BitSet usedSlots = new java.util.BitSet();
 
 	public ReefSchoolFish(EntityType<? extends ReefSchoolFish> type, Level level, ReefProfile profile) {
 		super(type, level);
@@ -47,14 +51,33 @@ public class ReefSchoolFish extends AbstractSchoolingFish implements ReefCreatur
 
 	@Override
 	public AbstractSchoolingFish startFollowing(AbstractSchoolingFish leader) {
+		this.releaseSlot();
 		this.reefLeader = leader;
+		this.slot = leader instanceof ReefSchoolFish l ? l.takeSlot() : 0;
 		return super.startFollowing(leader);
 	}
 
 	@Override
 	public void stopFollowing() {
+		this.releaseSlot();
 		this.reefLeader = null;
 		super.stopFollowing();
+	}
+
+	private int takeSlot() {
+		int n = this.usedSlots.nextClearBit(0);
+		this.usedSlots.set(n);
+		return n;
+	}
+
+	private void releaseSlot() {
+		if (this.reefLeader instanceof ReefSchoolFish l) {
+			l.usedSlots.clear(this.slot);
+		}
+	}
+
+	int reefSlot() {
+		return this.slot;
 	}
 
 	/** The living leader this fish follows, or null. */

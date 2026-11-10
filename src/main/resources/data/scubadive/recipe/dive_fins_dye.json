@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_dye",
+  "category": "equipment",
+  "target": "scubadive:dive_fins",
+  "dye": "#minecraft:dyes",
+  "result": {
+    "id": "scubadive:dive_fins"
+  }
+}
