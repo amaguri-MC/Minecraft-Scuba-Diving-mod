@@ -44,7 +44,12 @@ final class ReefFleeGoal extends Goal {
 	public void start() {
 		this.fish.setFled(true);
 		this.repath = 0;
-		this.hideSpot = this.profile.hide() ? this.findCoral() : null;
+		if (this.profile.trait() == ReefProfile.Trait.LURKER) {
+			// Groupers retreat into their shelter.
+			this.hideSpot = this.fish.reefHome();
+		} else {
+			this.hideSpot = this.profile.hide() ? this.findCoral() : null;
+		}
 	}
 
 	@Override

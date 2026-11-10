@@ -55,8 +55,8 @@ public final class ScubaDiveGearClient {
 
 	private static final int KEEPALIVE_TICKS = 10;
 	/** Neutral-buoyancy bob: amplitude in blocks, angular speed in rad/tick. */
-	private static final double NEUTRAL_BOB = 0.02;
-	private static final double NEUTRAL_BOB_SPEED = 0.07;
+	private static final double NEUTRAL_BOB = Buoyancy.NEUTRAL_BOB_AMPLITUDE;
+	private static final double NEUTRAL_BOB_SPEED = 2.0 * Math.PI / Buoyancy.NEUTRAL_BOB_PERIOD_TICKS;
 
 	private static KeyMapping inflateKey;
 	private static KeyMapping deflateKey;
@@ -144,7 +144,7 @@ public final class ScubaDiveGearClient {
 		if (swimming && !player.getAbilities().flying && !player.isPassenger()) {
 			Vec3 v = player.getDeltaMovement();
 			if (DiveClientState.neutral) {
-				// Hold height: cancel vanilla's underwater sinking, leave only a slow +-0.02 block bob.
+				// Hold height: cancel vanilla's underwater sinking, leave only a slow sine bob (+-0.06 block, 5 s period).
 				double bob = NEUTRAL_BOB * NEUTRAL_BOB_SPEED * Math.cos(clientTick * NEUTRAL_BOB_SPEED);
 				player.setDeltaMovement(v.x, bob, v.z);
 			} else if (Math.abs(net) < Buoyancy.NEUTRAL_NET) {

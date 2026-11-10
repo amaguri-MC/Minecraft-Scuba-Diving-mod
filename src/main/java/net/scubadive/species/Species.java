@@ -36,7 +36,17 @@ public enum Species {
 	ANEMONE_SHRIMP("anemone_shrimp", "scubadive:anemone_shrimp", false, 60),
 	GOBY("goby", "scubadive:goby", false, 45),
 	MORAY_EEL("moray_eel", "scubadive:moray_eel", false, 55),
-	FROGFISH("frogfish", "scubadive:frogfish", false, 120);
+	FROGFISH("frogfish", "scubadive:frogfish", false, 120),
+	// update-5
+	PARROTFISH("parrotfish", "scubadive:parrotfish", false, 35),
+	BOXFISH("boxfish", "scubadive:boxfish", false, 40),
+	TRIGGERFISH("triggerfish", "scubadive:triggerfish", false, 45),
+	GROUPER("grouper", "scubadive:grouper", false, 55),
+	BLUESTRIPE_SNAPPER("bluestripe_snapper", "scubadive:bluestripe_snapper", false, 25),
+	BIGEYE_TREVALLY("bigeye_trevally", "scubadive:bigeye_trevally", false, 50),
+	MANTA_RAY("manta_ray", "scubadive:manta_ray", false, 200),
+	STINGRAY("stingray", "scubadive:stingray", false, 90),
+	OCTOPUS("octopus", "scubadive:octopus", false, 80);
 
 	public final String id;
 	public final Identifier target;

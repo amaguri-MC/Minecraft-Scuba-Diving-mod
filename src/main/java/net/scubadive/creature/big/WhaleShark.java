@@ -1,19 +1,14 @@
 package net.scubadive.creature.big;
 
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.animal.fish.AbstractFish;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
 
-/** Whale shark: huge, very slow and completely harmless. Does not shy away from divers. */
-public class WhaleShark extends AbstractFish {
+/** Whale shark: 10+ blocks long, very slow, turns in wide arcs and is completely harmless. */
+public class WhaleShark extends GliderFish {
 	public WhaleShark(EntityType<? extends WhaleShark> type, Level level) {
 		super(type, level);
 	}
@@ -25,34 +20,8 @@ public class WhaleShark extends AbstractFish {
 	}
 
 	@Override
-	protected void registerGoals() {
-		super.registerGoals();
-		// Divers can swim right up to it.
-		this.goalSelector.removeAllGoals(goal -> goal instanceof AvoidEntityGoal<?>);
-	}
-
-	@Override
-	public ItemStack getBucketItemStack() {
-		return ItemStack.EMPTY;
-	}
-
-	@Override
-	public boolean canBePickedUpWithBucket(ItemStack stack) {
-		return false;
-	}
-
-	@Override
-	protected SoundEvent getFlopSound() {
-		return SoundEvents.COD_FLOP;
-	}
-
-	@Override
-	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.DOLPHIN_HURT;
-	}
-
-	@Override
-	protected SoundEvent getDeathSound() {
-		return SoundEvents.DOLPHIN_DEATH;
+	protected Goal createCruiseGoal() {
+		// 0.10 blocks/tick, 0.6 deg/tick (about 9 block turning radius), probe 14 blocks ahead.
+		return new CruiseGoal(this, 0.10, 0.6f, 0.4f, 14, 2.6f, 1.6f);
 	}
 }

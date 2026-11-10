@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "scubadive:item/bluestripe_snapper_spawn_egg"
+  }
+}

@@ -15,7 +15,13 @@ public class BigFishRenderer<T extends Mob> extends MobRenderer<T, BigFishRender
 
 	public BigFishRenderer(EntityRendererProvider.Context context, ModelLayerLocation layer, String textureName,
 			float modelScale, float shadow, float animSpeed, float animAmp) {
-		super(context, new BigFishModel(context.bakeLayer(layer), animSpeed, animAmp), shadow);
+		this(context, layer, textureName, modelScale, shadow, animSpeed, animAmp, 0.12f * animAmp);
+	}
+
+	/** {@code flapAmp}: wing / pectoral flap amplitude in radians. */
+	public BigFishRenderer(EntityRendererProvider.Context context, ModelLayerLocation layer, String textureName,
+			float modelScale, float shadow, float animSpeed, float animAmp, float flapAmp) {
+		super(context, new BigFishModel(context.bakeLayer(layer), animSpeed, animAmp, flapAmp), shadow);
 		this.texture = ScubaDive.id("textures/entity/" + textureName + ".png");
 		this.modelScale = modelScale;
 	}

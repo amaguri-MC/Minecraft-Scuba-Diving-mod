@@ -8,6 +8,24 @@ package net.scubadive.creature.reef;
  * @param homeRange  how far it may drift from its home before swimming back
  * @param schoolSize max school size (1 = loner, 2 = pair)
  * @param hide       dart into nearby coral instead of simply swimming away
+ * @param trait      extra behaviour (grazing, territorial chase, shelter lurking)
+ * @param moveSpeed  movement speed attribute override, 0 keeps the fish default
  */
-public record ReefProfile(String id, double fleeRadius, double fleeSpeed, double homeRange, int schoolSize, boolean hide) {
+public record ReefProfile(String id, double fleeRadius, double fleeSpeed, double homeRange, int schoolSize, boolean hide,
+		Trait trait, double moveSpeed) {
+	public enum Trait {
+		NONE,
+		/** Nibbles at nearby coral. */
+		GRAZER,
+		/** Chases a close diver for a moment, harmlessly. */
+		TERRITORIAL,
+		/** Picks a sheltered spot (rock overhang) as home and stays there. */
+		LURKER,
+		/** Always lives in a school: loners rejoin, followers hold slots around the leader. */
+		SCHOOLING
+	}
+
+	public ReefProfile(String id, double fleeRadius, double fleeSpeed, double homeRange, int schoolSize, boolean hide) {
+		this(id, fleeRadius, fleeSpeed, homeRange, schoolSize, hide, Trait.NONE, 0.0);
+	}
 }

@@ -14,8 +14,9 @@ public class ReefFishRenderer<T extends Mob> extends MobRenderer<T, ReefFishRend
 	private final Identifier texture;
 	private final float modelScale;
 
-	public ReefFishRenderer(EntityRendererProvider.Context context, ModelLayerLocation layer, String id, float modelScale) {
-		super(context, new ReefFishModel(context.bakeLayer(layer), layer == ReefFishModel.LION), 0.06f);
+	public ReefFishRenderer(EntityRendererProvider.Context context, ModelLayerLocation layer, String id, float modelScale,
+			float tailSpeed, float flapSpeed, float shadow) {
+		super(context, new ReefFishModel(context.bakeLayer(layer), tailSpeed, flapSpeed), shadow);
 		this.texture = ScubaDive.id("textures/entity/" + id + ".png");
 		this.modelScale = modelScale;
 	}

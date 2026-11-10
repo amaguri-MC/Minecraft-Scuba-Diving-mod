@@ -18,6 +18,13 @@ public final class BottomDwellersClient {
 			ScubaDive.id("textures/entity/frogfish_red.png")
 	};
 
+	private static final Identifier[] OCTOPUS_TEX = {
+			ScubaDive.id("textures/entity/octopus.png"),
+			ScubaDive.id("textures/entity/octopus_sand.png"),
+			ScubaDive.id("textures/entity/octopus_stone.png"),
+			ScubaDive.id("textures/entity/octopus_coral.png")
+	};
+
 	private BottomDwellersClient() {
 	}
 
@@ -27,6 +34,8 @@ public final class BottomDwellersClient {
 		ModelLayerRegistry.registerModelLayer(GobyModel.LAYER, GobyModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(MorayEelModel.LAYER, MorayEelModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(FrogfishModel.LAYER, FrogfishModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(OctopusModel.LAYER, OctopusModel::createBodyLayer);
+		EntityRenderers.register(BottomDwellers.OCTOPUS, ctx -> new OctopusRenderer(ctx, new OctopusModel(ctx.bakeLayer(OctopusModel.LAYER)), OCTOPUS_TEX));
 
 		EntityRenderers.register(BottomDwellers.CLOWNFISH, ctx ->
 				new BottomRenderer<>(ctx, new ClownfishModel(ctx.bakeLayer(ClownfishModel.LAYER)), 0.06f, 0.3f, s -> CLOWNFISH_TEX));

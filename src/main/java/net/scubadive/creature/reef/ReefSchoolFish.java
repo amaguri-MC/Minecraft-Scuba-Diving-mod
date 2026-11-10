@@ -12,11 +12,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-/** Reef fish that swim in a school (damselfish, chromis, anthias, butterflyfish pairs). */
+/** Reef fish that swim in a school (damselfish, chromis, anthias, butterflyfish pairs, snappers). */
 public class ReefSchoolFish extends AbstractSchoolingFish implements ReefCreature {
 	private final ReefProfile profile;
 	private BlockPos home;
 	private boolean fled;
+	private AbstractSchoolingFish reefLeader;
 
 	public ReefSchoolFish(EntityType<? extends ReefSchoolFish> type, Level level, ReefProfile profile) {
 		super(type, level);
@@ -42,6 +43,23 @@ public class ReefSchoolFish extends AbstractSchoolingFish implements ReefCreatur
 	@Override
 	public void setFled(boolean fled) {
 		this.fled = fled;
+	}
+
+	@Override
+	public AbstractSchoolingFish startFollowing(AbstractSchoolingFish leader) {
+		this.reefLeader = leader;
+		return super.startFollowing(leader);
+	}
+
+	@Override
+	public void stopFollowing() {
+		this.reefLeader = null;
+		super.stopFollowing();
+	}
+
+	/** The living leader this fish follows, or null. */
+	AbstractSchoolingFish reefLeader() {
+		return this.isFollower() ? this.reefLeader : null;
 	}
 
 	@Override

@@ -8,8 +8,11 @@ public final class Buoyancy {
 	public static final double ACCEL = 0.02;
 	/** |net| below this counts as neutral. */
 	public static final float NEUTRAL_NET = 0.06f;
-	/** Vertical speed (blocks/tick) below this counts as neutral. */
+	/** Vertical speed (blocks/tick) below this counts as neutral. Must stay above the bob's peak speed. */
 	public static final float NEUTRAL_SPEED = 0.03f;
+	/** Idle bob while neutral: amplitude in blocks, period in ticks (5 s). Peak speed = amplitude * 2pi / period ~ 0.004, well under NEUTRAL_SPEED. */
+	public static final double NEUTRAL_BOB_AMPLITUDE = 0.06;
+	public static final double NEUTRAL_BOB_PERIOD_TICKS = 100.0;
 
 	private Buoyancy() {
 	}

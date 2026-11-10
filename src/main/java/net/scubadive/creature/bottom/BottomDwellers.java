@@ -34,6 +34,7 @@ public final class BottomDwellers {
 	public static final ResourceKey<EntityType<?>> GOBY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("goby"));
 	public static final ResourceKey<EntityType<?>> MORAY_EEL_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("moray_eel"));
 	public static final ResourceKey<EntityType<?>> FROGFISH_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("frogfish"));
+	public static final ResourceKey<EntityType<?>> OCTOPUS_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("octopus"));
 
 	public static final EntityType<Clownfish> CLOWNFISH = FabricEntityType.Builder.createMob(Clownfish::new, MobCategory.WATER_AMBIENT, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
@@ -89,6 +90,16 @@ public final class BottomDwellers {
 			.clientTrackingRange(6)
 			.build(FROGFISH_KEY);
 
+	public static final EntityType<Octopus> OCTOPUS = FabricEntityType.Builder.createMob(Octopus::new, MobCategory.WATER_AMBIENT, mob -> mob
+					.defaultAttributes(() -> Mob.createMobAttributes()
+							.add(Attributes.MAX_HEALTH, 10.0)
+							.add(Attributes.MOVEMENT_SPEED, 0.03))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
+							Octopus.canSpawnAt(level, pos)))
+			.sized(0.6f, 0.4f)
+			.clientTrackingRange(8)
+			.build(OCTOPUS_KEY);
+
 	private BottomDwellers() {
 	}
 
@@ -98,12 +109,14 @@ public final class BottomDwellers {
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, GOBY_KEY, GOBY);
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, MORAY_EEL_KEY, MORAY_EEL);
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, FROGFISH_KEY, FROGFISH);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, OCTOPUS_KEY, OCTOPUS);
 
 		registerSpawnEgg("clownfish_spawn_egg", CLOWNFISH);
 		registerSpawnEgg("anemone_shrimp_spawn_egg", ANEMONE_SHRIMP);
 		registerSpawnEgg("goby_spawn_egg", GOBY);
 		registerSpawnEgg("moray_eel_spawn_egg", MORAY_EEL);
 		registerSpawnEgg("frogfish_spawn_egg", FROGFISH);
+		registerSpawnEgg("octopus_spawn_egg", OCTOPUS);
 
 		// Natural spawns in warm and lukewarm oceans. The placement rules above do the fine filtering.
 		var warmSeas = BiomeSelectors.includeByKey(Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN);
@@ -112,6 +125,9 @@ public final class BottomDwellers {
 		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, GOBY, 8, 1, 3);
 		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, MORAY_EEL, 4, 1, 1);
 		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, FROGFISH, 1, 1, 1);
+		// Octopuses also live in ordinary oceans, on rocky floors only (placement rule).
+		var octopusSeas = BiomeSelectors.includeByKey(Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.OCEAN, Biomes.DEEP_OCEAN);
+		BiomeModifications.addSpawn(octopusSeas, MobCategory.WATER_AMBIENT, OCTOPUS, 2, 1, 1);
 	}
 
 	/** True when a sea anemone block lies within the radius (sphere) of the position. */

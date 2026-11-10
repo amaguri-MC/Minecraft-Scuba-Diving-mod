@@ -16,6 +16,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
@@ -26,30 +27,40 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.scubadive.ScubaDive;
 
 /**
- * Small coral reef fish: registration, spawn rules and spawn eggs.
+ * Coral reef fish: registration, spawn rules and spawn eggs.
  * Alertness differs per species (see {@link ReefProfile}); schooling species use the vanilla
  * school logic, solitary ones wander near a home spot.
  */
 public final class ReefFish {
 	//                                                       id               flee  speed home school hide
-	public static final ReefProfile BLUE_DAMSEL_PROFILE = new ReefProfile("blue_damsel", 4.5, 1.9, 6.0, 6, false);
-	public static final ReefProfile CHROMIS_PROFILE = new ReefProfile("chromis", 7.0, 2.2, 2.5, 9, true);
-	public static final ReefProfile ANTHIAS_PROFILE = new ReefProfile("anthias", 7.0, 2.2, 6.0, 10, false);
+	public static final ReefProfile BLUE_DAMSEL_PROFILE = new ReefProfile("blue_damsel", 4.5, 1.9, 6.0, 8, false, ReefProfile.Trait.SCHOOLING, 0.0);
+	public static final ReefProfile CHROMIS_PROFILE = new ReefProfile("chromis", 7.0, 2.2, 2.5, 10, true, ReefProfile.Trait.SCHOOLING, 0.0);
+	public static final ReefProfile ANTHIAS_PROFILE = new ReefProfile("anthias", 7.0, 2.2, 6.0, 10, false, ReefProfile.Trait.SCHOOLING, 0.0);
 	public static final ReefProfile BLUE_TANG_PROFILE = new ReefProfile("blue_tang", 5.0, 1.8, 7.0, 1, false);
 	public static final ReefProfile BUTTERFLYFISH_PROFILE = new ReefProfile("butterflyfish", 4.5, 1.8, 5.0, 2, false);
 	public static final ReefProfile MOORISH_IDOL_PROFILE = new ReefProfile("moorish_idol", 5.5, 1.7, 7.0, 1, false);
 	public static final ReefProfile LIONFISH_PROFILE = new ReefProfile("lionfish", 1.8, 1.0, 5.0, 1, false);
+	public static final ReefProfile PARROTFISH_PROFILE = new ReefProfile("parrotfish", 5.0, 1.8, 7.0, 1, false, ReefProfile.Trait.GRAZER, 0.0);
+	public static final ReefProfile BOXFISH_PROFILE = new ReefProfile("boxfish", 3.5, 1.3, 5.0, 1, false, ReefProfile.Trait.NONE, 0.28);
+	public static final ReefProfile TRIGGERFISH_PROFILE = new ReefProfile("triggerfish", 1.1, 1.6, 6.0, 1, false, ReefProfile.Trait.TERRITORIAL, 0.0);
+	public static final ReefProfile GROUPER_PROFILE = new ReefProfile("grouper", 3.0, 1.4, 2.5, 1, false, ReefProfile.Trait.LURKER, 0.4);
+	public static final ReefProfile BLUESTRIPE_SNAPPER_PROFILE = new ReefProfile("bluestripe_snapper", 6.0, 2.0, 8.0, 20, false, ReefProfile.Trait.SCHOOLING, 0.0);
 
 	private static final List<Entry> ENTRIES = new ArrayList<>();
 
 	// Hitbox height = 2 * body centre offset * model scale / 16 (see ReefFishRenderer).
-	public static final EntityType<ReefSchoolFish> BLUE_DAMSEL = school(BLUE_DAMSEL_PROFILE, 0.2f, 0.16f, true, 10, 3, 6);
-	public static final EntityType<ReefSchoolFish> CHROMIS = school(CHROMIS_PROFILE, 0.2f, 0.15f, true, 9, 5, 9);
+	public static final EntityType<ReefSchoolFish> BLUE_DAMSEL = school(BLUE_DAMSEL_PROFILE, 0.2f, 0.16f, true, 10, 5, 8);
+	public static final EntityType<ReefSchoolFish> CHROMIS = school(CHROMIS_PROFILE, 0.2f, 0.15f, true, 9, 6, 10);
 	public static final EntityType<ReefSchoolFish> ANTHIAS = school(ANTHIAS_PROFILE, 0.22f, 0.18f, false, 9, 6, 10);
 	public static final EntityType<ReefLoneFish> BLUE_TANG = lone(BLUE_TANG_PROFILE, 0.25f, 0.24f, false, 6, 1, 3);
 	public static final EntityType<ReefSchoolFish> BUTTERFLYFISH = school(BUTTERFLYFISH_PROFILE, 0.25f, 0.23f, false, 6, 2, 2);
 	public static final EntityType<ReefLoneFish> MOORISH_IDOL = lone(MOORISH_IDOL_PROFILE, 0.25f, 0.23f, false, 4, 1, 2);
-	public static final EntityType<ReefLoneFish> LIONFISH = lone(LIONFISH_PROFILE, 0.3f, 0.21f, false, 1, 1, 1);
+	public static final EntityType<ReefLoneFish> LIONFISH = lone(LIONFISH_PROFILE, 0.45f, 0.4f, false, 1, 1, 1);
+	public static final EntityType<ReefLoneFish> PARROTFISH = lone(PARROTFISH_PROFILE, 0.35f, 0.3f, false, 3, 1, 3);
+	public static final EntityType<ReefLoneFish> BOXFISH = lone(BOXFISH_PROFILE, 0.25f, 0.22f, false, 3, 1, 1);
+	public static final EntityType<ReefLoneFish> TRIGGERFISH = lone(TRIGGERFISH_PROFILE, 0.3f, 0.3f, false, 3, 1, 2);
+	public static final EntityType<ReefLoneFish> GROUPER = lone(GROUPER_PROFILE, 0.5f, 0.38f, false, 2, 1, 1);
+	public static final EntityType<ReefSchoolFish> BLUESTRIPE_SNAPPER = school(BLUESTRIPE_SNAPPER_PROFILE, 0.22f, 0.18f, false, 2, 10, 20);
 
 	private record Entry(ReefProfile profile, EntityType<? extends Mob> type, int weight, int min, int max) {
 	}
@@ -71,7 +82,13 @@ public final class ReefFish {
 
 	private static <T extends Mob> EntityType<T> build(ReefProfile p, EntityType.EntityFactory<T> factory, float w, float h, boolean needCoral) {
 		return FabricEntityType.Builder.createMob(factory, MobCategory.WATER_AMBIENT, mob -> mob
-						.defaultAttributes(AbstractFish::createAttributes)
+						.defaultAttributes(() -> {
+							var attributes = AbstractFish.createAttributes();
+							if (p.moveSpeed() > 0.0) {
+								attributes.add(Attributes.MOVEMENT_SPEED, p.moveSpeed());
+							}
+							return attributes;
+						})
 						.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
 								canSpawnAt(level, pos, needCoral)))
 				.sized(w, h)
