@@ -1,18 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "pattern": [
-    "P",
-    "D",
-    "I"
-  ],
   "key": {
-    "P": "minecraft:glass_pane",
-    "D": "minecraft:glowstone_dust",
-    "I": "minecraft:iron_ingot"
+    "A": "minecraft:amethyst_shard",
+    "C": "minecraft:prismarine_crystals",
+    "U": "minecraft:copper_ingot"
   },
+  "pattern": [
+    "A",
+    "C",
+    "U"
+  ],
   "result": {
-    "id": "scubadive:dive_light",
-    "count": 1
+    "id": "scubadive:dive_light"
   }
 }

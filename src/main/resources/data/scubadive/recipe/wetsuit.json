@@ -1,16 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "pattern": [
-    "KKK",
-    "K K",
-    "K K"
-  ],
   "key": {
-    "K": "minecraft:dried_kelp"
+    "W": "#minecraft:wool"
   },
+  "pattern": [
+    "WWW",
+    "W W",
+    "W W"
+  ],
   "result": {
-    "id": "scubadive:wetsuit",
-    "count": 1
+    "id": "scubadive:wetsuit"
   }
 }
