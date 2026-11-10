@@ -13,12 +13,15 @@ import net.scubadive.species.Species;
 /** Species journal. Lists every {@link Species}; unphotographed ones show as "???". */
 public final class JournalScreen extends Screen {
 	private static final int ROW_HEIGHT = 14;
-	private static final int LIST_TOP = 56;
+	private static final int LIST_TOP = 66;
 	private static final int WHITE = 0xFFFFFFFF;
 	private static final int GRAY = 0xFFA0A0A0;
 	private static final int GOLD = 0xFFFFD84A;
 
 	private int page;
+	private boolean tour;
+	private Button wildTab;
+	private Button tourTab;
 	private Button prev;
 	private Button next;
 
@@ -37,6 +40,10 @@ public final class JournalScreen extends Screen {
 	@Override
 	protected void init() {
 		this.page = Math.min(this.page, pageCount() - 1);
+		this.wildTab = this.addRenderableWidget(Button.builder(Component.translatable("screen.scubadive.journal.tab_wild"), b -> setTab(false))
+				.pos(this.width / 2 - 82, 4).size(80, 20).build());
+		this.tourTab = this.addRenderableWidget(Button.builder(Component.translatable("screen.scubadive.journal.tab_tour"), b -> setTab(true))
+				.pos(this.width / 2 + 2, 4).size(80, 20).build());
 		this.prev = this.addRenderableWidget(Button.builder(Component.literal("<"), b -> changePage(-1))
 				.pos(this.width / 2 - 110, this.height - 28).size(30, 20).build());
 		this.addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> this.onClose())
@@ -46,12 +53,25 @@ public final class JournalScreen extends Screen {
 		updateButtons();
 	}
 
+	private void setTab(boolean tour) {
+		this.tour = tour;
+		this.page = 0;
+		updateButtons();
+	}
+
+	private Journal currentJournal() {
+		if (this.minecraft == null || this.minecraft.player == null) return Journal.EMPTY;
+		return this.tour ? ScubaCamera.tourJournalOf(this.minecraft.player) : ScubaCamera.journalOf(this.minecraft.player);
+	}
+
 	private void changePage(int delta) {
 		this.page = Math.max(0, Math.min(pageCount() - 1, this.page + delta));
 		updateButtons();
 	}
 
 	private void updateButtons() {
+		this.wildTab.active = this.tour;
+		this.tourTab.active = !this.tour;
 		this.prev.active = this.page > 0;
 		this.next.active = this.page < pageCount() - 1;
 	}
@@ -70,8 +90,8 @@ public final class JournalScreen extends Screen {
 		int i = start + (int) ((my - LIST_TOP) / ROW_HEIGHT);
 		if (i < start || i >= Math.min(all.length, start + per)) return false;
 		Species s = all[i];
-		if (!ScubaCamera.journalOf(this.minecraft.player).has(s.id)) return false;
-		this.minecraft.gui.setScreen(new PhotoViewerScreen(this, s));
+		if (!currentJournal().has(s.id)) return false;
+		this.minecraft.gui.setScreen(new PhotoViewerScreen(this, s, this.tour));
 		return true;
 	}
 
@@ -80,21 +100,20 @@ public final class JournalScreen extends Screen {
 		// Widgets only; the background is drawn by the screen framework (never call extractBackground here).
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 
-		Journal journal = this.minecraft != null && this.minecraft.player != null
-				? ScubaCamera.journalOf(this.minecraft.player) : Journal.EMPTY;
+		Journal journal = currentJournal();
 		Species[] all = Species.values();
 		int found = 0;
 		for (Species s : all) if (journal.has(s.id)) found++;
 
-		graphics.centeredText(this.font, this.title.getString(), this.width / 2, 12, WHITE);
+		graphics.centeredText(this.font, this.title.getString(), this.width / 2, 30, WHITE);
 		String summary = Component.translatable("screen.scubadive.journal.found", found, all.length).getString()
 				+ "    " + Component.translatable("screen.scubadive.journal.total", journal.total()).getString();
-		graphics.centeredText(this.font, summary, this.width / 2, 28, GOLD);
+		graphics.centeredText(this.font, summary, this.width / 2, 42, GOLD);
 
 		int left = this.width / 2 - 150;
-		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_name").getString(), left, 44, GRAY);
-		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_best").getString(), left + 170, 44, GRAY);
-		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_count").getString(), left + 230, 44, GRAY);
+		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_name").getString(), left, 54, GRAY);
+		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_best").getString(), left + 170, 54, GRAY);
+		graphics.text(this.font, Component.translatable("screen.scubadive.journal.col_count").getString(), left + 230, 54, GRAY);
 
 		int per = perPage();
 		int start = this.page * per;

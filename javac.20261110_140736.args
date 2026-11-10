@@ -1,0 +1,17 @@
+-proc:none
+-d
+/tmp/h3out
+-sourcepath
+src/main/java
+src/main/java/net/scubadive/tour/site/Boat.java
+src/main/java/net/scubadive/tour/site/CenoteSite.java
+src/main/java/net/scubadive/tour/site/DiveSites.java
+src/main/java/net/scubadive/tour/site/DropOffSite.java
+src/main/java/net/scubadive/tour/site/IceFloeSite.java
+src/main/java/net/scubadive/tour/site/LakeSite.java
+src/main/java/net/scubadive/tour/site/Noise.java
+src/main/java/net/scubadive/tour/site/Plants.java
+src/main/java/net/scubadive/tour/site/SiteCtx.java
+src/main/java/net/scubadive/tour/site/SiteGen.java
+src/main/java/net/scubadive/tour/site/WarmSeaSite.java
+src/main/java/net/scubadive/tour/site/WreckSite.java

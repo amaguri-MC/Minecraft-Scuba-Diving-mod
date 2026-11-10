@@ -306,7 +306,7 @@ public final class ScubaCameraClient {
 				} finally {
 					processed.close();
 				}
-				PhotoLog.append(new PhotoLog.Photo(p.species.id, result.score(), b, p.time, p.file.getFileName().toString()));
+				PhotoLog.append(new PhotoLog.Photo(p.species.id, result.score(), b, p.time, p.file.getFileName().toString(), result.tour()));
 			} catch (IOException | RuntimeException e) {
 				ScubaDive.LOGGER.warn("Failed to save camera screenshot", e);
 			} finally {

@@ -21,11 +21,22 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import net.scubadive.ScubaDive;
 import net.scubadive.species.Species;
+import net.scubadive.tour.TourApi;
 
 public final class ScubaCamera {
 	/** Persistent per-player journal, synced to the owning client only. */
 	public static final AttachmentType<Journal> JOURNAL = AttachmentRegistry.create(
 			ScubaDive.id("journal"),
+			builder -> builder
+					.initializer(() -> Journal.EMPTY)
+					.persistent(Journal.CODEC)
+					.copyOnDeath()
+					.syncWith(Journal.STREAM_CODEC, AttachmentSyncPredicate.targetOnly())
+	);
+
+	/** Same as {@link #JOURNAL} but for photos taken during dive tours. */
+	public static final AttachmentType<Journal> TOUR_JOURNAL = AttachmentRegistry.create(
+			ScubaDive.id("tour_journal"),
 			builder -> builder
 					.initializer(() -> Journal.EMPTY)
 					.persistent(Journal.CODEC)
@@ -74,17 +85,24 @@ public final class ScubaCamera {
 			return;
 		}
 
-		Journal journal = player.getAttachedOrElse(JOURNAL, Journal.EMPTY);
+		boolean tour = TourApi.isInTour(player);
+		AttachmentType<Journal> type = tour ? TOUR_JOURNAL : JOURNAL;
+		Journal journal = player.getAttachedOrElse(type, Journal.EMPTY);
 		boolean isNew = !journal.has(species.id);
-		player.setAttached(JOURNAL, journal.withShot(species.id, result.score()));
-		ServerPlayNetworking.send(player, new CaptureResultPayload(species.id, result.score(), isNew, result.breakdown()));
+		player.setAttached(type, journal.withShot(species.id, result.score()));
+		ServerPlayNetworking.send(player, new CaptureResultPayload(species.id, result.score(), isNew, result.breakdown(), tour));
+		if (tour) TourApi.onPhoto(player, species, result.score());
 	}
 
 	private static void reject(ServerPlayer player) {
-		ServerPlayNetworking.send(player, new CaptureResultPayload("", 0, false, Breakdown.NONE));
+		ServerPlayNetworking.send(player, new CaptureResultPayload("", 0, false, Breakdown.NONE, false));
 	}
 
 	public static Journal journalOf(Player player) {
 		return player.getAttachedOrElse(JOURNAL, Journal.EMPTY);
+	}
+
+	public static Journal tourJournalOf(Player player) {
+		return player.getAttachedOrElse(TOUR_JOURNAL, Journal.EMPTY);
 	}
 }

@@ -44,11 +44,11 @@ public final class PhotoViewerScreen extends Screen {
 	private Button delete;
 	private boolean confirmDelete;
 
-	public PhotoViewerScreen(Screen parent, Species species) {
+	public PhotoViewerScreen(Screen parent, Species species, boolean tour) {
 		super(Component.translatable("screen.scubadive.photos.title", Component.translatable(species.langKey())));
 		this.parent = parent;
 		this.species = species;
-		this.photos = PhotoLog.load(species.id);
+		this.photos = PhotoLog.load(species.id, tour);
 	}
 
 	@Override

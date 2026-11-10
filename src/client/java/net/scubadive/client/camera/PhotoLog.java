@@ -28,7 +28,7 @@ public final class PhotoLog {
 
 	private PhotoLog() { }
 
-	public record Photo(String species, int score, Breakdown breakdown, String time, String file) { }
+	public record Photo(String species, int score, Breakdown breakdown, String time, String file, boolean tour) { }
 
 	public static Path dir() {
 		return FabricLoader.getInstance().getGameDir().resolve("screenshots").resolve("scubadive");
@@ -78,14 +78,14 @@ public final class PhotoLog {
 		}
 	}
 
-	/** All photos of a species, newest first. */
-	public static synchronized List<Photo> load(String speciesId) {
+	/** All photos of a species in the wild (tour=false) or tour tab, newest first. Old entries count as wild. */
+	public static synchronized List<Photo> load(String speciesId, boolean tour) {
 		List<Photo> out = new ArrayList<>();
 		try {
 			for (JsonElement el : readArray()) {
 				try {
 					Photo p = fromJson(el.getAsJsonObject());
-					if (p.species().equals(speciesId)) out.add(p);
+					if (p.species().equals(speciesId) && p.tour() == tour) out.add(p);
 				} catch (RuntimeException e) {
 					ScubaDive.LOGGER.warn("Skipping bad photos.json entry", e);
 				}
@@ -112,6 +112,7 @@ public final class PhotoLog {
 		o.addProperty("score", p.score());
 		o.addProperty("time", p.time());
 		o.addProperty("file", p.file());
+		if (p.tour()) o.addProperty("tour", true);
 		Breakdown b = p.breakdown();
 		JsonObject bo = new JsonObject();
 		bo.addProperty("distance", b.distance());
@@ -130,7 +131,8 @@ public final class PhotoLog {
 		Breakdown b = new Breakdown(f(bo, "distance"), f(bo, "neutral"), f(bo, "brightness"), f(bo, "silt"),
 				f(bo, "center"), f(bo, "size"), f(bo, "group"));
 		return new Photo(o.get("species").getAsString(), o.get("score").getAsInt(), b,
-				o.get("time").getAsString(), o.get("file").getAsString());
+				o.get("time").getAsString(), o.get("file").getAsString(),
+				o.has("tour") && o.get("tour").getAsBoolean());
 	}
 
 	private static float f(JsonObject o, String key) {
