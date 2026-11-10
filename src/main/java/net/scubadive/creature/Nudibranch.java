@@ -61,8 +61,8 @@ public class Nudibranch extends Mob {
 		}
 
 		if (--this.moveTimer <= 0) {
-			this.moveTimer = 40 + this.getRandom().nextInt(80);
-			this.crawling = this.getRandom().nextInt(3) != 0;
+			this.moveTimer = 60 + this.getRandom().nextInt(140);
+			this.crawling = this.getRandom().nextInt(2) == 0;
 			this.heading = this.getRandom().nextFloat() * 360.0f;
 		}
 
@@ -72,7 +72,7 @@ public class Nudibranch extends Mob {
 			double dz = Math.cos(rad);
 			BlockPos ahead = BlockPos.containing(this.getX() + dx * 0.6, this.getY() + 0.1, this.getZ() + dz * 0.6);
 			if (this.level().getFluidState(ahead).is(FluidTags.WATER)) {
-				double speed = 0.02;
+				double speed = 0.004;
 				Vec3 motion = this.getDeltaMovement();
 				this.setDeltaMovement(dx * speed, motion.y, dz * speed);
 				this.setYRot(this.heading);

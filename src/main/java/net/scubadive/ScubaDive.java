@@ -25,6 +25,8 @@ public class ScubaDive implements ModInitializer {
 		net.scubadive.world.ScubaWorldgen.init();
 		net.scubadive.dive.ScubaDiveGear.init();
 		net.scubadive.camera.ScubaCamera.init();
+		net.scubadive.reef.ScubaReefs.init();
+		net.scubadive.silt.SiltClouds.init();
 
 		// All items in the scubadive namespace are listed in this tab automatically.
 		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_KEY, FabricCreativeModeTab.builder()

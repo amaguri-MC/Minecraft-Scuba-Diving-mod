@@ -4,17 +4,40 @@
 	"version": "${version}",
 	"name": "Scuba Dive",
 	"description": "Scuba diving, marine life, underwater photography and photo contests.",
-	"authors": ["scubadive"],
+	"authors": [
+		"scubadive"
+	],
 	"license": "All-Rights-Reserved",
 	"icon": "assets/scubadive/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["net.scubadive.ScubaDive"],
-		"client": ["net.scubadive.client.ScubaDiveClient"]
+		"main": [
+			"net.scubadive.ScubaDive"
+		],
+		"client": [
+			"net.scubadive.client.ScubaDiveClient"
+		]
 	},
 	"mixins": [
 		"scubadive.mixins.json",
-		{ "config": "scubadive.client.mixins.json", "environment": "client" }
+		{
+			"config": "scubadive.client.mixins.json",
+			"environment": "client"
+		},
+		"scubadive.dive.mixins.json",
+		"scubadive.world.mixins.json",
+		{
+			"config": "scubadive.dive.client.mixins.json",
+			"environment": "client"
+		},
+		{
+			"config": "scubadive.silt.client.mixins.json",
+			"environment": "client"
+		},
+		{
+			"config": "scubadive.camera.client.mixins.json",
+			"environment": "client"
+		}
 	],
 	"depends": {
 		"fabricloader": ">=0.20.1",

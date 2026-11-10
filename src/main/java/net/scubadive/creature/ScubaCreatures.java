@@ -45,7 +45,7 @@ public final class ScubaCreatures {
 	public static final EntityType<Nudibranch> NUDIBRANCH = FabricEntityType.Builder.createMob(Nudibranch::new, MobCategory.WATER_AMBIENT, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 4.0)
-							.add(Attributes.MOVEMENT_SPEED, 0.02))
+							.add(Attributes.MOVEMENT_SPEED, 0.004))
 					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
 							level.getFluidState(pos).is(FluidTags.WATER)
 									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
