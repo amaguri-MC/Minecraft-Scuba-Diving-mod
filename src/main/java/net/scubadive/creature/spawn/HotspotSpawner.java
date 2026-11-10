@@ -68,11 +68,11 @@ public final class HotspotSpawner {
 				new Entry("scubadive:triggerfish", 3, 1, 2),
 				new Entry("scubadive:bluestripe_snapper", 5, 10, 18),
 				new Entry("minecraft:tropical_fish", 8, 3, 6),
-				new Entry("scubadive:nudibranch", 6, 1, 3),
+				new Entry("scubadive:nudibranch", 12, 2, 4),
 				new Entry("scubadive:pygmy_seahorse", 2, 1, 1),
 				new Entry("scubadive:octopus", 2, 1, 1))),
 		ANEMONE(List.of(
-				new Entry("scubadive:clownfish", 10, 2, 4),
+				new Entry("scubadive:clownfish", 24, 2, 4),
 				new Entry("scubadive:anemone_shrimp", 5, 1, 3),
 				new Entry("scubadive:nudibranch", 4, 1, 2))),
 		ROCK(List.of(
@@ -81,7 +81,7 @@ public final class HotspotSpawner {
 				new Entry("scubadive:goby", 4, 1, 3),
 				new Entry("scubadive:lionfish", 3, 1, 2),
 				new Entry("minecraft:cod", 6, 2, 5),
-				new Entry("scubadive:nudibranch", 5, 1, 3),
+				new Entry("scubadive:nudibranch", 10, 2, 4),
 				new Entry("scubadive:octopus", 3, 1, 1))),
 		TRENCH(List.of(
 				new Entry("scubadive:hammerhead_shark", 4, 2, 5),
