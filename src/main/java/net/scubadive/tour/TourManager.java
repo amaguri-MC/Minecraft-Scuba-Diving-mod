@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -21,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
@@ -79,6 +81,13 @@ public final class TourManager {
 				}
 			}
 			return true;
+		});
+
+		// No hostile mobs in the tour dimension (natural spawns, spawners, leftovers).
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (entity instanceof Enemy && level.dimension().equals(TourApi.DIMENSION)) {
+				level.getServer().execute(entity::discard);
+			}
 		});
 
 		// No building or breaking anywhere in the tour dimension.
@@ -163,12 +172,13 @@ public final class TourManager {
 				session.tick();
 			} catch (RuntimeException e) {
 				ScubaDive.LOGGER.error("Tour session failed", e);
-				session.finished = true;
-				for (UUID id : new ArrayList<>(session.members)) {
-					DIVERS.remove(id, session);
+				try {
+					session.emergency();
+				} catch (RuntimeException e2) {
+					ScubaDive.LOGGER.error("Tour emergency abort failed", e2);
+					session.finished = true;
+					TourManager.slotFreed(session.slot, false);
 				}
-				USED_SLOTS.remove(session.slot);
-				CLEAN_SLOTS.remove(session.slot);
 			}
 			if (session.finished) {
 				SESSIONS.remove(session);

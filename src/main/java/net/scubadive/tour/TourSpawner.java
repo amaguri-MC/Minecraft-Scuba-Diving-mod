@@ -86,40 +86,39 @@ final class TourSpawner {
 		EntityType<?> type = types.get(index);
 		boolean bottom = BOTTOM.contains(spawn.entityId());
 
-		// Pick a column inside the site, away from the boat, and find its water range.
+		// Pick a column inside the site and a random water-source block anywhere in it (under ice, in caves too).
 		int r = DiveSites.RADIUS - 6;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		int cx = 0;
 		int cz = 0;
-		int top = 0;
-		int floor = 0;
+		int cy = 0;
 		boolean found = false;
-		for (int attempt = 0; attempt < 8 && !found; attempt++) {
+		int minY = Math.max(level.getMinY(), DiveSites.SURFACE_Y - 130);
+		for (int attempt = 0; attempt < 12 && !found; attempt++) {
 			cx = origin.getX() + random.nextInt(r * 2 + 1) - r;
 			cz = origin.getZ() + random.nextInt(r * 2 + 1) - r;
 			pos.set(cx, DiveSites.SURFACE_Y - 1, cz);
-			if (!level.hasChunkAt(pos) || !isWaterSource(level, pos)) {
+			if (!level.hasChunkAt(pos)) {
 				continue;
 			}
-			top = pos.getY();
-			int y = top;
-			while (y > top - 80 && isWaterSource(level, pos.set(cx, y - 1, cz))) {
-				y--;
+			int seen = 0;
+			for (int y = DiveSites.SURFACE_Y - 1; y >= minY; y--) {
+				if (isWaterSource(level, pos.set(cx, y, cz)) && random.nextInt(++seen) == 0) {
+					cy = y;
+				}
 			}
-			floor = y;
-			found = top - floor >= 2;
+			found = seen > 0;
 		}
 		if (!found) {
 			return 0;
 		}
-		int cy = bottom ? floor : floor + random.nextInt(top - floor);
 		int count = spawn.min() + random.nextInt(spawn.max() - spawn.min() + 1);
 		SpawnGroupData groupData = null;
 		int made = 0;
 		for (int i = 0; i < count; i++) {
 			int x = cx + random.nextInt(SCATTER * 2 + 1) - SCATTER;
 			int z = cz + random.nextInt(SCATTER * 2 + 1) - SCATTER;
-			int y = Math.max(floor, Math.min(top, cy + random.nextInt(3) - 1));
+			int y = cy + random.nextInt(3) - 1;
 			pos.set(x, y, z);
 			if (!level.hasChunkAt(pos) || !isWaterSource(level, pos)) {
 				continue;

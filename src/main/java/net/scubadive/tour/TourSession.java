@@ -35,6 +35,8 @@ final class TourSession {
 	private static final int MAX_DIVE_TICKS = 20 * 60 * 20;
 	private static final int RESULT_TICKS = 100;
 	private static final int STEPS_PER_TICK = 3;
+	/** Time budget for site build/clear slices per tick. */
+	private static final long STEP_BUDGET_NANOS = 15_000_000L;
 	private static final int CHUNK_WAIT_LIMIT = 600;
 	private static final int SPAWN_INTERVAL = 40;
 	private static final int FIRST_GROUPS_MIN = 30;
@@ -83,6 +85,7 @@ final class TourSession {
 	private int resultTicks;
 	private int cleanStep;
 	private boolean entitiesCleared;
+	private boolean leftoversCleared;
 	boolean finished;
 
 	TourSession(MinecraftServer server, int slot, DivePoint point, boolean preClear) {
@@ -194,14 +197,20 @@ final class TourSession {
 			return;
 		}
 		int totalWork = (preClear ? clearSteps : 0) + buildSteps;
+		if (preClear && !leftoversCleared) {
+			leftoversCleared = true;
+			discardEntities(level);
+		}
 		try {
-			for (int i = 0; i < STEPS_PER_TICK && work < totalWork; i++, work++) {
+			long end = System.nanoTime() + STEP_BUDGET_NANOS;
+			do {
 				if (work < (preClear ? clearSteps : 0)) {
 					DiveSites.clearStep(level, origin, work);
 				} else {
 					DiveSites.buildStep(level, origin, point, seed, work - (preClear ? clearSteps : 0));
 				}
-			}
+				work++;
+			} while (work < totalWork && System.nanoTime() < end);
 		} catch (RuntimeException e) {
 			ScubaDive.LOGGER.error("Tour site build failed", e);
 			forEachMember(p -> p.sendSystemMessage(Component.translatable("tour.scubadive.error")));
@@ -415,6 +424,47 @@ final class TourSession {
 		startCleanup();
 	}
 
+	private void discardEntities(ServerLevel level) {
+		for (Entity e : level.getEntitiesOfClass(Entity.class, TourSpawner.siteBox(origin), e -> !(e instanceof Player))) {
+			e.discard();
+		}
+	}
+
+	/** Safe abort after an unexpected error: everything is guarded so that nobody stays stranded. */
+	void emergency() {
+		for (UUID id : new ArrayList<>(members)) {
+			try {
+				ServerPlayer p = player(id);
+				if (p != null) {
+					ServerPlayNetworking.send(p, new TourLoadingPayload(-1, point.langKey()));
+					TourManager.returnPlayer(p);
+				}
+			} catch (RuntimeException e) {
+				ScubaDive.LOGGER.error("Tour emergency return failed", e);
+			}
+		}
+		members.clear();
+		waiting.clear();
+		TourManager.DIVERS.values().removeIf(s -> s == this);
+		ServerLevel level = level();
+		if (level != null) {
+			try {
+				discardEntities(level);
+			} catch (RuntimeException e) {
+				ScubaDive.LOGGER.error("Tour emergency entity clear failed", e);
+			}
+			try {
+				if (chunksForced) {
+					setForced(level, false);
+				}
+			} catch (RuntimeException e) {
+				ScubaDive.LOGGER.error("Tour emergency unforce failed", e);
+			}
+		}
+		TourManager.slotFreed(slot, false);
+		finished = true;
+	}
+
 	private void startCleanup() {
 		phase = Phase.CLEANUP;
 		cleanStep = 0;
@@ -424,9 +474,7 @@ final class TourSession {
 		if (!entitiesCleared) {
 			entitiesCleared = true;
 			if (chunksForced) {
-				for (Entity e : level.getEntitiesOfClass(Entity.class, TourSpawner.siteBox(origin), e -> !(e instanceof Player))) {
-					e.discard();
-				}
+				discardEntities(level);
 			}
 		}
 		boolean touched = chunksForced && chunksReady && work > 0;
