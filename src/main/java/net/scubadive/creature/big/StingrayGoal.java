@@ -52,14 +52,14 @@ final class StingrayGoal extends Goal {
 				double tz = this.ray.getZ() + away.z / len * dist;
 				double ty = this.ray.getY();
 				if (this.ray.level().getFluidState(BlockPos.containing(tx, ty, tz)).is(FluidTags.WATER)) {
-					this.ray.getMoveControl().setWantedPosition(tx, ty, tz, 1.6);
+					this.ray.getNavigation().moveTo(tx, ty, tz, 1.6);
 				}
 			}
 		}
 		if (this.fleeTicks > 0) {
 			if (--this.fleeTicks == 0) {
 				// Cancel any unfinished slide so the ray really stays put.
-				this.ray.getMoveControl().setWantedPosition(this.ray.getX(), this.ray.getY(), this.ray.getZ(), 0.0);
+				this.ray.getNavigation().stop();
 			}
 			return;
 		}

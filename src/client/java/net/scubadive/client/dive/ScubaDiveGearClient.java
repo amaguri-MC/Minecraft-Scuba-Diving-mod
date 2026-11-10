@@ -74,8 +74,8 @@ public final class ScubaDiveGearClient {
 
 	public static void init() {
 		KeyMapping.Category category = KeyMapping.Category.register(ScubaDive.id("dive"));
-		inflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_inflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, category));
-		deflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_deflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, category));
+		inflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_inflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_M, category));
+		deflateKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.dive_deflate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_N, category));
 		ClientTickEvents.END_CLIENT_TICK.register(ScubaDiveGearClient::tick);
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((entityType, renderer, helper, context) -> {
 			if (renderer instanceof AvatarRenderer<?> avatarRenderer) {

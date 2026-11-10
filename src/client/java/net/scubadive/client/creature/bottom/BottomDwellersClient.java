@@ -42,7 +42,7 @@ public final class BottomDwellersClient {
 		EntityRenderers.register(BottomDwellers.ANEMONE_SHRIMP, ctx ->
 				new BottomRenderer<>(ctx, new AnemoneShrimpModel(ctx.bakeLayer(AnemoneShrimpModel.LAYER)), 0.0f, 0.15f, s -> SHRIMP_TEX));
 		EntityRenderers.register(BottomDwellers.GOBY, ctx ->
-				new BottomRenderer<>(ctx, new GobyModel(ctx.bakeLayer(GobyModel.LAYER)), 0.06f, 0.25f, s -> GOBY_TEX));
+				new BottomRenderer<>(ctx, new GobyModel(ctx.bakeLayer(GobyModel.LAYER)), 0.06f, 0.35f, s -> GOBY_TEX));
 		EntityRenderers.register(BottomDwellers.MORAY_EEL, ctx ->
 				new BottomRenderer<>(ctx, new MorayEelModel(ctx.bakeLayer(MorayEelModel.LAYER)), 0.0f, 0.7f, s -> EEL_TEX));
 		EntityRenderers.register(BottomDwellers.FROGFISH, ctx ->

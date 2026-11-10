@@ -13,7 +13,7 @@ import net.scubadive.creature.FleeHelper;
 
 /** Skittish sand goby: rests on the sand and vanishes into it the moment a diver gets close. */
 public class Goby extends Mob {
-	private static final double ALERT_RADIUS = 4.0;
+	private static final double ALERT_RADIUS = 3.0;
 
 	private int hideTimer;
 	private int dartTimer = 60;
@@ -39,12 +39,16 @@ public class Goby extends Mob {
 		}
 
 		// Stay hidden while a diver is near, and a little while after they leave.
-		if (FleeHelper.tooClose(this, ALERT_RADIUS) != null) {
+		// Hide only when a diver comes very close, or rushes in; a calm, still photographer can watch it.
+		net.minecraft.world.entity.player.Player near = FleeHelper.tooClose(this, ALERT_RADIUS);
+		boolean startled = near != null && (near.distanceTo(this) < 1.6
+				|| near.getKnownMovement().horizontalDistance() > 0.09);
+		if (startled) {
 			if (this.hideTimer <= 0) {
 				serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SAND.defaultBlockState()),
 						this.getX(), this.getY() + 0.05, this.getZ(), 14, 0.1, 0.02, 0.1, 0.04);
 			}
-			this.hideTimer = Math.max(this.hideTimer, 50);
+			this.hideTimer = Math.max(this.hideTimer, 30);
 		}
 
 		Vec3 motion = this.getDeltaMovement();

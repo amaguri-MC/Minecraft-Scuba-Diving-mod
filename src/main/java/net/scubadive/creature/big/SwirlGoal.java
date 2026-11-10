@@ -81,7 +81,8 @@ final class SwirlGoal extends Goal {
 				return;
 			}
 		}
-		this.fish.getMoveControl().setWantedPosition(tx, ty, tz, 1.0);
+		// Fish move control only steers along an active path, so use navigation (not setWantedPosition).
+		this.fish.getNavigation().moveTo(tx, ty, tz, 1.0);
 	}
 
 	private boolean water(double x, double y, double z) {
