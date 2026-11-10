@@ -181,6 +181,10 @@ final class TourSpawner {
 		for (DivePoint.Spawn s : table) {
 			Identifier id = Identifier.tryParse(s.entityId());
 			EntityType<?> type = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
+			// Tours show only the mod's own creatures (vanilla ones are not in the journal and score nothing).
+			if (id == null || !"scubadive".equals(id.getNamespace())) {
+				continue;
+			}
 			if (type != null && s.weight() > 0 && Habitat.fits(s.entityId(), point.habitats)) {
 				usable.add(s);
 				types.add(type);

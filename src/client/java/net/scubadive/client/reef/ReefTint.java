@@ -37,18 +37,40 @@ public final class ReefTint {
 			if (block == Blocks.AIR) {
 				continue;
 			}
-			BlockColorRegistry.register(List.of(new BlockTintSource() {
+			BlockTintSource main = new BlockTintSource() {
 				@Override
 				public int color(BlockState state) {
-					return PALETTE[2];
+					return PALETTE[0];
 				}
 
 				@Override
 				public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
 					return colorAt(pos.getX(), pos.getZ());
 				}
-			}), block);
+			};
+			// Second colour (brain coral overlay): another part of the palette, so each block shows a mix.
+			BlockTintSource accent = new BlockTintSource() {
+				@Override
+				public int color(BlockState state) {
+					return PALETTE[3];
+				}
+
+				@Override
+				public int colorInWorld(BlockState state, BlockAndTintGetter level, BlockPos pos) {
+					return accentAt(pos.getX(), pos.getY(), pos.getZ());
+				}
+			};
+			BlockColorRegistry.register(List.of(main, accent), block);
 		}
+	}
+
+	/** Accent colour: palette entry a few steps away from the main colour, varying per block. */
+	public static int accentAt(int x, int y, int z) {
+		int h = (x * 73_856_093) ^ (y * 19_349_663) ^ (z * 83_492_791);
+		int step = 2 + Math.floorMod(h >> 4, 3);
+		float n = noise(x / CELL, z / CELL, 0);
+		int i = Math.floorMod((int) (n * PALETTE.length) + step, PALETTE.length);
+		return Math.floorMod(h, 5) == 0 ? BLEACHED : PALETTE[i];
 	}
 
 	/** Deterministic colour for a column: smooth palette drift, with bleached patches. */

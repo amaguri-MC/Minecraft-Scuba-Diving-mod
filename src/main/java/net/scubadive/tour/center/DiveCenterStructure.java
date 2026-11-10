@@ -33,7 +33,7 @@ public class DiveCenterStructure extends Structure {
 	public static final StructurePieceType.ContextlessType PIECE = DiveCenterPiece::new;
 
 	/** Candidate origins: offsets from the start chunk's middle. */
-	private static final int[] OFFSETS = {-24, -18, -12, -6, 0, 6, 12, 18, 24};
+	private static final int[] OFFSETS = {-16, -8, 0, 8, 16};
 
 	/** Cost counters for the site search (read by the automated client game test). */
 	public static final java.util.concurrent.atomic.AtomicLong SEARCH_CALLS = new java.util.concurrent.atomic.AtomicLong();
@@ -55,31 +55,64 @@ public class DiveCenterStructure extends Structure {
 		return TYPE;
 	}
 
-	/** Noise-stage view of the terrain used by the site search. */
-	private record Terrain(ChunkGenerator gen, LevelHeightAccessor height, RandomState random, int sea) {
+	/** Most noise height samples one site search may take (each is a noise column evaluation, the expensive part). */
+	static final int SAMPLE_BUDGET = 96;
+
+	/** Thrown when the search runs out of its sample budget. */
+	private static final class OutOfBudget extends RuntimeException {
+		OutOfBudget() {
+			super(null, null, false, false);
+		}
+	}
+
+	/**
+	 * Noise-stage view of the terrain used by the site search. Each column is sampled once (cached) and the
+	 * whole search is capped at {@link #SAMPLE_BUDGET} samples so a start chunk can never stall world generation.
+	 */
+	private static final class Terrain {
+		private final ChunkGenerator gen;
+		private final LevelHeightAccessor height;
+		private final RandomState random;
+		private final int sea;
+		private final it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap cache = new it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap();
+		private int samples;
+
+		Terrain(ChunkGenerator gen, LevelHeightAccessor height, RandomState random, int sea) {
+			this.gen = gen;
+			this.height = height;
+			this.random = random;
+			this.sea = sea;
+		}
+
+		int sea() {
+			return sea;
+		}
+
+		/** Top of the solid ground (first block above it). Water sits on top when this is below sea level. */
 		int floor(int x, int z) {
+			long key = ((long) x << 32) ^ (z & 0xFFFFFFFFL);
+			if (cache.containsKey(key)) {
+				return cache.get(key);
+			}
+			if (samples >= SAMPLE_BUDGET) {
+				throw new OutOfBudget();
+			}
+			samples++;
 			HEIGHT_SAMPLES.incrementAndGet();
-			return gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, height, random);
+			int floor = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, height, random);
+			cache.put(key, floor);
+			return floor;
 		}
 
-		int surface(int x, int z) {
-			HEIGHT_SAMPLES.incrementAndGet();
-			return gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, height, random);
-		}
-
-		/** Water at sea level: the solid ground is below sea level and something (water) is on top of it. */
+		/** Sea water at this column: the ground is below sea level. */
 		boolean isWater(int x, int z) {
-			int floor = floor(x, z);
-			return floor < sea && surface(x, z) > floor;
+			return floor(x, z) < sea;
 		}
 
-		/** Ground top block (or -1 if the column is wet or the ground is below sea level). */
+		/** Ground top block (or -1 if the column is under water). */
 		int dryGround(int x, int z) {
 			int floor = floor(x, z);
-			if (floor < sea || surface(x, z) != floor) {
-				return -1;
-			}
-			return floor - 1;
+			return floor < sea ? -1 : floor - 1;
 		}
 	}
 
@@ -88,6 +121,8 @@ public class DiveCenterStructure extends Structure {
 		long start = System.nanoTime();
 		try {
 			return search(context);
+		} catch (OutOfBudget e) {
+			return Optional.empty();
 		} finally {
 			SEARCH_CALLS.incrementAndGet();
 			SEARCH_NANOS.addAndGet(System.nanoTime() - start);

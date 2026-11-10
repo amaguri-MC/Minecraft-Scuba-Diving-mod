@@ -61,6 +61,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			BlockPos center = locate(context, sp);
 			gear(context, sp, center);
 			book(context);
+			showcase(context, sp);
 			underwater(context, sp);
 		}
 	}
@@ -76,6 +77,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			int x = i * 600;
 			server.runCommand("tp @p " + x + " 120 " + (i % 2 == 0 ? 300 : -300));
 			long t = System.nanoTime();
+			context.waitTicks(5);
 			sp.getConnection().waitForChunksRender(false, 20 * 120);
 			long ms = (System.nanoTime() - t) / 1_000_000;
 			totalWait += ms;
@@ -104,6 +106,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 	private static BlockPos locate(ClientGameTestContext context, TestSingleplayerContext sp) {
 		var server = sp.getServer();
 		long calls0 = DiveCenterStructure.SEARCH_CALLS.get();
+		long nanos0 = DiveCenterStructure.SEARCH_NANOS.get();
 		long t = System.nanoTime();
 		BlockPos found = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
@@ -114,8 +117,9 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			return r == null ? null : r.getFirst();
 		});
 		long ms = (System.nanoTime() - t) / 1_000_000;
-		log("locate dive_center from 0,0: %s in %d ms (%d searches)", found, ms,
-				DiveCenterStructure.SEARCH_CALLS.get() - calls0);
+		long n = DiveCenterStructure.SEARCH_CALLS.get() - calls0;
+		log("locate dive_center from 0,0: %s in %d ms (%d searches, %d ms inside the site search)", found, ms, n,
+				(DiveCenterStructure.SEARCH_NANOS.get() - nanos0) / 1_000_000);
 		if (found == null) {
 			throw new AssertionError("dive center not found within 100 chunks");
 		}
@@ -124,6 +128,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		}
 		server.runCommand("tp @p " + found.getX() + " 90 " + found.getZ() + " 0 30");
 		long w = System.nanoTime();
+		context.waitTicks(5);
 		sp.getConnection().waitForChunksRender(false, 20 * 120);
 		log("dive center chunks ready in %d ms", (System.nanoTime() - w) / 1_000_000);
 		context.waitTicks(20);
@@ -174,6 +179,30 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		log("guide book: %d spreads turned in %d ms, fps %d", spreads, (System.nanoTime() - t) / 1_000_000,
 				context.computeOnClient(mc -> mc.getFps()));
 		context.setScreen(() -> null);
+	}
+
+	/** Brain coral colours and the barracuda model, close up on a platform in the sky. */
+	private static void showcase(ClientGameTestContext context, TestSingleplayerContext sp) {
+		var server = sp.getServer();
+		int bx = 40, by = 200, bz = 40;
+		server.runCommand("fill " + (bx - 6) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 6) + " " + (by - 1) + " " + (bz + 10) + " minecraft:smooth_stone");
+		for (int i = 0; i < 9; i++) {
+			int x = bx - 4 + i;
+			server.runCommand("setblock " + x + " " + by + " " + (bz + 6) + " scubadive:brain_coral");
+			server.runCommand("setblock " + x + " " + (by + 1) + " " + (bz + 6 + (i % 2)) + " scubadive:brain_coral");
+		}
+		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
+		server.runCommand("tp @p " + bx + ".5 " + by + " " + bz + ".5 0 15");
+		sp.getConnection().waitForChunksRender(false, 20 * 60);
+		server.runCommand("summon scubadive:barracuda " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[90f,0f]}");
+		server.runCommand("summon scubadive:barracuda " + (bx + 2) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[-60f,0f]}");
+		context.waitTicks(10);
+		context.takeScreenshot("09_showcase_coral_barracuda");
+		server.runCommand("tp @p " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 1) + ".5 0 20");
+		context.waitTicks(5);
+		context.takeScreenshot("10_barracuda_closeup");
+		server.runCommand("kill @e[type=scubadive:barracuda]");
+		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
 	}
 
 	/** Stays in the ocean for a while: server tick time, client fps and how many mod creatures are around. */

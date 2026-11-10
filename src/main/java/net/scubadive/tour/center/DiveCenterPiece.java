@@ -289,7 +289,8 @@ public class DiveCenterPiece extends StructurePiece {
 			SignText text = new SignText()
 					.setMessage(1, Component.translatable("sign.scubadive.dive_center.line1"))
 					.setMessage(2, Component.translatable("sign.scubadive.dive_center.line2"));
-			signEntity.setText(text, true);
+			// No setText here: it calls markUpdated, which needs a level that world generation does not give.
+			((net.scubadive.mixin.SignBlockEntityAccessor) signEntity).scubadive$setFrontText(text);
 		}
 	}
 

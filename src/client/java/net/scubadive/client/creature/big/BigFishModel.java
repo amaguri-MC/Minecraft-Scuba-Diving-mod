@@ -146,7 +146,7 @@ public class BigFishModel extends EntityModel<BigFishRenderState> {
 		PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create()
 				.texOffs(38, 0).addBox(-1.5f, -1.5f, -4f, 3f, 3f, 4f)
 				.texOffs(38, 7).addBox(-1f, -1f, -8f, 2f, 1f, 4f)
-				.texOffs(24, 8).addBox(-1f, 0f, -8.5f, 2f, 1f, 4f), PartPose.offsetAndRotation(0f, -0.5f, -4f, 0f, 0f, 0f));
+				.texOffs(24, 8).addBox(-1f, 0f, -8.5f, 2f, 1f, 5f), PartPose.offsetAndRotation(0f, -0.5f, -4f, 0f, 0f, 0f));
 		PartDefinition tail1 = body.addOrReplaceChild("tail1", CubeListBuilder.create()
 				.texOffs(24, 0).addBox(-1f, -1.5f, 0f, 2f, 3f, 5f)
 				.texOffs(8, 13).addBox(-0.5f, -2.5f, 1f, 1f, 1f, 2f)
