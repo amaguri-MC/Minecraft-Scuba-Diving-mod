@@ -27,13 +27,15 @@ jobs:
       - name: build
         run: ./gradlew build
       - name: dump apis
+        shell: bash
         run: |
+          set +e
           D=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft
           CJ=$(ls $D/minecraft-clientonly-deobf/26.2/*.jar); MJ=$(ls $D/minecraft-common-deobf/26.2/*.jar)
           FJ=$(find ~/.gradle -name "fabric-*.jar" | grep -v sources | grep -v loader | sort -u)
           CP="$CJ:$MJ:$(echo $FJ | tr ' ' ':')"
           mkdir -p out/mc out/fabric out/data
-          dumpjar() { unzip -Z1 "$1" | grep '\.class$' | grep -v 'module-info' | sed 's/\.class$//; s#/#.#g' > /tmp/cls.txt; split -l 400 /tmp/cls.txt /tmp/chunk_; for f in /tmp/chunk_*; do javap -p -cp "$CP" $(cat $f) 2>/dev/null; done; rm -f /tmp/chunk_*; }
+          dumpjar() { unzip -Z1 "$1" | grep '\.class$' | grep -v 'module-info' | sed 's/\.class$//; s#/#.#g' > /tmp/cls.txt; split -l 400 /tmp/cls.txt /tmp/chunk_; for f in /tmp/chunk_*; do javap -p -cp "$CP" $(cat $f) 2>/dev/null || true; done; rm -f /tmp/chunk_*; }
           dumpjar "$CJ" > out/mc/client.txt
           dumpjar "$MJ" > out/mc/common.txt
           for j in $FJ; do dumpjar "$j"; done > out/fabric/fabric.txt
