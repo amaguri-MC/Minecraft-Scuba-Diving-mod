@@ -43,6 +43,15 @@ public class AnemoneShrimp extends AnemoneDweller {
 			faceTowards(this.target.subtract(this.position()).add(
 					(this.getRandom().nextDouble() - 0.5) * 0.5, 0, (this.getRandom().nextDouble() - 0.5) * 0.5));
 		}
-		steer(this.target, 0.006);
+		// Tiny speeds get zeroed by vanilla movement, so move the shrimp directly along the path.
+		Vec3 d = this.target.subtract(this.position());
+		double len = d.length();
+		if (len > 6.0) {
+			this.setPos(this.target.x, this.target.y, this.target.z);
+		} else if (len > 0.01) {
+			Vec3 step = d.scale(Math.min(0.03, len) / len);
+			this.setPos(this.getX() + step.x, this.getY() + step.y, this.getZ() + step.z);
+		}
+		this.setDeltaMovement(Vec3.ZERO);
 	}
 }
