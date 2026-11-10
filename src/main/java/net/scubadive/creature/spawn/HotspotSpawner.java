@@ -46,6 +46,9 @@ public final class HotspotSpawner {
 	private static final int SCATTER = 3;
 	private static final int SAND_MIN = 12;
 	private static final int ROCK_MIN = 4;
+	private static final java.util.Set<String> BOTTOM_DWELLERS = java.util.Set.of(
+			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
+			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse");
 
 	private static final ResourceKey<Biome> DEEP_TRENCH = ResourceKey.create(Registries.BIOME, ScubaDive.id("deep_trench"));
 	private static final Identifier ANEMONE = ScubaDive.id("sea_anemone");
@@ -134,7 +137,9 @@ public final class HotspotSpawner {
 		y = Math.max(level.getMinY() + 1, Math.min(level.getMaxY() - 1, y));
 
 		BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos(x, y, z);
-		if (!level.hasChunkAt(cursor) || !isWaterSource(level, cursor)) {
+		// Never touch unloaded chunks: the marker scan and the scatter reach a few blocks sideways.
+		int reach = Math.max(MARKER_RADIUS, SCATTER) + 1;
+		if (!level.hasChunksAt(x - reach, level.getMinY(), z - reach, x + reach, level.getMaxY(), z + reach) || !isWaterSource(level, cursor)) {
 			return;
 		}
 		// Find the seabed below the probe
@@ -152,10 +157,11 @@ public final class HotspotSpawner {
 		if (hotspot == null) {
 			return;
 		}
-		if (countFish(level, floorWater) >= FISH_CAP) {
+		int room = FISH_CAP - countFish(level, floorWater);
+		if (room <= 0) {
 			return;
 		}
-		spawnGroup(level, player, floorWater, hotspot, random);
+		spawnGroup(level, player, floorWater, hotspot, random, room);
 	}
 
 	private static boolean isWaterSource(ServerLevel level, BlockPos pos) {
@@ -251,7 +257,7 @@ public final class HotspotSpawner {
 		return ScubaDive.MOD_ID.equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace());
 	}
 
-	private static void spawnGroup(ServerLevel level, ServerPlayer player, BlockPos center, Hotspot hotspot, RandomSource random) {
+	private static void spawnGroup(ServerLevel level, ServerPlayer player, BlockPos center, Hotspot hotspot, RandomSource random, int room) {
 		// Resolve the table at runtime; unknown ids are ignored
 		List<Entry> usable = new ArrayList<>();
 		List<EntityType<?>> types = new ArrayList<>();
@@ -277,14 +283,21 @@ public final class HotspotSpawner {
 		}
 		Entry entry = usable.get(index);
 		EntityType<?> type = types.get(index);
-		int count = entry.minGroup() + random.nextInt(entry.maxGroup() - entry.minGroup() + 1);
+		int count = Math.min(room, entry.minGroup() + random.nextInt(entry.maxGroup() - entry.minGroup() + 1));
+		boolean bottom = BOTTOM_DWELLERS.contains(entry.id());
 
 		SpawnGroupData groupData = null;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int i = 0; i < count; i++) {
 			pos.setWithOffset(center, random.nextInt(SCATTER * 2 + 1) - SCATTER, random.nextInt(3), random.nextInt(SCATTER * 2 + 1) - SCATTER);
-			if (!isWaterSource(level, pos) || !level.hasChunkAt(pos)) {
+			if (!level.hasChunkAt(pos) || !isWaterSource(level, pos)) {
 				continue;
+			}
+			if (bottom) {
+				// Sea-floor species are placed on the floor, not in mid-water above a slope.
+				for (int down = 0; down < 8 && isWaterSource(level, pos.below()); down++) {
+					pos.move(0, -1, 0);
+				}
 			}
 			if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE) {
 				continue;

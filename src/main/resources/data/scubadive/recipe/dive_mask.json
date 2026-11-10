@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "KKK",
+    "G G"
+  ],
+  "key": {
+    "K": "minecraft:dried_kelp",
+    "G": "minecraft:glass_pane"
+  },
+  "result": {
+    "id": "scubadive:dive_mask",
+    "count": 1
+  }
+}
