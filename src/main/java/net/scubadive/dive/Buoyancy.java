@@ -24,7 +24,19 @@ public final class Buoyancy {
 		return Math.max(-1f, Math.min(1f, net));
 	}
 
+	/**
+	 * Neutral means "left alone, the diver neither rises nor sinks": decided by net buoyancy only,
+	 * so finning up or down does not break it. The speed argument is kept for callers but ignored.
+	 */
 	public static boolean isNeutral(float net, float verticalSpeed) {
-		return Math.abs(net) < NEUTRAL_NET && Math.abs(verticalSpeed) < NEUTRAL_SPEED;
+		return Math.abs(net) < NEUTRAL_NET;
 	}
+
+	/** Vertical drift speed (blocks/tick) the diver settles at when doing nothing: + rises, - sinks. */
+	public static double driftSpeed(float net) {
+		return Math.abs(net) < NEUTRAL_NET ? 0.0 : net * DRIFT_PER_NET;
+	}
+
+	/** Drift speed per unit of net buoyancy. Full BCD (net ~1) rises at 0.12 blocks/tick, fast enough to trip the rapid-ascent warning. */
+	public static final double DRIFT_PER_NET = 0.12;
 }

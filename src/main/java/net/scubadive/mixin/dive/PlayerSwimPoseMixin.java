@@ -9,13 +9,13 @@ import net.minecraft.world.entity.player.Player;
 
 import net.scubadive.dive.ScubaDiveGear;
 
-/** Full dive set + body in water: always in the swimming pose (server and client run the same check). No sprint is implied, so no speed bonus. */
+/** Full dive set + head under water: always in the swimming pose (at the surface the diver can stand) (server and client run the same check). No sprint is implied, so no speed bonus. */
 @Mixin(Player.class)
 public abstract class PlayerSwimPoseMixin {
 	@Inject(method = "updateSwimming()V", at = @At("HEAD"), cancellable = true)
 	private void scubadive$alwaysSwim(CallbackInfo ci) {
 		Player self = (Player) (Object) this;
-		if (self.isInWater() && !self.isPassenger() && ScubaDiveGear.hasFullSet(self)) {
+		if (self.isUnderWater() && !self.isPassenger() && ScubaDiveGear.hasFullSet(self)) {
 			self.setSwimming(true);
 			ci.cancel();
 		}

@@ -143,14 +143,18 @@ public final class ScubaDiveGearClient {
 		DiveClientState.neutral = swimming && Buoyancy.isNeutral(net, (float) speed);
 		if (swimming && !player.getAbilities().flying && !player.isPassenger()) {
 			Vec3 v = player.getDeltaMovement();
-			if (DiveClientState.neutral) {
-				// Hold height: cancel vanilla's underwater sinking, leave only a slow sine bob (+-0.06 block, 5 s period).
-				double bob = NEUTRAL_BOB * NEUTRAL_BOB_SPEED * Math.cos(clientTick * NEUTRAL_BOB_SPEED);
-				player.setDeltaMovement(v.x, bob, v.z);
-			} else if (Math.abs(net) < Buoyancy.NEUTRAL_NET) {
-				// Almost neutral: damp vertical motion so the diver can settle into neutral.
-				player.setDeltaMovement(v.x, v.y * 0.5, v.z);
-			} else {
+			var keys = player.input.keyPresses;
+			boolean finning = keys.forward() || keys.backward() || keys.left() || keys.right() || keys.jump() || keys.shift();
+			if (!finning) {
+				// Left alone the diver drifts purely by buoyancy (vanilla's underwater sinking is replaced):
+				// positive rises, negative sinks, neutral holds height with a slow sine bob.
+				double target = Buoyancy.driftSpeed(net);
+				if (DiveClientState.neutral) {
+					target = NEUTRAL_BOB * NEUTRAL_BOB_SPEED * Math.cos(clientTick * NEUTRAL_BOB_SPEED);
+				}
+				player.setDeltaMovement(v.x, v.y + (target - v.y) * 0.2, v.z);
+			} else if (!DiveClientState.neutral) {
+				// While finning, buoyancy still pulls up or down on top of the swimming motion.
 				player.addDeltaMovement(new Vec3(0.0, Buoyancy.ACCEL * net, 0.0));
 			}
 		}
