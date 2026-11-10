@@ -29,7 +29,6 @@ jobs:
       - name: probe recipes
         run: |
           MJ=$(ls ~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-common-deobf/26.2/*.jar)
-          unzip -Z1 "$MJ" | grep -i "data/minecraft/recipe/" | grep -iE "dye|leather_boots|clock" | head -40
-          for f in $(unzip -Z1 "$MJ" | grep -iE "data/minecraft/recipe/(leather_boots|clock|.*dye.*leather.*|dye_.*|.*armor_dye.*)\.json" | head -6); do echo "### $f"; unzip -p "$MJ" "$f"; done
+          for f in leather_chestplate_dyed leather_boots clock; do echo "### $f"; unzip -p "$MJ" data/minecraft/recipe/$f.json; echo; done
           echo "### dyeable tag"; unzip -p "$MJ" data/minecraft/tags/item/dyeable.json || true
           unzip -Z1 "$MJ" | grep -i "tags/item" | grep -i dye
