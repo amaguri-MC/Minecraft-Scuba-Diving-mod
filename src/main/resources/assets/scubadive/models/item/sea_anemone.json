@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "scubadive:block/sea_anemone"
+    "layer0": "scubadive:block/sea_anemone_fan",
+    "layer1": "scubadive:block/sea_anemone"
   }
 }

@@ -68,20 +68,20 @@ public final class ScubaCamera {
 			reject(player);
 			return;
 		}
-		int score = CameraLogic.verify(player, species, payload.entityId(), new BlockPos(payload.x(), payload.y(), payload.z()), payload.fov());
-		if (score <= 0) {
+		CameraLogic.Verified result = CameraLogic.verify(player, species, payload.entityId(), new BlockPos(payload.x(), payload.y(), payload.z()), payload.fov());
+		if (result == null || result.score() <= 0) {
 			reject(player);
 			return;
 		}
 
 		Journal journal = player.getAttachedOrElse(JOURNAL, Journal.EMPTY);
 		boolean isNew = !journal.has(species.id);
-		player.setAttached(JOURNAL, journal.withShot(species.id, score));
-		ServerPlayNetworking.send(player, new CaptureResultPayload(species.id, score, isNew));
+		player.setAttached(JOURNAL, journal.withShot(species.id, result.score()));
+		ServerPlayNetworking.send(player, new CaptureResultPayload(species.id, result.score(), isNew, result.breakdown()));
 	}
 
 	private static void reject(ServerPlayer player) {
-		ServerPlayNetworking.send(player, new CaptureResultPayload("", 0, false));
+		ServerPlayNetworking.send(player, new CaptureResultPayload("", 0, false, Breakdown.NONE));
 	}
 
 	public static Journal journalOf(Player player) {

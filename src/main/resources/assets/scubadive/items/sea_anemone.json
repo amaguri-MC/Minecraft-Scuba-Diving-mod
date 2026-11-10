@@ -6,6 +6,10 @@
       {
         "type": "minecraft:constant",
         "value": -4957486
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -4957486
       }
     ]
   }

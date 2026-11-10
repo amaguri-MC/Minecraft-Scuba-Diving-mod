@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "scubadive:block/branch_coral"
+    },
+    "waterlogged=true": {
+      "model": "scubadive:block/branch_coral"
+    }
+  }
+}

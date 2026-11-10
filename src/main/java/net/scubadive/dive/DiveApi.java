@@ -2,6 +2,7 @@ package net.scubadive.dive;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -36,16 +37,32 @@ public final class DiveApi {
 
 	/** True if the player wears the BCD (which carries the cylinder). Both sides. */
 	public static boolean hasTank(Player player) {
-		return false;
+		return player.getItemBySlot(EquipmentSlot.CHEST).is(ScubaDiveGear.BCD);
 	}
 
 	/** Tank pressure in bar (0..200). 0 without a tank. Server-authoritative, synced to the owning client. */
 	public static float pressure(Player player) {
-		return 0f;
+		if (!hasTank(player)) {
+			return 0f;
+		}
+		if (!player.level().isClientSide()) {
+			DiveServer.Live live = DiveServer.peek(player);
+			if (live != null) {
+				return live.pressure;
+			}
+		}
+		return player.getAttachedOrElse(ScubaDiveGear.DIVE, DiveData.DEFAULT).pressure();
 	}
 
 	/** True while the diver is neutrally buoyant (BCD worn, in water, net buoyancy and vertical speed near zero). Server and owning client. */
 	public static boolean isNeutral(Player player) {
-		return false;
+		if (!hasTank(player)) {
+			return false;
+		}
+		if (player.level().isClientSide()) {
+			return player.isLocalPlayer() && DiveClientState.neutral;
+		}
+		DiveServer.Live live = DiveServer.peek(player);
+		return live != null && live.neutral;
 	}
 }

@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "scubadive:block/fan_coral",
+      "y": 0
+    },
+    "facing=north,waterlogged=true": {
+      "model": "scubadive:block/fan_coral",
+      "y": 0
+    },
+    "facing=east,waterlogged=false": {
+      "model": "scubadive:block/fan_coral",
+      "y": 90
+    },
+    "facing=east,waterlogged=true": {
+      "model": "scubadive:block/fan_coral",
+      "y": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "scubadive:block/fan_coral",
+      "y": 180
+    },
+    "facing=south,waterlogged=true": {
+      "model": "scubadive:block/fan_coral",
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "scubadive:block/fan_coral",
+      "y": 270
+    },
+    "facing=west,waterlogged=true": {
+      "model": "scubadive:block/fan_coral",
+      "y": 270
+    }
+  }
+}

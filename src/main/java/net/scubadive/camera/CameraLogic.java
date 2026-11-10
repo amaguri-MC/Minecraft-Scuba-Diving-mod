@@ -14,6 +14,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import net.minecraft.world.level.LightLayer;
+
+import net.scubadive.dive.DiveApi;
+import net.scubadive.silt.SiltApi;
 import net.scubadive.species.Species;
 
 /**
@@ -29,9 +33,16 @@ public final class CameraLogic {
 	public static final double SERVER_CENTER_LIMIT = 0.6;
 	public static final int NO_ENTITY = -1;
 
+	private static final Scored REJECT = new Scored(-1, Breakdown.NONE);
+
 	private CameraLogic() { }
 
 	public record Shot(Species species, int entityId, BlockPos pos, int score) { }
+
+	/** Server result: final score plus the multipliers that produced it. */
+	public record Verified(int score, Breakdown breakdown) { }
+
+	private record Scored(int score, Breakdown breakdown) { }
 
 	/** Client: find the highest scoring subject, or null. */
 	public static Shot pickBest(Player player, double fov) {
@@ -44,7 +55,7 @@ public final class CameraLogic {
 		for (Entity e : nearby) {
 			Species s = speciesOf(e);
 			if (s == null) continue;
-			int score = scoreEntity(player, level, e, s, nearby, fov, MAX_DIST, CENTER_LIMIT, eye, look);
+			int score = scoreEntity(player, level, e, s, nearby, fov, MAX_DIST, CENTER_LIMIT, eye, look).score();
 			if (score > 0 && (best == null || score > best.score())) {
 				best = new Shot(s, e.getId(), BlockPos.ZERO, score);
 			}
@@ -56,7 +67,7 @@ public final class CameraLogic {
 			BlockPos bp = hit.getBlockPos();
 			Species s = blockSpecies(level, bp);
 			if (s != null) {
-				int score = scoreBlock(player, level, bp, s, fov, MAX_DIST, CENTER_LIMIT, eye, look);
+				int score = scoreBlock(player, level, bp, s, fov, MAX_DIST, CENTER_LIMIT, eye, look).score();
 				if (score > 0 && (best == null || score > best.score())) {
 					best = new Shot(s, NO_ENTITY, bp, score);
 				}
@@ -65,19 +76,21 @@ public final class CameraLogic {
 		return best;
 	}
 
-	/** Server: recompute the score of the claimed subject. Returns -1 if the claim is invalid. */
-	public static int verify(Player player, Species species, int entityId, BlockPos pos, double fovClaim) {
+	/** Server: recompute the score of the claimed subject. Returns null if the claim is invalid. */
+	public static Verified verify(Player player, Species species, int entityId, BlockPos pos, double fovClaim) {
 		double fov = Math.max(5.0, Math.min(110.0, fovClaim));
 		Level level = player.level();
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getViewVector(1.0F);
 		if (species.isBlock) {
-			if (blockSpecies(level, pos) != species) return -1;
-			return scoreBlock(player, level, pos, species, fov, SERVER_MAX_DIST, SERVER_CENTER_LIMIT, eye, look);
+			if (blockSpecies(level, pos) != species) return null;
+			Scored r = scoreBlock(player, level, pos, species, fov, SERVER_MAX_DIST, SERVER_CENTER_LIMIT, eye, look);
+			return r.score() > 0 ? new Verified(r.score(), r.breakdown()) : null;
 		}
 		Entity e = level.getEntity(entityId);
-		if (e == null || e.isRemoved() || speciesOf(e) != species) return -1;
-		return scoreEntity(player, level, e, species, nearby(player, level), fov, SERVER_MAX_DIST, SERVER_CENTER_LIMIT, eye, look);
+		if (e == null || e.isRemoved() || speciesOf(e) != species) return null;
+		Scored r = scoreEntity(player, level, e, species, nearby(player, level), fov, SERVER_MAX_DIST, SERVER_CENTER_LIMIT, eye, look);
+		return r.score() > 0 ? new Verified(r.score(), r.breakdown()) : null;
 	}
 
 	private static List<Entity> nearby(Player player, Level level) {
@@ -94,14 +107,14 @@ public final class CameraLogic {
 		return Species.byTarget(id, true);
 	}
 
-	private static int scoreEntity(Player player, Level level, Entity e, Species s, List<Entity> nearby, double fov,
+	private static Scored scoreEntity(Player player, Level level, Entity e, Species s, List<Entity> nearby, double fov,
 			double maxDist, double maxOffset, Vec3 eye, Vec3 look) {
 		Vec3 center = e.getBoundingBox().getCenter();
 		double dist = eye.distanceTo(center);
-		if (dist > maxDist) return -1;
+		if (dist > maxDist) return REJECT;
 		double r = offset(eye, look, center, fov);
-		if (r > maxOffset) return -1;
-		if (!clearLine(player, level, eye, center)) return -1;
+		if (r > maxOffset) return REJECT;
+		if (!clearLine(player, level, eye, center)) return REJECT;
 
 		int same = 0;
 		for (Entity o : nearby) {
@@ -113,26 +126,30 @@ public final class CameraLogic {
 			same++;
 		}
 		double size = Math.max(e.getBbWidth(), e.getBbHeight());
-		return computeScore(s.basePoints, r, dist, size, fov, same);
+		return computeScore(player, level, s.basePoints, r, dist, size, fov, same, eye, center);
 	}
 
-	private static int scoreBlock(Player player, Level level, BlockPos pos, Species s, double fov,
+	private static Scored scoreBlock(Player player, Level level, BlockPos pos, Species s, double fov,
 			double maxDist, double maxOffset, Vec3 eye, Vec3 look) {
 		Vec3 center = Vec3.atCenterOf(pos);
 		double dist = eye.distanceTo(center);
-		if (dist > maxDist) return -1;
-		if (offset(eye, look, center, fov) > maxOffset) return -1;
+		if (dist > maxDist) return REJECT;
+		if (offset(eye, look, center, fov) > maxOffset) return REJECT;
 		BlockHitResult hit = level.clip(new ClipContext(eye, center, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
 		if (hit.getType() == HitResult.Type.BLOCK && !hit.getBlockPos().equals(pos)
 				&& hit.getLocation().distanceTo(center) > 0.9) {
-			return -1;
+			return REJECT;
 		}
 		// A block subject is aimed at directly: treat it as dead centre, 1 block in size.
-		return computeScore(s.basePoints, 0.0, dist, 1.0, fov, 1);
+		return computeScore(player, level, s.basePoints, 0.0, dist, 1.0, fov, 1, eye, center);
 	}
 
-	/** score = base * centre(1.0-2.0) * size(1.0-1.5, lower when far) * group(1.5 if 3+ of the species on screen). */
-	public static int computeScore(int basePoints, double r, double dist, double size, double fov, int sameOnScreen) {
+	/**
+	 * score = base * center(1.0-2.0) * size(1.0-1.5, lower when far) * group(1.5 if 3+ on screen)
+	 * * distance/turbidity(0.2-1.0) * buoyancy(1.2 neutral / 0.9 not) * brightness(0.85-1.25) * silt(0.3-1.0).
+	 */
+	private static Scored computeScore(Player player, Level level, int basePoints, double r, double dist, double size,
+			double fov, int sameOnScreen, Vec3 eye, Vec3 subject) {
 		double center = 1.0 + (1.0 - clamp(r / CENTER_LIMIT, 0.0, 1.0));
 		double angular = 2.0 * Math.atan(size / (2.0 * Math.max(dist, 0.5)));
 		double frac = angular / Math.toRadians(fov);
@@ -142,7 +159,22 @@ public final class CameraLogic {
 			sizeFactor = 1.0 + (sizeFactor - 1.0) * clamp(1.0 - (dist - 16.0) / 8.0, 0.0, 1.0);
 		}
 		double group = sameOnScreen >= 3 ? 1.5 : 1.0;
-		return Math.max(1, (int) Math.round(basePoints * center * sizeFactor * group));
+		double distance = clamp(Math.exp(-(dist - 2.0) / 14.0), 0.2, 1.0);
+		double neutral = DiveApi.isNeutral(player) ? 1.2 : 0.9;
+
+		// Sample light a little in front of the subject (towards the eye) so solid blocks do not read as dark.
+		Vec3 toEye = eye.subtract(subject);
+		double len = toEye.length();
+		Vec3 probe = len > 1.0E-6 ? subject.add(toEye.scale(Math.min(0.75, len) / len)) : subject;
+		BlockPos lp = BlockPos.containing(probe);
+		int raw = Math.max(level.getBrightness(LightLayer.BLOCK, lp), level.getBrightness(LightLayer.SKY, lp));
+		double brightness = 0.85 + 0.4 * clamp(raw, 0, 15) / 15.0;
+
+		double silt = 1.0 - 0.7 * clamp(SiltApi.siltAlong(level, eye, subject), 0.0, 1.0);
+
+		Breakdown b = new Breakdown((float) distance, (float) neutral, (float) brightness, (float) silt,
+				(float) center, (float) sizeFactor, (float) group);
+		return new Scored(Math.max(1, (int) Math.round(basePoints * b.product())), b);
 	}
 
 	private static double offset(Vec3 eye, Vec3 look, Vec3 target, double fov) {

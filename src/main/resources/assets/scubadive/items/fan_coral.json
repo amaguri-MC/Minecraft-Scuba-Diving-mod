@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "scubadive:item/fan_coral",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1521586
+      }
+    ]
+  }
+}

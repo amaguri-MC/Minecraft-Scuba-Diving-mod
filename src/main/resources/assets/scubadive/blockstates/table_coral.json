@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "scubadive:block/table_coral"
+    },
+    "waterlogged=true": {
+      "model": "scubadive:block/table_coral"
+    }
+  }
+}

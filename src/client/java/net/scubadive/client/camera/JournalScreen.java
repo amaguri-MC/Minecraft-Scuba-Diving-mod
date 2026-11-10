@@ -3,6 +3,7 @@ package net.scubadive.client.camera;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import net.scubadive.camera.Journal;
@@ -26,7 +27,7 @@ public final class JournalScreen extends Screen {
 	}
 
 	private int perPage() {
-		return Math.max(1, (this.height - LIST_TOP - 36) / ROW_HEIGHT);
+		return Math.max(1, (this.height - LIST_TOP - 60) / ROW_HEIGHT);
 	}
 
 	private int pageCount() {
@@ -56,7 +57,27 @@ public final class JournalScreen extends Screen {
 	}
 
 	@Override
+	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+		if (super.mouseClicked(event, doubleClick)) return true;
+		if (event.button() != 0 || this.minecraft == null || this.minecraft.player == null) return false;
+		Species[] all = Species.values();
+		int left = this.width / 2 - 150;
+		int per = perPage();
+		int start = this.page * per;
+		double mx = event.x();
+		double my = event.y();
+		if (mx < left || mx > left + 260 || my < LIST_TOP) return false;
+		int i = start + (int) ((my - LIST_TOP) / ROW_HEIGHT);
+		if (i < start || i >= Math.min(all.length, start + per)) return false;
+		Species s = all[i];
+		if (!ScubaCamera.journalOf(this.minecraft.player).has(s.id)) return false;
+		this.minecraft.gui.setScreen(new PhotoViewerScreen(this, s));
+		return true;
+	}
+
+	@Override
 	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		// Widgets only; the background is drawn by the screen framework (never call extractBackground here).
 		super.extractRenderState(graphics, mouseX, mouseY, delta);
 
 		Journal journal = this.minecraft != null && this.minecraft.player != null
@@ -89,6 +110,7 @@ public final class JournalScreen extends Screen {
 				graphics.text(this.font, String.valueOf(entry.count()), left + 230, y, WHITE);
 			}
 		}
+		graphics.centeredText(this.font, Component.translatable("screen.scubadive.journal.hint").getString(), this.width / 2, this.height - 54, GRAY);
 		graphics.centeredText(this.font, (this.page + 1) + " / " + pageCount(), this.width / 2, this.height - 42, GRAY);
 	}
 }

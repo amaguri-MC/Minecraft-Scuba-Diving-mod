@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "net.scubadive.mixin.dive",
 	"compatibilityLevel": "JAVA_25",
-	"mixins": [],
+	"mixins": [
+		"LivingEntityBreathMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

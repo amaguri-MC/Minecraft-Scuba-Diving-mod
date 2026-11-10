@@ -1,6 +1,40 @@
 {
   "variants": {
-    "waterlogged=false": { "model": "scubadive:block/sea_anemone" },
-    "waterlogged=true": { "model": "scubadive:block/sea_anemone" }
+    "waterlogged=false": [
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 0
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 90
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 180
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 270
+      }
+    ],
+    "waterlogged=true": [
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 0
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 90
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 180
+      },
+      {
+        "model": "scubadive:block/sea_anemone",
+        "y": 270
+      }
+    ]
   }
 }

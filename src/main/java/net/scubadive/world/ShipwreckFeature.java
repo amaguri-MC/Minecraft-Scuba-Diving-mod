@@ -9,6 +9,8 @@ import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
@@ -48,10 +50,16 @@ public class ShipwreckFeature extends Feature<NoneFeatureConfiguration> {
 			return false; // too shallow
 		}
 
-		BlockState planks = Blocks.OAK_PLANKS.defaultBlockState();
-		BlockState dark = Blocks.DARK_OAK_PLANKS.defaultBlockState();
-		BlockState fence = Blocks.OAK_FENCE.defaultBlockState();
-		BlockState log = Blocks.OAK_LOG.defaultBlockState();
+		// Warped (green) timber, to set these wrecks apart from vanilla ones. Waterlogged so no air pockets appear.
+		BlockState planks = Blocks.WARPED_PLANKS.defaultBlockState();
+		BlockState dark = Blocks.STRIPPED_WARPED_STEM.defaultBlockState();
+		BlockState ballast = Blocks.MOSSY_COBBLESTONE.defaultBlockState();
+		BlockState fence = Blocks.WARPED_FENCE.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true);
+		BlockState slab = Blocks.WARPED_SLAB.defaultBlockState().setValue(BlockStateProperties.WATERLOGGED, true);
+		BlockState stairs = Blocks.WARPED_STAIRS.defaultBlockState()
+				.setValue(StairBlock.FACING, bowDir(rot))
+				.setValue(BlockStateProperties.WATERLOGGED, true);
+		BlockState log = Blocks.WARPED_STEM.defaultBlockState();
 
 		for (int l = -4; l <= 4; l++) {
 			int bw = l == 4 ? 0 : (l == 3 ? 1 : (l == -4 ? 1 : 2)); // half-beam: pointed bow, narrow stern
@@ -61,7 +69,7 @@ public class ShipwreckFeature extends Feature<NoneFeatureConfiguration> {
 				for (int y = 0; y <= 3; y++) {
 					BlockState state = null;
 					if (y == 0) {
-						state = aw < bw || bw == 0 ? dark : null;
+						state = aw < bw || bw == 0 ? (random.nextInt(6) == 0 ? ballast : dark) : null;
 						if (bw == 1 && aw == 1) {
 							state = null;
 						}
@@ -69,7 +77,8 @@ public class ShipwreckFeature extends Feature<NoneFeatureConfiguration> {
 						if (side) {
 							state = planks;
 						} else if (y == 2 && l >= -3 && l <= 3) {
-							state = planks; // deck
+							// deck: mostly planks, some half slabs, and a stair at the aft cabin step
+							state = l == -3 && w == 0 ? stairs : (random.nextInt(4) == 0 ? slab : planks);
 						}
 					} else if (side && l >= -3 && l <= 3) {
 						state = fence; // rail
@@ -105,6 +114,21 @@ public class ShipwreckFeature extends Feature<NoneFeatureConfiguration> {
 			}
 		}
 
+		// A little seagrass growing inside the hull.
+		for (int l = -2; l <= 3; l++) {
+			for (int w = -1; w <= 1; w++) {
+				if (random.nextInt(9) != 0) {
+					continue;
+				}
+				int y = base + 1 + (w < 0 ? -1 : 0);
+				BlockPos p = new BlockPos(wx(origin, rot, l, w), y, wz(origin, rot, l, w));
+				BlockState below = level.getBlockState(p.below());
+				if (level.getBlockState(p).is(Blocks.WATER) && !below.isAir() && !below.is(Blocks.WATER)) {
+					level.setBlock(p, Blocks.SEAGRASS.defaultBlockState(), 2);
+				}
+			}
+		}
+
 		// Treasure chest inside the hull (under a hole in the deck).
 		int cx = wx(origin, rot, -1, 0);
 		int cz = wz(origin, rot, -1, 0);
@@ -117,6 +141,16 @@ public class ShipwreckFeature extends Feature<NoneFeatureConfiguration> {
 		level.setBlock(chestPos.above(), Blocks.WATER.defaultBlockState(), 2); // keep the hole open
 		RandomizableContainer.setBlockEntityLootTable(level, random, chestPos, BuiltInLootTables.SHIPWRECK_TREASURE);
 		return true;
+	}
+
+	/** World direction of the bow (+l) for a rotation. */
+	private static Direction bowDir(int rot) {
+		return switch (rot) {
+			case 0 -> Direction.EAST;
+			case 1 -> Direction.WEST;
+			case 2 -> Direction.SOUTH;
+			default -> Direction.NORTH;
+		};
 	}
 
 	private static int wx(BlockPos o, int rot, int l, int w) {

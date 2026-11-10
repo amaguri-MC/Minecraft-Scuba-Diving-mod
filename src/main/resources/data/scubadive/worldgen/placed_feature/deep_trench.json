@@ -1,0 +1,6 @@
+{
+  "feature": "scubadive:deep_trench",
+  "placement": [
+    { "type": "minecraft:count", "count": 1 }
+  ]
+}

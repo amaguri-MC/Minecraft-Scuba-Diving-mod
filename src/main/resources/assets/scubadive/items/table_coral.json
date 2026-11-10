@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "scubadive:item/table_coral",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -876470
+      }
+    ]
+  }
+}
