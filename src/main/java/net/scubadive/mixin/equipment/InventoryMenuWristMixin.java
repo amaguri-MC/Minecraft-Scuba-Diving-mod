@@ -1,7 +1,6 @@
 package net.scubadive.mixin.equipment;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -9,7 +8,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -18,12 +19,11 @@ import net.scubadive.equipment.WristSlot;
 
 /** Adds the wrist slot as the last slot of the player inventory menu and routes shift-click for it. */
 @Mixin(InventoryMenu.class)
-public abstract class InventoryMenuWristMixin {
-	@Shadow
-	protected abstract Slot addSlot(Slot slot);
-
-	@Shadow
-	protected abstract boolean moveItemStackTo(ItemStack stack, int start, int end, boolean reverse);
+public abstract class InventoryMenuWristMixin extends AbstractCraftingMenu {
+	// addSlot / moveItemStackTo are inherited from AbstractContainerMenu, so extend the superclass instead of shadowing.
+	private InventoryMenuWristMixin(MenuType<?> type, int containerId, int width, int height) {
+		super(type, containerId, width, height);
+	}
 
 	@Inject(method = "<init>(Lnet/minecraft/world/entity/player/Inventory;ZLnet/minecraft/world/entity/player/Player;)V", at = @At("TAIL"))
 	private void scubadive$addWristSlot(Inventory inventory, boolean active, Player owner, CallbackInfo ci) {
