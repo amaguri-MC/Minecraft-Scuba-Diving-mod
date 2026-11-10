@@ -10,6 +10,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** A sea star lying on the floor and creeping very slowly. Crown-of-thorns ones prick on touch. */
 public class Starfish extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private final TouchHazard hazard = new TouchHazard(20);
 	private int moveTimer;
 	private float heading;

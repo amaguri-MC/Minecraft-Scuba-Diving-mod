@@ -10,6 +10,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Drifting jellyfish: pulses upward, sinks slowly, drifts. Touching the tentacles stings briefly (poison). */
 public class Jellyfish extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private final TouchHazard hazard = new TouchHazard(30);
 	private float drift;
 

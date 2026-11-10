@@ -232,5 +232,20 @@
  "species.scubadive.spotted_jelly": "Spotted Jelly",
  "item.scubadive.spotted_jelly_spawn_egg": "Spotted Jelly Spawn Egg",
  "hud.scubadive.dc.rapid_ascent": "RAPID ASCENT! Slow down - deflate your BCD",
- "message.scubadive.bent": "Decompression sickness: you surfaced too fast."
+ "message.scubadive.bent": "Decompression sickness: you surfaced too fast.",
+ "book.scubadive.manual.p1": "§lScuba Dive\nGuide§r\n\nDive, photograph sea life and fill your own field guide.\n\nThis book explains gear, buoyancy, photos and tours.",
+ "book.scubadive.manual.p2": "§lGear§r\nMask (head)\nBCD (chest, cylinder on the back)\nWetsuit (legs)\nFins (feet, faster swimming)\n\nMask + BCD with air left: breathe underwater. Full set: hostiles ignore you.",
+ "book.scubadive.manual.p3": "§lBCD & buoyancy§r\nM = inflate (rise)\nN = deflate (sink)\n\nAir shrinks with depth. Green dive computer = neutral. Neutral saves air and scores better photos.",
+ "book.scubadive.manual.p4": "§lTank§r\n200 bar.\nDeeper, faster or out of trim uses more. Resting on the bottom or hovering saves air.\n\nRefills in about 10 s at the surface.",
+ "book.scubadive.manual.p5": "§lRapid ascent§r\nAfter going below 8 m, rising too fast shows a warning. Ignore it and you get decompression sickness at the surface.\n\nDeflate the BCD and ascend slowly.",
+ "book.scubadive.manual.p6": "§lDive computer§r\nPut it in the wrist slot (above the off-hand slot) or hold it.\n\nDive time, depth, max depth, tank, BCD air and buoyancy.",
+ "book.scubadive.manual.p7": "§lDive light§r\nHold it to light the way ahead.\n\nBrighter subjects score higher. A must in caves and deep water.",
+ "book.scubadive.manual.p8": "§lCamera§r\nLeft click: photo mode\nWheel: zoom\nRight click: shoot\nLeft click: leave photo mode\n\nJ: field guide (Wild / Tour). Review your photos there.",
+ "book.scubadive.manual.p9": "§lPhoto score§r\nCentre, size, group, distance (haze), buoyancy, light, silt and angle (from behind scores less).\n\nGet close rather than zooming.",
+ "book.scubadive.manual.p10": "§lCareful§r\nSharks, barracuda and morays bite back if attacked.\nCrown-of-thorns and urchins prick.\nJellyfish sting.\nCorals break if you crash into them. Fast swimming over sand stirs up silt.",
+ "book.scubadive.manual.p11": "§lDive center§r\nFound now and then on beaches.\n\nClerk: buys fish (also small fish in buckets) for emeralds, sells gear.\nGuide: tour reception.",
+ "book.scubadive.manual.p12": "§lTours§r\nPay the guide to sign up; others join at the same guide and the host starts.\n\nOne cylinder only (no refills). Rankings at the end.",
+ "book.scubadive.manual.p13": "§lDive sites§r\nWarm sea\nIce floe\nLake\nWreck\nDrop-off\nCenote\n\nEach has its own creatures and price.",
+ "book.scubadive.manual.p14": "§lCommand§r\n/scubadive trench\nShows the nearest deep trench; click the coordinates for a teleport command.\n\nHappy diving!",
+ "item.scubadive.dive_manual": "Scuba Dive Guide"
 }

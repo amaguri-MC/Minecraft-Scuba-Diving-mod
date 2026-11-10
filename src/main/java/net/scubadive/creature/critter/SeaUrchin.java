@@ -8,6 +8,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Long-spined sea urchin (Diadema): sits on rock and sand; stepping on or brushing it hurts. */
 public class SeaUrchin extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private final TouchHazard hazard = new TouchHazard(15);
 
 	public SeaUrchin(EntityType<? extends SeaUrchin> type, Level level) {

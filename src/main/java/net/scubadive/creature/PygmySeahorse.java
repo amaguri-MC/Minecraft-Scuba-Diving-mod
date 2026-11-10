@@ -9,6 +9,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Very small, rare seahorse that hangs in the water and barely drifts. */
 public class PygmySeahorse extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private int driftTimer;
 	private Vec3 drift = Vec3.ZERO;
 

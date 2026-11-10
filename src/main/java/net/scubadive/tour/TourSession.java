@@ -233,6 +233,8 @@ final class TourSession {
 	}
 
 	private void beginDive(ServerLevel level) {
+		// Entities load asynchronously after the chunks; clear any leftovers that arrived late.
+		discardEntities(level);
 		TourSpawner.spawnGroups(level, origin, point,
 				FIRST_GROUPS_MIN + level.getRandom().nextInt(FIRST_GROUPS_MAX - FIRST_GROUPS_MIN + 1), false);
 		phase = Phase.DIVING;

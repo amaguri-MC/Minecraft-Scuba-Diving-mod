@@ -32,6 +32,12 @@ import net.scubadive.reef.ScubaReefs;
  * red-brown, squirts ink (briefly blinding nearby players) and jets backwards away from the threat.
  */
 public class Octopus extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	/** Camo indices: 0 natural red-brown, 1 sand, 2 stone, 3 coral. */
 	public static final int CAMO_COUNT = 4;
 	private static final EntityDataAccessor<Integer> CAMO = SynchedEntityData.defineId(Octopus.class, EntityDataSerializers.INT);

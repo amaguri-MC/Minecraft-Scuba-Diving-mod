@@ -15,6 +15,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Tiny slow sea slug that crawls along the sea floor. Colour variant is synced entity data (0 blue, 1 orange, 2 black/white). */
 public class Nudibranch extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	public static final int VARIANT_COUNT = 3;
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Nudibranch.class, EntityDataSerializers.INT);
 
@@ -55,6 +61,20 @@ public class Nudibranch extends Mob {
 		return super.finalizeSpawn(level, difficulty, reason, data);
 	}
 
+	@Override
+	protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putBoolean("Settled", this.settled);
+		output.putBoolean("Deliberate", this.deliberate);
+	}
+
+	@Override
+	protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+		super.readAdditionalSaveData(input);
+		this.settled = input.getBooleanOr("Settled", true);
+		this.deliberate = input.getBooleanOr("Deliberate", true);
+	}
+
 	/** Sea slugs live on rock reefs and coral, never on bare sand or mud. */
 	public static boolean isReefFloor(BlockState state) {
 		return state.is(BlockTags.BASE_STONE_OVERWORLD) || state.is(BlockTags.CORAL_BLOCKS)
@@ -83,6 +103,9 @@ public class Nudibranch extends Mob {
 		}
 		if (best != null) {
 			this.setPos(best.getX() + 0.5, best.getY(), best.getZ() + 0.5);
+		} else {
+			// No reef anywhere near (open sand, ice floe, cave floor): a sea slug would not live here.
+			this.discard();
 		}
 	}
 

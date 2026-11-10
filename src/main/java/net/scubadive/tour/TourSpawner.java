@@ -125,7 +125,7 @@ final class TourSpawner {
 				continue;
 			}
 			if (bottom) {
-				for (int down = 0; down < 8 && isWaterSource(level, pos.below()); down++) {
+				for (int down = 0; down < 160 && isWaterSource(level, pos.below()); down++) {
 					pos.move(0, -1, 0);
 				}
 			}

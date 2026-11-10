@@ -13,6 +13,12 @@ import net.scubadive.creature.FleeHelper;
 
 /** Skittish sand goby: rests on the sand and vanishes into it the moment a diver gets close. */
 public class Goby extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private static final double ALERT_RADIUS = 3.0;
 
 	private int hideTimer;

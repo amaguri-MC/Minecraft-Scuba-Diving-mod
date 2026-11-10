@@ -21,6 +21,12 @@ import net.minecraft.world.phys.Vec3;
  * bites back at whoever hurt it while they are in reach.
  */
 public class MorayEel extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(MorayEel.class, EntityDataSerializers.BOOLEAN);
 	/** Horizontal directions as {dx, dz}: south, west, north, east. */
 	private static final int[][] DIRS = {{0, 1}, {-1, 0}, {0, -1}, {1, 0}};

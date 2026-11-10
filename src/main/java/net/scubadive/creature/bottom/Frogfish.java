@@ -10,6 +10,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** Camouflaged frogfish that sits motionless on rock or coral. Colour variant is synced (0 grey, 1 yellow, 2 red). */
 public class Frogfish extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	public static final int VARIANT_COUNT = 3;
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Frogfish.class, EntityDataSerializers.INT);
 

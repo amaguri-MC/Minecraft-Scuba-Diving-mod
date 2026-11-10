@@ -10,6 +10,12 @@ import net.scubadive.creature.ScubaCreatures;
 
 /** Base for creatures that live on a sea anemone: remembers one anemone as home and steers around it. */
 public abstract class AnemoneDweller extends Mob {
+
+	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
+	@Override
+	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
+		return level.isUnobstructed(this);
+	}
 	/** Radius in blocks within which an anemone is adopted as home. */
 	public static final int HOME_RANGE = 8;
 
