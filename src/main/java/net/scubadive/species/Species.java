@@ -4,18 +4,7 @@ import net.minecraft.resources.Identifier;
 
 /** Every photographable subject. Display name: lang key "species.scubadive.<id>". */
 public enum Species {
-	// vanilla
-	COD("cod", "minecraft:cod", false, 5),
-	SALMON("salmon", "minecraft:salmon", false, 5),
-	TROPICAL_FISH("tropical_fish", "minecraft:tropical_fish", false, 10),
-	PUFFERFISH("pufferfish", "minecraft:pufferfish", false, 15),
-	SQUID("squid", "minecraft:squid", false, 10),
-	GLOW_SQUID("glow_squid", "minecraft:glow_squid", false, 25),
-	DOLPHIN("dolphin", "minecraft:dolphin", false, 20),
-	TURTLE("turtle", "minecraft:turtle", false, 25),
-	AXOLOTL("axolotl", "minecraft:axolotl", false, 30),
-	GUARDIAN("guardian", "minecraft:guardian", false, 35),
-	ELDER_GUARDIAN("elder_guardian", "minecraft:elder_guardian", false, 120),
+	// Vanilla mobs are deliberately not photographable subjects: only this mod's creatures count.
 	// scubadive (phase 1)
 	SEA_ANEMONE("sea_anemone", "scubadive:sea_anemone", true, 10),
 	NUDIBRANCH("nudibranch", "scubadive:nudibranch", false, 40),
@@ -54,7 +43,16 @@ public enum Species {
 	SEA_URCHIN("sea_urchin", "scubadive:sea_urchin", false, 20),
 	MOON_JELLY("moon_jelly", "scubadive:moon_jelly", false, 30),
 	SEA_NETTLE("sea_nettle", "scubadive:sea_nettle", false, 55),
-	SPOTTED_JELLY("spotted_jelly", "scubadive:spotted_jelly", false, 45);
+	SPOTTED_JELLY("spotted_jelly", "scubadive:spotted_jelly", false, 45),
+	CLIONE("clione", "scubadive:clione", false, 70),
+	// fresh water and cold water
+	RAINBOW_TROUT("rainbow_trout", "scubadive:rainbow_trout", false, 25),
+	CARP("carp", "scubadive:carp", false, 20),
+	CATFISH("catfish", "scubadive:catfish", false, 40),
+	BLIND_CAVEFISH("blind_cavefish", "scubadive:blind_cavefish", false, 80),
+	CRAYFISH("crayfish", "scubadive:crayfish", false, 30),
+	LUMPSUCKER("lumpsucker", "scubadive:lumpsucker", false, 90),
+	WOLF_EEL("wolf_eel", "scubadive:wolf_eel", false, 75);
 
 	public final String id;
 	public final Identifier target;

@@ -2,8 +2,6 @@ package net.scubadive.creature.reef;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -21,10 +19,10 @@ import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.scubadive.ScubaDive;
+import net.scubadive.creature.spawn.SeaZones;
 
 /**
  * Coral reef fish: registration, spawn rules and spawn eggs.
@@ -49,18 +47,18 @@ public final class ReefFish {
 	private static final List<Entry> ENTRIES = new ArrayList<>();
 
 	// Hitbox height = 2 * body centre offset * model scale / 16 (see ReefFishRenderer).
-	public static final EntityType<ReefSchoolFish> BLUE_DAMSEL = school(BLUE_DAMSEL_PROFILE, 0.2f, 0.16f, true, 10, 5, 8);
-	public static final EntityType<ReefSchoolFish> CHROMIS = school(CHROMIS_PROFILE, 0.2f, 0.15f, true, 9, 6, 10);
-	public static final EntityType<ReefSchoolFish> ANTHIAS = school(ANTHIAS_PROFILE, 0.22f, 0.18f, false, 9, 6, 10);
-	public static final EntityType<ReefLoneFish> BLUE_TANG = lone(BLUE_TANG_PROFILE, 0.25f, 0.24f, false, 6, 1, 3);
-	public static final EntityType<ReefSchoolFish> BUTTERFLYFISH = school(BUTTERFLYFISH_PROFILE, 0.25f, 0.23f, false, 6, 2, 2);
-	public static final EntityType<ReefLoneFish> MOORISH_IDOL = lone(MOORISH_IDOL_PROFILE, 0.25f, 0.23f, false, 4, 1, 2);
-	public static final EntityType<ReefLoneFish> LIONFISH = lone(LIONFISH_PROFILE, 0.45f, 0.4f, false, 1, 1, 1);
-	public static final EntityType<ReefLoneFish> PARROTFISH = lone(PARROTFISH_PROFILE, 0.35f, 0.3f, false, 3, 1, 3);
+	public static final EntityType<ReefSchoolFish> BLUE_DAMSEL = school(BLUE_DAMSEL_PROFILE, 0.2f, 0.16f, true, 6, 5, 8);
+	public static final EntityType<ReefSchoolFish> CHROMIS = school(CHROMIS_PROFILE, 0.2f, 0.15f, true, 5, 6, 10);
+	public static final EntityType<ReefSchoolFish> ANTHIAS = school(ANTHIAS_PROFILE, 0.22f, 0.18f, false, 10, 6, 10);
+	public static final EntityType<ReefLoneFish> BLUE_TANG = lone(BLUE_TANG_PROFILE, 0.25f, 0.24f, false, 7, 2, 4);
+	public static final EntityType<ReefSchoolFish> BUTTERFLYFISH = school(BUTTERFLYFISH_PROFILE, 0.25f, 0.23f, false, 7, 2, 2);
+	public static final EntityType<ReefLoneFish> MOORISH_IDOL = lone(MOORISH_IDOL_PROFILE, 0.25f, 0.23f, false, 5, 1, 2);
+	public static final EntityType<ReefLoneFish> LIONFISH = lone(LIONFISH_PROFILE, 0.45f, 0.4f, false, 2, 1, 1);
+	public static final EntityType<ReefLoneFish> PARROTFISH = lone(PARROTFISH_PROFILE, 0.35f, 0.3f, false, 5, 1, 3);
 	public static final EntityType<ReefLoneFish> BOXFISH = lone(BOXFISH_PROFILE, 0.25f, 0.22f, false, 3, 1, 1);
 	public static final EntityType<ReefLoneFish> TRIGGERFISH = lone(TRIGGERFISH_PROFILE, 0.3f, 0.3f, false, 3, 1, 2);
 	public static final EntityType<ReefLoneFish> GROUPER = lone(GROUPER_PROFILE, 0.5f, 0.38f, false, 2, 1, 1);
-	public static final EntityType<ReefSchoolFish> BLUESTRIPE_SNAPPER = school(BLUESTRIPE_SNAPPER_PROFILE, 0.22f, 0.18f, false, 2, 10, 20);
+	public static final EntityType<ReefSchoolFish> BLUESTRIPE_SNAPPER = school(BLUESTRIPE_SNAPPER_PROFILE, 0.22f, 0.18f, false, 5, 8, 14);
 
 	private record Entry(ReefProfile profile, EntityType<? extends Mob> type, int weight, int min, int max) {
 	}
@@ -89,8 +87,8 @@ public final class ReefFish {
 							}
 							return attributes;
 						})
-						.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-								canSpawnAt(level, pos, needCoral)))
+						.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+								canSpawnAt(level, pos, needCoral))))
 				.sized(w, h)
 				.clientTrackingRange(8)
 				.build(ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id(p.id())));
@@ -119,7 +117,7 @@ public final class ReefFish {
 	}
 
 	public static void init() {
-		var warmSeas = BiomeSelectors.includeByKey(Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN);
+		// Coral reef fish live in warm and lukewarm water; the grouper also in the temperate sea.
 		for (Entry e : ENTRIES) {
 			ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id(e.profile().id()));
 			Registry.register(BuiltInRegistries.ENTITY_TYPE, key, e.type());
@@ -127,7 +125,8 @@ public final class ReefFish {
 			ResourceKey<Item> eggKey = ResourceKey.create(Registries.ITEM, ScubaDive.id(e.profile().id() + "_spawn_egg"));
 			Registry.register(BuiltInRegistries.ITEM, eggKey, new SpawnEggItem(new Item.Properties().setId(eggKey).spawnEgg(e.type())));
 
-			BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, e.type(), e.weight(), e.min(), e.max());
+			SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.WATER_AMBIENT, e.type(), e.weight(), e.min(), e.max());
 		}
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.WATER_AMBIENT, GROUPER, 5, 1, 1);
 	}
 }

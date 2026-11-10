@@ -1,7 +1,5 @@
 package net.scubadive.creature.bottom;
 
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,12 +17,12 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.scubadive.ScubaDive;
 import net.scubadive.creature.ScubaCreatures;
+import net.scubadive.creature.spawn.SeaZones;
 import net.scubadive.reef.ScubaReefs;
 
 /** Registration for the symbiotic and bottom-dwelling creatures: clownfish, anemone shrimp, goby, moray eel, frogfish. */
@@ -36,66 +34,62 @@ public final class BottomDwellers {
 	public static final ResourceKey<EntityType<?>> FROGFISH_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("frogfish"));
 	public static final ResourceKey<EntityType<?>> OCTOPUS_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("octopus"));
 
-	public static final EntityType<Clownfish> CLOWNFISH = FabricEntityType.Builder.createMob(Clownfish::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<Clownfish> CLOWNFISH = FabricEntityType.Builder.createMob(Clownfish::new, MobCategory.AXOLOTLS, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 3.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.04))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							level.getFluidState(pos).is(FluidTags.WATER) && anemoneNear(level, pos, AnemoneDweller.HOME_RANGE)))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							nearAnemoneFloor(level, pos))))
 			.sized(0.3f, 0.2f)
 			.clientTrackingRange(8)
 			.build(CLOWNFISH_KEY);
 
-	public static final EntityType<AnemoneShrimp> ANEMONE_SHRIMP = FabricEntityType.Builder.createMob(AnemoneShrimp::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<AnemoneShrimp> ANEMONE_SHRIMP = FabricEntityType.Builder.createMob(AnemoneShrimp::new, MobCategory.AXOLOTLS, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 1.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.006))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							level.getFluidState(pos).is(FluidTags.WATER) && anemoneNear(level, pos, AnemoneDweller.HOME_RANGE)))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							nearAnemoneFloor(level, pos))))
 			.sized(0.1f, 0.1f)
 			.clientTrackingRange(6)
 			.build(ANEMONE_SHRIMP_KEY);
 
-	public static final EntityType<Goby> GOBY = FabricEntityType.Builder.createMob(Goby::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<Goby> GOBY = FabricEntityType.Builder.createMob(Goby::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 3.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.05))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							level.getFluidState(pos).is(FluidTags.WATER)
-									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
-									&& level.getBlockState(pos.below()).is(Blocks.SAND)))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							onFloor(level, pos, f -> level.getBlockState(f.below()).is(Blocks.SAND)))))
 			.sized(0.22f, 0.14f)
 			.clientTrackingRange(6)
 			.build(GOBY_KEY);
 
-	public static final EntityType<MorayEel> MORAY_EEL = FabricEntityType.Builder.createMob(MorayEel::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<MorayEel> MORAY_EEL = FabricEntityType.Builder.createMob(MorayEel::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 12.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.0))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							level.getFluidState(pos).is(FluidTags.WATER) && MorayEel.findCrevice(level, pos, 3) != null))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							level.getFluidState(pos).is(FluidTags.WATER) && MorayEel.findCrevice(level, pos, 3) != null)))
 			.sized(0.4f, 0.4f)
 			.clientTrackingRange(8)
 			.build(MORAY_EEL_KEY);
 
-	public static final EntityType<Frogfish> FROGFISH = FabricEntityType.Builder.createMob(Frogfish::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<Frogfish> FROGFISH = FabricEntityType.Builder.createMob(Frogfish::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 8.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.0))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							level.getFluidState(pos).is(FluidTags.WATER)
-									&& level.getFluidState(pos.above()).is(FluidTags.WATER)
-									&& isMimicryBed(level, pos)))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							onFloor(level, pos, f -> isMimicryBed(level, f)))))
 			.sized(0.35f, 0.3f)
 			.clientTrackingRange(6)
 			.build(FROGFISH_KEY);
 
-	public static final EntityType<Octopus> OCTOPUS = FabricEntityType.Builder.createMob(Octopus::new, MobCategory.WATER_AMBIENT, mob -> mob
+	public static final EntityType<Octopus> OCTOPUS = FabricEntityType.Builder.createMob(Octopus::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 10.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.03))
-					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, (type, level, reason, pos, random) ->
-							Octopus.canSpawnAt(level, pos)))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							onFloor(level, pos, f -> Octopus.canSpawnAt(level, f)))))
 			.sized(0.6f, 0.4f)
 			.clientTrackingRange(8)
 			.build(OCTOPUS_KEY);
@@ -118,16 +112,28 @@ public final class BottomDwellers {
 		registerSpawnEgg("frogfish_spawn_egg", FROGFISH);
 		registerSpawnEgg("octopus_spawn_egg", OCTOPUS);
 
-		// Natural spawns in warm and lukewarm oceans. The placement rules above do the fine filtering.
-		var warmSeas = BiomeSelectors.includeByKey(Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN);
-		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, CLOWNFISH, 10, 2, 4);
-		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, ANEMONE_SHRIMP, 6, 1, 2);
-		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, GOBY, 8, 1, 3);
-		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, MORAY_EEL, 4, 1, 1);
-		BiomeModifications.addSpawn(warmSeas, MobCategory.WATER_AMBIENT, FROGFISH, 1, 1, 1);
-		// Octopuses also live in ordinary oceans, on rocky floors only (placement rule).
-		var octopusSeas = BiomeSelectors.includeByKey(Biomes.WARM_OCEAN, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN, Biomes.OCEAN, Biomes.DEEP_OCEAN);
-		BiomeModifications.addSpawn(octopusSeas, MobCategory.WATER_AMBIENT, OCTOPUS, 2, 1, 1);
+		// Natural spawns. Anemone dwellers use the AXOLOTLS cap and floor dwellers the UNDERGROUND_WATER_CREATURE
+		// cap (both unused in the open sea), so they no longer crowd the fish out of the 20-mob WATER_AMBIENT cap.
+		// Tropical species: warm and lukewarm oceans. The placement rules above do the fine filtering.
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, CLOWNFISH, 10, 2, 3);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, ANEMONE_SHRIMP, 5, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, GOBY, 8, 1, 3);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, MORAY_EEL, 4, 1, 1);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, FROGFISH, 2, 1, 1);
+		// Octopuses: reefs and the temperate sea, on rocky floors only (placement rule).
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, OCTOPUS, 3, 1, 1);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.UNDERGROUND_WATER_CREATURE, OCTOPUS, 6, 1, 1);
+	}
+
+	/** Natural floor-dweller check: the floor lies at most 3 cells below (the creature sinks onto it) and passes the test. */
+	private static boolean onFloor(LevelReader level, BlockPos pos, java.util.function.Predicate<BlockPos> floorTest) {
+		BlockPos f = SeaZones.floorWater(level, pos, 3);
+		return f != null && level.getFluidState(f.above()).is(FluidTags.WATER) && floorTest.test(f);
+	}
+
+	/** Anemone dwellers: low over the floor (cheap test first) with an anemone within their home range. */
+	private static boolean nearAnemoneFloor(LevelReader level, BlockPos pos) {
+		return SeaZones.floorWater(level, pos, 4) != null && anemoneNear(level, pos, AnemoneDweller.HOME_RANGE);
 	}
 
 	/** True when a sea anemone block lies within the radius (sphere) of the position. */

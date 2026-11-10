@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "scubadive:item/dive_fins"
+    "layer0": "scubadive:item/dive_fins",
+    "layer1": "scubadive:item/dive_fins_overlay"
   }
 }

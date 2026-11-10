@@ -20,6 +20,14 @@ import net.minecraft.world.phys.HitResult;
 
 /** A bucket holding one small fish. Use it on water to release the fish (the bucket comes back empty). */
 public class FishBucketItem extends Item {
+	/** Name always follows the species inside, so shop trades also show "Clownfish in a bucket" etc. */
+	@Override
+	public net.minecraft.network.chat.Component getName(ItemStack stack) {
+		net.minecraft.network.chat.Component species = FishBuckets.speciesName(FishBuckets.speciesOf(stack));
+		return species == null ? super.getName(stack)
+				: net.minecraft.network.chat.Component.translatable("item.scubadive.fish_bucket.of", species);
+	}
+
 	public FishBucketItem(Properties properties) {
 		super(properties);
 	}

@@ -1,6 +1,7 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "scubadive:item/bcd"
+    "layer0": "scubadive:item/bcd",
+    "layer1": "scubadive:item/bcd_overlay"
   }
 }

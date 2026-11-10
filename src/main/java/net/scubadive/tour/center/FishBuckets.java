@@ -66,6 +66,12 @@ public final class FishBuckets {
 		return data.copyTag().getStringOr(TAG, "");
 	}
 
+	/** Display name of the species in a bucket, or null if unknown. */
+	public static Component speciesName(String entityId) {
+		Species species = species(entityId);
+		return species == null ? null : Component.translatable(species.langKey());
+	}
+
 	private static Species species(String entityId) {
 		Identifier id = Identifier.tryParse(entityId);
 		return id == null ? null : Species.byTarget(id, false);

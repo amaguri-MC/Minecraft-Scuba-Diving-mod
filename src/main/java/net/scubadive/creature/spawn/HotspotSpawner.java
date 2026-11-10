@@ -2,13 +2,12 @@ package net.scubadive.creature.spawn;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -19,107 +18,186 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.fish.WaterAnimal;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.scubadive.ScubaDive;
+import net.scubadive.tour.TourApi;
 
 /**
- * Dense fish spawning around reefs and other hotspots. Owner: spawn module (G4).
- * Cheap by design: a few random probes per player every couple of seconds.
+ * Dense fish spawning around reefs and other hotspots, and a lighter background of life in the open sea.
+ * Tables depend on the water temperature of the biome (see {@link SeaZones}), like the biome spawns.
+ * Cheap by design: a few random probes per player every couple of seconds; the tour dimension is skipped
+ * (the tour spawner fills each site itself).
  */
 public final class HotspotSpawner {
 	// Tuning constants
 	private static final int INTERVAL_TICKS = 40;
-	private static final int PROBES_PER_PLAYER = 3;
-	private static final int MIN_RANGE = 24;
-	private static final int MAX_RANGE = 48;
+	private static final int PROBES_PER_PLAYER = 4;
+	private static final int MIN_RANGE = 20;
+	private static final int MAX_RANGE = 40;
 	private static final int VERTICAL_RANGE = 16;
 	private static final int MAX_FLOOR_SEARCH = 24;
 	private static final int MARKER_RADIUS = 3;
-	private static final int FISH_CAP = 60;
+	private static final int FISH_CAP = 72;
 	private static final double CAP_RADIUS = 32.0;
+	/** Large or rare animals: at most one group of the kind around the spot. */
+	private static final double SOLO_RADIUS = 48.0;
 	private static final double MIN_PLAYER_DISTANCE = 8.0;
 	private static final int SCATTER = 3;
 	private static final int SAND_MIN = 12;
 	private static final int ROCK_MIN = 4;
-	private static final java.util.Set<String> BOTTOM_DWELLERS = java.util.Set.of(
+	private static final int PLACE_TRIES = 3;
+	/** Placed on the sea floor. */
+	private static final Set<String> BOTTOM_DWELLERS = Set.of(
+			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
+			"scubadive:moray_eel", "scubadive:frogfish",
+			"scubadive:blue_starfish", "scubadive:cushion_star", "scubadive:crown_of_thorns", "scubadive:sea_urchin",
+			"scubadive:crayfish", "scubadive:catfish", "scubadive:lumpsucker", "minecraft:tadpole");
+	/** Their own placement rule must pass (anemone close by, right kind of floor, crevice...). */
+	private static final Set<String> CHECKED = Set.of(
 			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
 			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse",
-			"scubadive:blue_starfish", "scubadive:cushion_star", "scubadive:crown_of_thorns", "scubadive:sea_urchin");
+			"scubadive:blue_starfish", "scubadive:cushion_star", "scubadive:crown_of_thorns", "scubadive:sea_urchin",
+			"scubadive:clownfish", "scubadive:anemone_shrimp", "scubadive:wolf_eel", "scubadive:crayfish",
+			"scubadive:catfish", "scubadive:lumpsucker");
+	private static final Set<String> SOLO = Set.of(
+			"scubadive:whale_shark", "scubadive:manta_ray", "scubadive:hammerhead_shark", "scubadive:reef_shark",
+			"scubadive:frogfish", "scubadive:pygmy_seahorse", "scubadive:barracuda", "scubadive:wolf_eel");
 
-	private static final ResourceKey<Biome> DEEP_TRENCH = ResourceKey.create(Registries.BIOME, ScubaDive.id("deep_trench"));
 	private static final Identifier ANEMONE = ScubaDive.id("sea_anemone");
 
 	/** One spawn table row: entity id, weight, group size range. */
 	private record Entry(String id, int weight, int minGroup, int maxGroup) {
 	}
 
+	private static Entry e(String id, int weight, int min, int max) {
+		return new Entry(id, weight, min, max);
+	}
+
 	private enum Hotspot {
-		REEF(List.of(
-				new Entry("scubadive:blue_damsel", 10, 6, 12),
-				new Entry("scubadive:chromis", 10, 8, 16),
-				new Entry("scubadive:anthias", 10, 8, 16),
-				new Entry("scubadive:blue_tang", 6, 2, 4),
-				new Entry("scubadive:butterflyfish", 5, 1, 3),
-				new Entry("scubadive:moorish_idol", 3, 1, 2),
-				new Entry("scubadive:lionfish", 3, 1, 2),
-				new Entry("scubadive:parrotfish", 5, 1, 3),
-				new Entry("scubadive:boxfish", 3, 1, 1),
-				new Entry("scubadive:triggerfish", 3, 1, 2),
-				new Entry("scubadive:bluestripe_snapper", 5, 10, 18),
-				new Entry("minecraft:tropical_fish", 8, 3, 6),
-				new Entry("scubadive:nudibranch", 12, 2, 4),
-				new Entry("scubadive:pygmy_seahorse", 2, 1, 1),
-				new Entry("scubadive:octopus", 2, 1, 1),
-				new Entry("scubadive:blue_starfish", 4, 1, 2),
-				new Entry("scubadive:crown_of_thorns", 2, 1, 1),
-				new Entry("scubadive:sea_urchin", 4, 2, 4),
-				new Entry("scubadive:spotted_jelly", 2, 2, 3))),
-		ANEMONE(List.of(
-				new Entry("scubadive:clownfish", 24, 2, 4),
-				new Entry("scubadive:anemone_shrimp", 5, 1, 3),
-				new Entry("scubadive:nudibranch", 4, 1, 2))),
-		ROCK(List.of(
-				new Entry("scubadive:grouper", 6, 1, 2),
-				new Entry("scubadive:moray_eel", 4, 1, 1),
-				new Entry("scubadive:goby", 4, 1, 3),
-				new Entry("scubadive:lionfish", 3, 1, 2),
-				new Entry("minecraft:cod", 6, 2, 5),
-				new Entry("scubadive:nudibranch", 10, 2, 4),
-				new Entry("scubadive:octopus", 3, 1, 1))),
-		TRENCH(List.of(
-				new Entry("scubadive:hammerhead_shark", 4, 2, 5),
-				new Entry("scubadive:bigeye_trevally", 6, 12, 24),
-				new Entry("scubadive:manta_ray", 2, 1, 1),
-				new Entry("minecraft:glow_squid", 6, 2, 4))),
-		WRECK(List.of(
-				new Entry("scubadive:barracuda", 6, 3, 6),
-				new Entry("scubadive:bigeye_trevally", 6, 12, 24),
-				new Entry("scubadive:grouper", 5, 1, 2),
-				new Entry("scubadive:reef_shark", 3, 1, 2))),
-		SAND(List.of(
-				new Entry("scubadive:stingray", 3, 1, 1),
-				new Entry("scubadive:goby", 6, 1, 3)));
+		WRECK, ANEMONE, REEF, ROCK, SAND, TRENCH,
+		/** Plain floor (gravel, mud, clay...) or no floor in reach: mid-water life. */
+		OPEN
+	}
 
-		final List<Entry> entries;
+	// ---- warm and lukewarm water: coral reef and tropical life ----
+	private static final List<Entry> WARM_REEF = List.of(
+			e("scubadive:blue_damsel", 10, 6, 12), e("scubadive:chromis", 10, 8, 16), e("scubadive:anthias", 10, 8, 16),
+			e("scubadive:blue_tang", 6, 2, 4), e("scubadive:butterflyfish", 5, 2, 2), e("scubadive:moorish_idol", 3, 1, 2),
+			e("scubadive:lionfish", 3, 1, 2), e("scubadive:parrotfish", 5, 1, 3), e("scubadive:boxfish", 3, 1, 1),
+			e("scubadive:triggerfish", 3, 1, 2), e("scubadive:bluestripe_snapper", 5, 10, 18),
+			e("minecraft:tropical_fish", 6, 3, 6), e("scubadive:nudibranch", 10, 2, 4), e("scubadive:pygmy_seahorse", 2, 1, 1),
+			e("scubadive:octopus", 2, 1, 1), e("scubadive:blue_starfish", 4, 1, 2), e("scubadive:crown_of_thorns", 2, 1, 1),
+			e("scubadive:sea_urchin", 4, 2, 4), e("scubadive:spotted_jelly", 2, 2, 3), e("scubadive:frogfish", 1, 1, 1));
+	private static final List<Entry> ANEMONE_TABLE = List.of(
+			e("scubadive:clownfish", 24, 2, 4), e("scubadive:anemone_shrimp", 6, 1, 3), e("scubadive:nudibranch", 4, 1, 2));
+	private static final List<Entry> WARM_ROCK = List.of(
+			e("scubadive:grouper", 4, 1, 2), e("scubadive:moray_eel", 5, 1, 1), e("scubadive:goby", 3, 1, 3),
+			e("scubadive:lionfish", 3, 1, 2), e("scubadive:blue_tang", 4, 2, 4), e("scubadive:triggerfish", 2, 1, 2),
+			e("scubadive:nudibranch", 8, 2, 4), e("scubadive:octopus", 3, 1, 1), e("scubadive:sea_urchin", 4, 2, 4),
+			e("scubadive:frogfish", 1, 1, 1));
+	private static final List<Entry> WARM_SAND = List.of(
+			e("scubadive:stingray", 3, 1, 1), e("scubadive:goby", 6, 1, 3), e("scubadive:blue_starfish", 3, 1, 2),
+			e("minecraft:tropical_fish", 4, 3, 6), e("scubadive:bluestripe_snapper", 2, 8, 14));
+	private static final List<Entry> WARM_OPEN = List.of(
+			e("scubadive:bluestripe_snapper", 4, 8, 14), e("scubadive:anthias", 3, 6, 10), e("scubadive:bigeye_trevally", 3, 10, 20),
+			e("minecraft:tropical_fish", 6, 3, 6), e("scubadive:spotted_jelly", 3, 2, 3), e("scubadive:barracuda", 2, 3, 6),
+			e("scubadive:reef_shark", 1, 1, 1));
 
-		Hotspot(List<Entry> entries) {
-			this.entries = entries;
+	// ---- ordinary ocean: temperate life ----
+	private static final List<Entry> TEMPERATE_ROCK = List.of(
+			e("scubadive:grouper", 6, 1, 2), e("scubadive:octopus", 5, 1, 1), e("scubadive:nudibranch", 3, 1, 2),
+			e("scubadive:cushion_star", 4, 1, 2), e("minecraft:cod", 6, 3, 6), e("scubadive:bigeye_trevally", 2, 8, 14));
+	private static final List<Entry> TEMPERATE_SAND = List.of(
+			e("scubadive:cushion_star", 4, 1, 2), e("scubadive:stingray", 2, 1, 1), e("minecraft:cod", 5, 3, 6),
+			e("scubadive:bigeye_trevally", 3, 8, 14), e("scubadive:moon_jelly", 2, 2, 4));
+	private static final List<Entry> TEMPERATE_OPEN = List.of(
+			e("scubadive:bigeye_trevally", 6, 12, 24), e("scubadive:moon_jelly", 6, 3, 6), e("minecraft:cod", 6, 3, 6),
+			e("scubadive:grouper", 2, 1, 1), e("minecraft:squid", 2, 1, 3));
+
+	// ---- cold and frozen oceans: cold-water life ----
+	private static final List<Entry> COLD_FLOOR = List.of(
+			e("scubadive:cushion_star", 6, 1, 3), e("minecraft:cod", 6, 3, 6), e("minecraft:salmon", 4, 3, 5),
+			e("scubadive:sea_nettle", 2, 1, 2), e("scubadive:clione", 5, 2, 4), e("scubadive:lumpsucker", 3, 1, 1),
+			e("scubadive:wolf_eel", 2, 1, 1));
+	private static final List<Entry> COLD_OPEN = List.of(
+			e("minecraft:cod", 8, 3, 6), e("minecraft:salmon", 6, 3, 6), e("scubadive:sea_nettle", 4, 1, 3),
+			e("scubadive:clione", 8, 2, 5), e("minecraft:squid", 2, 1, 3));
+
+	// ---- deep water and wrecks: big fish ----
+	private static final List<Entry> DEEP = List.of(
+			e("scubadive:hammerhead_shark", 3, 2, 5), e("scubadive:bigeye_trevally", 6, 12, 24), e("scubadive:manta_ray", 2, 1, 1),
+			e("scubadive:reef_shark", 2, 1, 2), e("scubadive:whale_shark", 1, 1, 1), e("minecraft:glow_squid", 4, 2, 4));
+	private static final List<Entry> COLD_DEEP = List.of(
+			e("minecraft:cod", 6, 4, 8), e("minecraft:salmon", 4, 3, 6), e("scubadive:clione", 6, 3, 6),
+			e("scubadive:sea_nettle", 3, 1, 3), e("scubadive:wolf_eel", 1, 1, 1));
+
+	// ---- fresh water: rivers, lakes, swamps and flooded caves ----
+	private static final List<Entry> FRESH_FLOOR = List.of(
+			e("scubadive:crayfish", 6, 1, 2), e("scubadive:catfish", 3, 1, 1), e("scubadive:carp", 4, 2, 4),
+			e("scubadive:rainbow_trout", 4, 1, 3), e("minecraft:salmon", 2, 2, 4), e("minecraft:tadpole", 2, 2, 4));
+	private static final List<Entry> FRESH_OPEN = List.of(
+			e("scubadive:rainbow_trout", 6, 1, 3), e("scubadive:carp", 5, 2, 4), e("minecraft:salmon", 3, 2, 4));
+	private static final List<Entry> FRESH_CAVE = List.of(
+			e("scubadive:blind_cavefish", 6, 6, 12), e("scubadive:crayfish", 2, 1, 2), e("minecraft:glow_squid", 3, 1, 3),
+			e("minecraft:axolotl", 2, 1, 2));
+	private static final List<Entry> WRECK_TABLE = List.of(
+			e("scubadive:barracuda", 6, 3, 6), e("scubadive:bigeye_trevally", 6, 12, 24), e("scubadive:grouper", 5, 1, 2),
+			e("scubadive:reef_shark", 3, 1, 2), e("scubadive:moray_eel", 3, 1, 1));
+
+	/** The table for a hotspot in a water-temperature zone. */
+	private static List<Entry> table(Hotspot hotspot, SeaZones.Zone zone, boolean deepBiome, boolean cave) {
+		if (zone == SeaZones.Zone.FRESH) {
+			// Lakes, rivers, swamps and caves: fresh-water life only, whatever the bottom looks like.
+			if (cave) {
+				return FRESH_CAVE;
+			}
+			return hotspot == Hotspot.OPEN ? FRESH_OPEN : FRESH_FLOOR;
 		}
+		return switch (hotspot) {
+			case ANEMONE -> ANEMONE_TABLE;
+			case WRECK -> zone == SeaZones.Zone.COLD ? COLD_FLOOR : WRECK_TABLE;
+			case TRENCH -> zone == SeaZones.Zone.COLD ? COLD_DEEP : DEEP;
+			case REEF -> switch (zone) {
+				case WARM -> WARM_REEF;
+				case TEMPERATE -> TEMPERATE_ROCK;
+				case COLD, FRESH -> COLD_FLOOR;
+			};
+			case ROCK -> switch (zone) {
+				case WARM -> WARM_ROCK;
+				case TEMPERATE -> TEMPERATE_ROCK;
+				case COLD, FRESH -> COLD_FLOOR;
+			};
+			case SAND -> switch (zone) {
+				case WARM -> WARM_SAND;
+				case TEMPERATE -> TEMPERATE_SAND;
+				case COLD, FRESH -> COLD_FLOOR;
+			};
+			case OPEN -> switch (zone) {
+				case WARM -> deepBiome ? DEEP : WARM_OPEN;
+				case TEMPERATE -> deepBiome ? DEEP : TEMPERATE_OPEN;
+				case COLD, FRESH -> deepBiome ? COLD_DEEP : COLD_OPEN;
+			};
+		};
 	}
 
 	private HotspotSpawner() {
 	}
 
 	public static void init() {
+		// Vanilla biome spawns that contradict the habitat table are removed here (no extra init line needed).
+		SeaZones.cleanVanillaSpawns();
 		ServerTickEvents.END_LEVEL_TICK.register(HotspotSpawner::tick);
 	}
 
 	private static void tick(ServerLevel level) {
+		if (level.dimension().equals(TourApi.DIMENSION)) {
+			return;
+		}
 		long time = level.getGameTime();
 		for (ServerPlayer player : level.players()) {
 			// Stagger players so they do not all probe on the same tick
@@ -147,26 +225,52 @@ public final class HotspotSpawner {
 		if (!level.hasChunksAt(x - reach, level.getMinY(), z - reach, x + reach, level.getMaxY(), z + reach) || !isWaterSource(level, cursor)) {
 			return;
 		}
+		BlockPos probe = cursor.immutable();
 		// Find the seabed below the probe
 		int steps = 0;
 		while (steps < MAX_FLOOR_SEARCH && isWaterSource(level, cursor.below())) {
 			cursor.move(0, -1, 0);
 			steps++;
 		}
-		if (steps >= MAX_FLOOR_SEARCH || level.getBlockState(cursor.below()).isAir()) {
-			return;
-		}
+		boolean hasFloor = steps < MAX_FLOOR_SEARCH && !level.getBlockState(cursor.below()).isAir();
 		BlockPos floorWater = cursor.immutable();
 
-		Hotspot hotspot = classify(level, floorWater);
-		if (hotspot == null) {
+		var biome = level.getBiome(probe);
+		SeaZones.Zone zone = SeaZones.zoneOf(biome);
+		boolean deepBiome = SeaZones.isDeep(biome);
+		Hotspot hotspot;
+		if (hasFloor) {
+			hotspot = classify(level, floorWater);
+		} else {
+			// Deep open water with no floor in reach: pelagic life only, never right under the surface.
+			if (probe.getY() > level.getSeaLevel() - 4) {
+				return;
+			}
+			hotspot = Hotspot.OPEN;
+			deepBiome = deepBiome || steps >= MAX_FLOOR_SEARCH;
+		}
+		// The open sea gets a thinner background than the hotspots.
+		if (hotspot == Hotspot.OPEN && random.nextInt(3) != 0) {
 			return;
 		}
-		int room = FISH_CAP - countFish(level, floorWater);
+		BlockPos center = hasFloor ? floorWater : probe;
+		int room = FISH_CAP - countFish(level, center);
 		if (room <= 0) {
 			return;
 		}
-		spawnGroup(level, player, floorWater, hotspot, random, room);
+		boolean cave = !level.canSeeSky(probe);
+		List<Entry> table = table(hotspot, zone, deepBiome, cave);
+		// Mid-water species of the open sea swim at the probe depth (at least two cells above the floor).
+		BlockPos midWater = probe;
+		if (hasFloor && probe.getY() < floorWater.getY() + 2) {
+			midWater = floorWater.above(2);
+		}
+		// Only species whose habitat matches this water (see Habitat), deep-water species only in deep water.
+		java.util.EnumSet<Habitat> here = java.util.EnumSet.of(zone.habitat);
+		if (deepBiome) {
+			here.add(Habitat.DEEP);
+		}
+		spawnGroup(level, player, hotspot == Hotspot.OPEN ? midWater : center, table, here, random, room);
 	}
 
 	private static boolean isWaterSource(ServerLevel level, BlockPos pos) {
@@ -174,7 +278,7 @@ public final class HotspotSpawner {
 		return fluid.is(FluidTags.WATER) && fluid.isSource();
 	}
 
-	/** Looks at blocks around the point and returns the strongest matching hotspot, or null. */
+	/** Looks at blocks around the point and returns the strongest matching hotspot (OPEN when nothing stands out). */
 	private static Hotspot classify(ServerLevel level, BlockPos center) {
 		int coral = 0;
 		int anemone = 0;
@@ -216,8 +320,7 @@ public final class HotspotSpawner {
 		if (coral > 0) {
 			return Hotspot.REEF;
 		}
-		var biome = level.getBiome(center);
-		if (biome.is(DEEP_TRENCH)) {
+		if (level.getBiome(center).is(SeaZones.DEEP_TRENCH)) {
 			return Hotspot.TRENCH;
 		}
 		if (rock >= ROCK_MIN) {
@@ -226,7 +329,7 @@ public final class HotspotSpawner {
 		if (sand >= SAND_MIN) {
 			return Hotspot.SAND;
 		}
-		return null;
+		return Hotspot.OPEN;
 	}
 
 	private static boolean isAnemone(Block block) {
@@ -246,7 +349,8 @@ public final class HotspotSpawner {
 	}
 
 	private static boolean isRock(BlockState state) {
-		return state.is(Blocks.STONE) || state.is(Blocks.ANDESITE) || state.is(Blocks.TUFF) || state.is(Blocks.MOSSY_COBBLESTONE);
+		return state.is(Blocks.STONE) || state.is(Blocks.ANDESITE) || state.is(Blocks.TUFF) || state.is(Blocks.MOSSY_COBBLESTONE)
+				|| state.is(Blocks.GRANITE) || state.is(Blocks.DIORITE) || state.is(Blocks.COBBLESTONE);
 	}
 
 	/** Counts scubadive and vanilla fish near the point. */
@@ -262,14 +366,25 @@ public final class HotspotSpawner {
 		return ScubaDive.MOD_ID.equals(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).getNamespace());
 	}
 
-	private static void spawnGroup(ServerLevel level, ServerPlayer player, BlockPos center, Hotspot hotspot, RandomSource random, int room) {
+	/** Extra 1-in-n thinning for the rarest animals so they stay a lucky find. */
+	private static int thinning(String id) {
+		return switch (id) {
+			case "scubadive:whale_shark" -> 6;
+			case "scubadive:manta_ray" -> 3;
+			case "scubadive:frogfish", "scubadive:pygmy_seahorse" -> 2;
+			default -> 1;
+		};
+	}
+
+	private static void spawnGroup(ServerLevel level, ServerPlayer player, BlockPos center, List<Entry> table, Set<Habitat> here,
+			RandomSource random, int room) {
 		// Resolve the table at runtime; unknown ids are ignored
 		List<Entry> usable = new ArrayList<>();
 		List<EntityType<?>> types = new ArrayList<>();
 		int total = 0;
-		for (Entry entry : hotspot.entries) {
+		for (Entry entry : table) {
 			EntityType<?> type = lookup(entry.id());
-			if (type != null) {
+			if (type != null && Habitat.fits(entry.id(), here)) {
 				usable.add(entry);
 				types.add(type);
 				total += entry.weight();
@@ -288,23 +403,41 @@ public final class HotspotSpawner {
 		}
 		Entry entry = usable.get(index);
 		EntityType<?> type = types.get(index);
+		if (random.nextInt(thinning(entry.id())) != 0) {
+			return;
+		}
+		if (SOLO.contains(entry.id()) && !level.getEntitiesOfClass(Entity.class, new AABB(center).inflate(SOLO_RADIUS), e -> e.getType() == type).isEmpty()) {
+			return;
+		}
 		int count = Math.min(room, entry.minGroup() + random.nextInt(entry.maxGroup() - entry.minGroup() + 1));
 		boolean bottom = BOTTOM_DWELLERS.contains(entry.id());
+		boolean checked = CHECKED.contains(entry.id());
 
 		SpawnGroupData groupData = null;
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int i = 0; i < count; i++) {
-			pos.setWithOffset(center, random.nextInt(SCATTER * 2 + 1) - SCATTER, random.nextInt(3), random.nextInt(SCATTER * 2 + 1) - SCATTER);
-			if (!level.hasChunkAt(pos) || !isWaterSource(level, pos)) {
-				continue;
-			}
-			if (bottom) {
-				// Sea-floor species are placed on the floor, not in mid-water above a slope.
-				for (int down = 0; down < 8 && isWaterSource(level, pos.below()); down++) {
-					pos.move(0, -1, 0);
+			boolean placed = false;
+			for (int attempt = 0; attempt < PLACE_TRIES && !placed; attempt++) {
+				pos.setWithOffset(center, random.nextInt(SCATTER * 2 + 1) - SCATTER, random.nextInt(3), random.nextInt(SCATTER * 2 + 1) - SCATTER);
+				if (!level.hasChunkAt(pos) || !isWaterSource(level, pos)) {
+					continue;
 				}
+				if (bottom) {
+					// Sea-floor species are placed on the floor, not in mid-water above a slope.
+					for (int down = 0; down < 8 && isWaterSource(level, pos.below()); down++) {
+						pos.move(0, -1, 0);
+					}
+				}
+				if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE) {
+					continue;
+				}
+				// Picky species only where their own rule allows (e.g. clownfish next to an anemone, gobies on sand).
+				if (checked && !SpawnPlacements.checkSpawnRules(type, level, EntitySpawnReason.NATURAL, pos, random)) {
+					continue;
+				}
+				placed = true;
 			}
-			if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < MIN_PLAYER_DISTANCE * MIN_PLAYER_DISTANCE) {
+			if (!placed) {
 				continue;
 			}
 			Entity entity = type.create(level, EntitySpawnReason.NATURAL);

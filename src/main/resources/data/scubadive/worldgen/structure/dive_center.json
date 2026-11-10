@@ -1,0 +1,6 @@
+{
+  "type": "scubadive:dive_center",
+  "biomes": "#scubadive:has_structure/dive_center",
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}

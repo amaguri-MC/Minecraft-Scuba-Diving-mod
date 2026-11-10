@@ -2,9 +2,15 @@ package net.scubadive.creature.bottom;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.scubadive.creature.ScubaCreatures;
 
@@ -19,10 +25,18 @@ public abstract class AnemoneDweller extends Mob {
 	/** Radius in blocks within which an anemone is adopted as home. */
 	public static final int HOME_RANGE = 8;
 
+	/** Home searches without result before a wild dweller gives up and vanishes (about 20-40 s). */
+	private static final int HOMELESS_LIMIT = 20;
+
 	protected BlockPos home;
 	protected Vec3 target;
 	protected int retarget;
 	private int searchTimer;
+	/** Placed on purpose (spawn egg, bucket, command): never removed for lack of an anemone. */
+	private boolean deliberate;
+	/** The one-time "is there an anemone near where I appeared" check has run. */
+	private boolean anemoneChecked;
+	private int homelessSearches;
 
 	protected AnemoneDweller(EntityType<? extends AnemoneDweller> type, Level level) {
 		super(type, level);
@@ -33,12 +47,48 @@ public abstract class AnemoneDweller extends Mob {
 		return true;
 	}
 
+	@Override
+	public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+			SpawnGroupData data) {
+		// Only wild spawns must live on an anemone; anything a player placed stays where it was put.
+		this.deliberate = reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION
+				&& reason != EntitySpawnReason.STRUCTURE;
+		this.anemoneChecked = false;
+		return super.finalizeSpawn(level, difficulty, reason, data);
+	}
+
+	@Override
+	protected void addAdditionalSaveData(ValueOutput output) {
+		super.addAdditionalSaveData(output);
+		output.putBoolean("Deliberate", this.deliberate);
+		output.putBoolean("AnemoneChecked", this.anemoneChecked);
+	}
+
+	@Override
+	protected void readAdditionalSaveData(ValueInput input) {
+		super.readAdditionalSaveData(input);
+		// Older saves lack the flags: treat them as wild and check once, which clears strays left by earlier versions.
+		this.deliberate = input.getBooleanOr("Deliberate", false);
+		this.anemoneChecked = input.getBooleanOr("AnemoneChecked", false);
+	}
+
 	protected boolean isAnemone(BlockPos pos) {
 		return this.level().getBlockState(pos).is(ScubaCreatures.SEA_ANEMONE);
 	}
 
-	/** Drops a destroyed home and, now and then, looks for a new one. */
+	/**
+	 * Drops a destroyed home and, now and then, looks for a new one. A wild dweller that appears with no
+	 * anemone within {@link #HOME_RANGE}, or stays homeless for long, is removed.
+	 */
 	protected void updateHome() {
+		if (!this.anemoneChecked) {
+			this.anemoneChecked = true;
+			this.home = findNearestAnemone();
+			if (this.home == null && !this.deliberate) {
+				this.discard();
+				return;
+			}
+		}
 		if (this.home != null && !isAnemone(this.home)) {
 			this.home = null;
 		}
@@ -48,6 +98,11 @@ public abstract class AnemoneDweller extends Mob {
 		this.searchTimer = 60 + this.getRandom().nextInt(60);
 		if (this.home == null) {
 			this.home = findNearestAnemone();
+		}
+		if (this.home != null) {
+			this.homelessSearches = 0;
+		} else if (!this.deliberate && ++this.homelessSearches >= HOMELESS_LIMIT) {
+			this.discard();
 		}
 	}
 

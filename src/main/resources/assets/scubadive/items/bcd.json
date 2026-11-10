@@ -6,6 +6,10 @@
       {
         "type": "minecraft:dye",
         "default": -14803422
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -1
       }
     ]
   }

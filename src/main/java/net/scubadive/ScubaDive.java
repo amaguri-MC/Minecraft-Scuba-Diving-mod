@@ -31,6 +31,8 @@ public class ScubaDive implements ModInitializer {
 		net.scubadive.creature.reef.ReefFish.init();
 		net.scubadive.creature.bottom.BottomDwellers.init();
 		net.scubadive.creature.critter.Critters.init();
+		net.scubadive.creature.cold.ColdCreatures.init();
+		net.scubadive.creature.fresh.FreshwaterCreatures.init();
 		net.scubadive.guide.DiveManual.init();
 		net.scubadive.equipment.WristSlot.init();
 		net.scubadive.creature.spawn.HotspotSpawner.init();

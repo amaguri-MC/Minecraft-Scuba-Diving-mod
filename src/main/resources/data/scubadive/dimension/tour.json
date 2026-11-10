@@ -3,7 +3,7 @@
   "generator": {
     "type": "minecraft:flat",
     "settings": {
-      "biome": "minecraft:warm_ocean",
+      "biome": "scubadive:tour_sea",
       "features": false,
       "lakes": false,
       "layers": [],

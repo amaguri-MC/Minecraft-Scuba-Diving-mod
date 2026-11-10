@@ -1,7 +1,5 @@
 package net.scubadive.tour.center;
 
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 import net.minecraft.core.Registry;
@@ -14,11 +12,8 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 import net.scubadive.ScubaDive;
 
@@ -66,10 +61,8 @@ public final class DiveCenter {
 		PayloadTypeRegistry.serverboundPlay().register(GuideActionPayload.TYPE, GuideActionPayload.CODEC);
 		DiveLobby.init();
 
-		// Rare beach huts: the placed feature (data/scubadive/worldgen/placed_feature/dive_center.json) does the rarity.
+		// Beach huts are a structure (worldgen/structure + structure_set dive_center); the feature stays for /place only.
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("dive_center"), FEATURE);
-		ResourceKey<PlacedFeature> placed = ResourceKey.create(Registries.PLACED_FEATURE, ScubaDive.id("dive_center"));
-		BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.BEACH, Biomes.SNOWY_BEACH, Biomes.STONY_SHORE),
-				GenerationStep.Decoration.SURFACE_STRUCTURES, placed);
+		DiveCenterStructure.register();
 	}
 }
