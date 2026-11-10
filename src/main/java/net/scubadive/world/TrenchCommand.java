@@ -74,7 +74,13 @@ public final class TrenchCommand {
 		int dist = (int) Math.round(Math.sqrt(bestSq));
 		int fx = bestX;
 		int fz = bestZ;
-		source.sendSuccess(() -> Component.translatable("message.scubadive.trench.found", fx, fz, dist), false);
+		// Clickable coordinates like vanilla /locate: clicking fills in a teleport command.
+		net.minecraft.network.chat.Component coords = net.minecraft.network.chat.ComponentUtils.wrapInSquareBrackets(
+				Component.translatable("chat.coordinates", fx, "~", fz))
+				.withStyle(style -> style.withColor(net.minecraft.ChatFormatting.GREEN)
+						.withClickEvent(new net.minecraft.network.chat.ClickEvent.SuggestCommand("/tp @s " + fx + " ~ " + fz))
+						.withHoverEvent(new net.minecraft.network.chat.HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip"))));
+		source.sendSuccess(() -> Component.translatable("message.scubadive.trench.found", coords, dist), false);
 		return 1;
 	}
 

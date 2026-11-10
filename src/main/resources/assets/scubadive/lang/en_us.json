@@ -44,7 +44,7 @@
  "hud.scubadive.dc.empty": "Out of air!",
  "hud.scubadive.camera.zoom": "Zoom x%s",
  "biome.scubadive.deep_trench": "Deep Trench",
- "message.scubadive.trench.found": "Nearest deep trench: X=%s Z=%s (about %s blocks away)",
+ "message.scubadive.trench.found": "Nearest deep trench: %s (about %s blocks away)",
  "message.scubadive.trench.none": "No deep trench found within %s blocks.",
  "block.scubadive.table_coral": "Table Coral",
  "block.scubadive.brain_coral": "Brain Coral",

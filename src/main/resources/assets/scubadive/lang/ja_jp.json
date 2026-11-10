@@ -44,7 +44,7 @@
  "hud.scubadive.dc.empty": "エア切れ！",
  "hud.scubadive.camera.zoom": "ズーム x%s",
  "biome.scubadive.deep_trench": "深海",
- "message.scubadive.trench.found": "最寄りの海溝: X=%s Z=%s（約%sブロック先）",
+ "message.scubadive.trench.found": "最寄りの海溝: %s（約%sブロック先）",
  "message.scubadive.trench.none": "半径%sブロック以内に海溝は見つかりませんでした。",
  "block.scubadive.table_coral": "テーブルサンゴ",
  "block.scubadive.brain_coral": "ノウサンゴ",
