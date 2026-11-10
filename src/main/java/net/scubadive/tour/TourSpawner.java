@@ -25,6 +25,7 @@ final class TourSpawner {
 	private static final int BOAT_AVOID = 8;
 	private static final int SCATTER = 3;
 	private static final Set<String> BOTTOM = Set.of(
+			"scubadive:blue_starfish", "scubadive:cushion_star", "scubadive:crown_of_thorns", "scubadive:sea_urchin",
 			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
 			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse",
 			"minecraft:axolotl", "minecraft:tadpole", "minecraft:frog");

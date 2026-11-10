@@ -46,7 +46,15 @@ public enum Species {
 	BIGEYE_TREVALLY("bigeye_trevally", "scubadive:bigeye_trevally", false, 50),
 	MANTA_RAY("manta_ray", "scubadive:manta_ray", false, 200),
 	STINGRAY("stingray", "scubadive:stingray", false, 90),
-	OCTOPUS("octopus", "scubadive:octopus", false, 80);
+	OCTOPUS("octopus", "scubadive:octopus", false, 80),
+	// critters
+	BLUE_STARFISH("blue_starfish", "scubadive:blue_starfish", false, 25),
+	CUSHION_STAR("cushion_star", "scubadive:cushion_star", false, 30),
+	CROWN_OF_THORNS("crown_of_thorns", "scubadive:crown_of_thorns", false, 60),
+	SEA_URCHIN("sea_urchin", "scubadive:sea_urchin", false, 20),
+	MOON_JELLY("moon_jelly", "scubadive:moon_jelly", false, 30),
+	SEA_NETTLE("sea_nettle", "scubadive:sea_nettle", false, 55),
+	SPOTTED_JELLY("spotted_jelly", "scubadive:spotted_jelly", false, 45);
 
 	public final String id;
 	public final Identifier target;

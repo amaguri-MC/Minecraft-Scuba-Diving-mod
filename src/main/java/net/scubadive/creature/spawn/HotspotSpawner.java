@@ -48,7 +48,8 @@ public final class HotspotSpawner {
 	private static final int ROCK_MIN = 4;
 	private static final java.util.Set<String> BOTTOM_DWELLERS = java.util.Set.of(
 			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
-			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse");
+			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse",
+			"scubadive:blue_starfish", "scubadive:cushion_star", "scubadive:crown_of_thorns", "scubadive:sea_urchin");
 
 	private static final ResourceKey<Biome> DEEP_TRENCH = ResourceKey.create(Registries.BIOME, ScubaDive.id("deep_trench"));
 	private static final Identifier ANEMONE = ScubaDive.id("sea_anemone");
@@ -73,7 +74,11 @@ public final class HotspotSpawner {
 				new Entry("minecraft:tropical_fish", 8, 3, 6),
 				new Entry("scubadive:nudibranch", 12, 2, 4),
 				new Entry("scubadive:pygmy_seahorse", 2, 1, 1),
-				new Entry("scubadive:octopus", 2, 1, 1))),
+				new Entry("scubadive:octopus", 2, 1, 1),
+				new Entry("scubadive:blue_starfish", 4, 1, 2),
+				new Entry("scubadive:crown_of_thorns", 2, 1, 1),
+				new Entry("scubadive:sea_urchin", 4, 2, 4),
+				new Entry("scubadive:spotted_jelly", 2, 2, 3))),
 		ANEMONE(List.of(
 				new Entry("scubadive:clownfish", 24, 2, 4),
 				new Entry("scubadive:anemone_shrimp", 5, 1, 3),

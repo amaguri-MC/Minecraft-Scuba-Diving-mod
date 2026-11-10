@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "scubadive:item/cushion_star_spawn_egg"
+  }
+}

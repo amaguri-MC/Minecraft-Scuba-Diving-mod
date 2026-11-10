@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "scubadive:item/sea_urchin_spawn_egg"
+  }
+}
