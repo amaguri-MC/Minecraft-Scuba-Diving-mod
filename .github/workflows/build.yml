@@ -6,6 +6,9 @@
 name: build
 on: [pull_request, push]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -28,3 +31,10 @@ jobs:
         with:
           name: Artifacts
           path: build/libs/
+      - name: publish jar to builds branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir out && cp build/libs/scubadive-*[0-9].jar out/ && cd out
+          git init -q -b builds && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -q -m "build ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}" builds
