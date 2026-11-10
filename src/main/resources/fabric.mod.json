@@ -1,0 +1,25 @@
+{
+	"schemaVersion": 1,
+	"id": "scubadive",
+	"version": "${version}",
+	"name": "Scuba Dive",
+	"description": "Scuba diving, marine life, underwater photography and photo contests.",
+	"authors": ["scubadive"],
+	"license": "All-Rights-Reserved",
+	"icon": "assets/scubadive/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["net.scubadive.ScubaDive"],
+		"client": ["net.scubadive.client.ScubaDiveClient"]
+	},
+	"mixins": [
+		"scubadive.mixins.json",
+		{ "config": "scubadive.client.mixins.json", "environment": "client" }
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "scubadive:block/sea_anemone",
+    "particle": "scubadive:block/sea_anemone"
+  }
+}

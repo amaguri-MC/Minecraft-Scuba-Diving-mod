@@ -1,0 +1,138 @@
+package net.scubadive.client.camera;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import org.lwjgl.glfw.GLFW;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.loader.api.FabricLoader;
+
+import net.scubadive.ScubaDive;
+import net.scubadive.camera.CameraLogic;
+import net.scubadive.camera.CapturePayload;
+import net.scubadive.camera.CaptureResultPayload;
+import net.scubadive.camera.ScubaCamera;
+import net.scubadive.species.Species;
+
+public final class ScubaCameraClient {
+	private static final long FLASH_MS = 300L;
+	private static final long SHOT_INTERVAL_MS = 500L;
+	private static final DateTimeFormatter FILE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
+
+	private static KeyMapping openJournal;
+	private static long flashStart = -100000L;
+	private static long lastShotMs = -100000L;
+
+	private ScubaCameraClient() { }
+
+	public static void init() {
+		KeyMapping.Category category = KeyMapping.Category.register(ScubaDive.id("main"));
+		openJournal = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.scubadive.journal", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, category));
+
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (client.player == null) return;
+			while (openJournal.consumeClick()) {
+				if (client.gui.screen() == null) {
+					client.gui.setScreen(new JournalScreen());
+				}
+			}
+		});
+
+		UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (!level.isClientSide()) return InteractionResult.PASS;
+			if (!player.getItemInHand(hand).is(ScubaCamera.CAMERA)) return InteractionResult.PASS;
+			takePhoto(Minecraft.getInstance(), player);
+			return InteractionResult.SUCCESS;
+		});
+
+		ClientPlayNetworking.registerGlobalReceiver(CaptureResultPayload.TYPE, (payload, context) -> onResult(context.client(), payload));
+
+		HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, ScubaDive.id("camera_flash"), ScubaCameraClient::extractFlash);
+	}
+
+	private static void takePhoto(Minecraft client, Player player) {
+		long now = System.currentTimeMillis();
+		if (now - lastShotMs < SHOT_INTERVAL_MS) return;
+		lastShotMs = now;
+
+		double fov = client.options.fov().get();
+		CameraLogic.Shot shot = CameraLogic.pickBest(player, fov);
+
+		client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.GLASS_PLACE, 1.6F, 1.0F));
+
+		if (shot == null) {
+			flashStart = now;
+			client.gui.hud.setOverlayMessage(Component.translatable("message.scubadive.camera.nothing"), false);
+			return;
+		}
+
+		saveScreenshot(shot.species());
+		flashStart = now;
+		ClientPlayNetworking.send(new CapturePayload(shot.species().id, shot.entityId(),
+				shot.pos().getX(), shot.pos().getY(), shot.pos().getZ(), (float) fov));
+	}
+
+	/** Saves the current frame to <game dir>/screenshots/scubadive/. Failures are only logged. */
+	private static void saveScreenshot(Species species) {
+		try {
+			Minecraft client = Minecraft.getInstance();
+			Path dir = FabricLoader.getInstance().getGameDir().resolve("screenshots").resolve("scubadive");
+			Files.createDirectories(dir);
+			Path file = dir.resolve(FILE_TIME.format(LocalDateTime.now()) + "_" + species.id + ".png");
+			Screenshot.takeScreenshot(client.gameRenderer.mainRenderTarget(), image -> {
+				try {
+					image.writeToFile(file);
+				} catch (IOException e) {
+					ScubaDive.LOGGER.warn("Failed to save camera screenshot", e);
+				}
+			});
+		} catch (IOException | RuntimeException e) {
+			ScubaDive.LOGGER.warn("Failed to prepare camera screenshot", e);
+		}
+	}
+
+	private static void onResult(Minecraft client, CaptureResultPayload payload) {
+		Species species = Species.byId(payload.species());
+		if (species == null || payload.score() <= 0) {
+			client.gui.hud.setOverlayMessage(Component.translatable("message.scubadive.camera.rejected"), false);
+			return;
+		}
+		MutableComponent text = Component.translatable("message.scubadive.camera.shot",
+				Component.translatable(species.langKey()), payload.score());
+		if (payload.isNew()) {
+			text.append(" ").append(Component.translatable("message.scubadive.camera.new").withStyle(ChatFormatting.GOLD));
+		}
+		client.gui.hud.setOverlayMessage(text, false);
+	}
+
+	private static void extractFlash(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		long elapsed = System.currentTimeMillis() - flashStart;
+		if (elapsed < 0 || elapsed >= FLASH_MS) return;
+		int alpha = (int) (255.0 * (1.0 - (double) elapsed / FLASH_MS));
+		graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), (alpha << 24) | 0xFFFFFF);
+	}
+}

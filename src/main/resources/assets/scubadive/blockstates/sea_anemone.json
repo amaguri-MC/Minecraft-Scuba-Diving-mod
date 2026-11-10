@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "waterlogged=false": { "model": "scubadive:block/sea_anemone" },
+    "waterlogged=true": { "model": "scubadive:block/sea_anemone" }
+  }
+}
