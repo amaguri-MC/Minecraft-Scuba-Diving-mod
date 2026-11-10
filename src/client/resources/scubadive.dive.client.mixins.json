@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "net.scubadive.client.mixin.dive",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"AvatarRendererCapeMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},
