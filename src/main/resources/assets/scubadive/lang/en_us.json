@@ -316,5 +316,11 @@
  "item.scubadive.lumpsucker_spawn_egg": "Lumpsucker Spawn Egg",
  "entity.scubadive.wolf_eel": "Wolf Eel",
  "species.scubadive.wolf_eel": "Wolf Eel",
- "item.scubadive.wolf_eel_spawn_egg": "Wolf Eel Spawn Egg"
+ "item.scubadive.wolf_eel_spawn_egg": "Wolf Eel Spawn Egg",
+ "entity.scubadive.spear_squid": "Spear Squid",
+ "species.scubadive.spear_squid": "Spear Squid",
+ "item.scubadive.spear_squid_spawn_egg": "Spear Squid Spawn Egg",
+ "entity.scubadive.cuttlefish": "Cuttlefish",
+ "species.scubadive.cuttlefish": "Cuttlefish",
+ "item.scubadive.cuttlefish_spawn_egg": "Cuttlefish Spawn Egg"
 }

@@ -91,14 +91,14 @@ public final class HotspotSpawner {
 			e("scubadive:lionfish", 3, 1, 2), e("scubadive:parrotfish", 5, 1, 3), e("scubadive:boxfish", 3, 1, 1),
 			e("scubadive:triggerfish", 3, 1, 2), e("scubadive:bluestripe_snapper", 5, 10, 18),
 			e("minecraft:tropical_fish", 6, 3, 6), e("scubadive:nudibranch", 10, 2, 4), e("scubadive:pygmy_seahorse", 2, 1, 1),
-			e("scubadive:octopus", 2, 1, 1), e("scubadive:blue_starfish", 4, 1, 2), e("scubadive:crown_of_thorns", 2, 1, 1),
+			e("scubadive:octopus", 2, 1, 1), e("scubadive:cuttlefish", 2, 1, 2), e("scubadive:blue_starfish", 4, 1, 2), e("scubadive:crown_of_thorns", 2, 1, 1),
 			e("scubadive:sea_urchin", 4, 2, 4), e("scubadive:spotted_jelly", 2, 2, 3), e("scubadive:frogfish", 1, 1, 1));
 	private static final List<Entry> ANEMONE_TABLE = List.of(
 			e("scubadive:clownfish", 24, 2, 4), e("scubadive:anemone_shrimp", 6, 1, 3), e("scubadive:nudibranch", 4, 1, 2));
 	private static final List<Entry> WARM_ROCK = List.of(
 			e("scubadive:grouper", 4, 1, 2), e("scubadive:moray_eel", 5, 1, 1), e("scubadive:goby", 3, 1, 3),
 			e("scubadive:lionfish", 3, 1, 2), e("scubadive:blue_tang", 4, 2, 4), e("scubadive:triggerfish", 2, 1, 2),
-			e("scubadive:nudibranch", 8, 2, 4), e("scubadive:octopus", 3, 1, 1), e("scubadive:sea_urchin", 4, 2, 4),
+			e("scubadive:nudibranch", 8, 2, 4), e("scubadive:octopus", 3, 1, 1), e("scubadive:spear_squid", 3, 5, 10), e("scubadive:sea_urchin", 4, 2, 4),
 			e("scubadive:frogfish", 1, 1, 1));
 	private static final List<Entry> WARM_SAND = List.of(
 			e("scubadive:stingray", 3, 1, 1), e("scubadive:goby", 6, 1, 3), e("scubadive:blue_starfish", 3, 1, 2),

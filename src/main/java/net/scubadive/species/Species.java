@@ -52,7 +52,10 @@ public enum Species {
 	BLIND_CAVEFISH("blind_cavefish", "scubadive:blind_cavefish", false, 80),
 	CRAYFISH("crayfish", "scubadive:crayfish", false, 30),
 	LUMPSUCKER("lumpsucker", "scubadive:lumpsucker", false, 90),
-	WOLF_EEL("wolf_eel", "scubadive:wolf_eel", false, 75);
+	WOLF_EEL("wolf_eel", "scubadive:wolf_eel", false, 75),
+	// cephalopods
+	SPEAR_SQUID("spear_squid", "scubadive:spear_squid", false, 45),
+	CUTTLEFISH("cuttlefish", "scubadive:cuttlefish", false, 70);
 
 	public final String id;
 	public final Identifier target;

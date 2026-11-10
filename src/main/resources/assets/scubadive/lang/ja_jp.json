@@ -316,5 +316,11 @@
  "item.scubadive.lumpsucker_spawn_egg": "ダンゴウオのスポーンエッグ",
  "entity.scubadive.wolf_eel": "オオカミウオ",
  "species.scubadive.wolf_eel": "オオカミウオ",
- "item.scubadive.wolf_eel_spawn_egg": "オオカミウオのスポーンエッグ"
+ "item.scubadive.wolf_eel_spawn_egg": "オオカミウオのスポーンエッグ",
+ "entity.scubadive.spear_squid": "ヤリイカ",
+ "species.scubadive.spear_squid": "ヤリイカ",
+ "item.scubadive.spear_squid_spawn_egg": "ヤリイカのスポーンエッグ",
+ "entity.scubadive.cuttlefish": "モンゴウイカ",
+ "species.scubadive.cuttlefish": "モンゴウイカ",
+ "item.scubadive.cuttlefish_spawn_egg": "モンゴウイカのスポーンエッグ"
 }

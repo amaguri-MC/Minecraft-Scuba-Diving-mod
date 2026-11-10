@@ -48,6 +48,8 @@ public enum Habitat {
 		}
 		put("scubadive:nudibranch", TROPICAL, TEMPERATE);
 		put("scubadive:octopus", TROPICAL, TEMPERATE);
+		put("scubadive:spear_squid", TEMPERATE, COLD);
+		put("scubadive:cuttlefish", TROPICAL, TEMPERATE);
 		put("scubadive:stingray", TROPICAL, TEMPERATE);
 		put("scubadive:grouper", TROPICAL, TEMPERATE);
 		put("scubadive:bigeye_trevally", TROPICAL, TEMPERATE, DEEP);

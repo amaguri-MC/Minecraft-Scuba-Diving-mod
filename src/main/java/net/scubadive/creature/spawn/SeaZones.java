@@ -150,12 +150,12 @@ public final class SeaZones {
 	/** Removes vanilla spawns that break the habitat table (cod on warm reefs, squid in rivers, tropical fish in fresh water...). */
 	public static void cleanVanillaSpawns() {
 		BiomeModifications.create(ScubaDive.id("habitat_cleanup"))
-				.add(ModificationPhase.REMOVALS, warm(), ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(EntityType.COD))
-				.add(ModificationPhase.REMOVALS, cold(), ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(EntityType.NAUTILUS))
+				.add(ModificationPhase.REMOVALS, warm(), ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(net.minecraft.world.entity.EntityTypes.COD))
+				.add(ModificationPhase.REMOVALS, cold(), ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(net.minecraft.world.entity.EntityTypes.NAUTILUS))
 				.add(ModificationPhase.REMOVALS, BiomeSelectors.includeByKey(Biomes.RIVER, Biomes.FROZEN_RIVER),
-						ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(EntityType.SQUID))
+						ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(net.minecraft.world.entity.EntityTypes.SQUID))
 				.add(ModificationPhase.REMOVALS, BiomeSelectors.includeByKey(Biomes.MANGROVE_SWAMP, Biomes.LUSH_CAVES),
-						ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(EntityType.TROPICAL_FISH));
+						ctx -> ctx.getMobSpawnSettings().removeSpawnsOfEntityType(net.minecraft.world.entity.EntityTypes.TROPICAL_FISH));
 	}
 
 	/** Zone of a biome: the oceans by water temperature, every other biome (rivers, lakes, swamps, caves) is fresh water. */

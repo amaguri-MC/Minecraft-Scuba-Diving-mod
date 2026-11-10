@@ -21,7 +21,7 @@ public enum DivePoint {
 			new Spawn("scubadive:bluestripe_snapper", 5, 10, 18), new Spawn("scubadive:clownfish", 8, 2, 4),
 			new Spawn("scubadive:anemone_shrimp", 4, 1, 3), new Spawn("scubadive:nudibranch", 10, 2, 4),
 			new Spawn("scubadive:pygmy_seahorse", 3, 1, 1), new Spawn("scubadive:frogfish", 1, 1, 1),
-			new Spawn("scubadive:octopus", 2, 1, 1), new Spawn("scubadive:reef_shark", 2, 1, 2),
+			new Spawn("scubadive:octopus", 2, 1, 1), new Spawn("scubadive:cuttlefish", 3, 1, 2), new Spawn("scubadive:reef_shark", 2, 1, 2),
 			new Spawn("scubadive:moray_eel", 3, 1, 1), new Spawn("scubadive:goby", 4, 1, 3),
 			new Spawn("scubadive:stingray", 2, 1, 1), new Spawn("minecraft:tropical_fish", 6, 3, 6),
 			new Spawn("minecraft:turtle", 1, 1, 1), new Spawn("scubadive:blue_starfish", 4, 1, 2),
@@ -31,6 +31,7 @@ public enum DivePoint {
 	// Cold sea under the floe: cold-water species only, with many cliones and lumpsuckers. Rare: a wolf eel
 	// out of its crevice, or a pod of dolphins under the ice.
 	ICE_FLOE("ice_floe", 6, 8, 28, EnumSet.of(Habitat.COLD), List.of(
+			new Spawn("scubadive:spear_squid", 4, 5, 10),
 			new Spawn("minecraft:cod", 10, 4, 8), new Spawn("minecraft:salmon", 8, 3, 6),
 			new Spawn("scubadive:clione", 10, 2, 5), new Spawn("scubadive:lumpsucker", 6, 1, 2),
 			new Spawn("minecraft:squid", 4, 2, 4), new Spawn("scubadive:sea_nettle", 5, 1, 3),
@@ -48,7 +49,7 @@ public enum DivePoint {
 			new Spawn("scubadive:barracuda", 6, 6, 12), new Spawn("scubadive:grouper", 6, 1, 2),
 			new Spawn("scubadive:moray_eel", 5, 1, 1), new Spawn("scubadive:bigeye_trevally", 4, 12, 24),
 			new Spawn("scubadive:reef_shark", 3, 1, 2), new Spawn("scubadive:lionfish", 4, 1, 2),
-			new Spawn("scubadive:octopus", 3, 1, 1), new Spawn("scubadive:nudibranch", 6, 2, 3),
+			new Spawn("scubadive:octopus", 3, 1, 1), new Spawn("scubadive:cuttlefish", 2, 1, 1), new Spawn("scubadive:nudibranch", 6, 2, 3),
 			new Spawn("scubadive:frogfish", 2, 1, 1), new Spawn("scubadive:anthias", 5, 8, 14),
 			new Spawn("scubadive:sea_urchin", 3, 2, 4), new Spawn("scubadive:moon_jelly", 3, 3, 6),
 			new Spawn("scubadive:stingray", 2, 1, 1)),
