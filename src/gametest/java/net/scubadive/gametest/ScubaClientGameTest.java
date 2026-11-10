@@ -55,6 +55,8 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			server.runCommand("time set noon");
 			server.runCommand("gamerule advance_weather false");
 			server.runCommand("weather clear");
+			server.runCommand("gamerule send_command_feedback false");
+			context.runOnClient(mc -> mc.options.chatVisibility().set(net.minecraft.world.entity.player.ChatVisiblity.HIDDEN));
 			context.takeScreenshot("00_spawn");
 
 			terrainCost(context, sp);
@@ -139,7 +141,9 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 	/** Held light in first and third person, full kit with gray fins. */
 	private static void gear(ClientGameTestContext context, TestSingleplayerContext sp, BlockPos center) {
 		var server = sp.getServer();
-		server.runCommand("tp @p " + center.getX() + " " + (center.getY() + 1) + " " + center.getZ());
+		int top = server.computeOnServer(s -> s.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+				center.getX(), center.getZ()));
+		server.runCommand("tp @p " + center.getX() + " " + top + " " + center.getZ());
 		server.runCommand("item replace entity @p armor.head with scubadive:dive_mask");
 		server.runCommand("item replace entity @p armor.chest with scubadive:bcd");
 		server.runCommand("item replace entity @p armor.legs with scubadive:wetsuit");
@@ -196,10 +200,11 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		sp.getConnection().waitForChunksRender(false, 20 * 60);
 		server.runCommand("summon scubadive:barracuda " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[90f,0f]}");
 		server.runCommand("summon scubadive:barracuda " + (bx + 2) + ".5 " + (by + 1) + " " + (bz + 3) + ".5 {NoAI:1b,NoGravity:1b,Rotation:[-60f,0f]}");
-		context.waitTicks(10);
+		sp.getConnection().waitForChunksRender(false, 20 * 60);
+		context.waitTicks(40);
 		context.takeScreenshot("09_showcase_coral_barracuda");
 		server.runCommand("tp @p " + (bx - 1) + ".5 " + (by + 1) + " " + (bz + 1) + ".5 0 20");
-		context.waitTicks(5);
+		context.waitTicks(40);
 		context.takeScreenshot("10_barracuda_closeup");
 		server.runCommand("kill @e[type=scubadive:barracuda]");
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
