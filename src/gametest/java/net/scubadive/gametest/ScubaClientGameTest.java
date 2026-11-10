@@ -233,6 +233,16 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.getInput().lookAt(0, 0);
 		context.waitTicks(40);
 		context.takeScreenshot("12_coral_macro");
+		context.runOnClient(mc -> {
+			var state = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("scubadive", "brain_coral")).defaultBlockState();
+			var sources = mc.getBlockColors().getTintSources(state);
+			BlockPos p = new BlockPos(bx, by, bz + 6);
+			StringBuilder b = new StringBuilder();
+			for (var src : sources) {
+				b.append(String.format(" %06X", src.colorInWorld(state, mc.level, p) & 0xFFFFFF));
+			}
+			log("brain coral tints at %s: %d sources:%s", p, sources.size(), b);
+		});
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
 	}
 
