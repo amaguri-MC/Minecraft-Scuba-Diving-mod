@@ -205,7 +205,7 @@
  "tour.scubadive.result.best_shot_line": "  %1$s位 %2$s - %3$s: %4$s点",
  "tour.scubadive.result.total": "合計点（種ごとの最高点の合計） ベスト3",
  "tour.scubadive.result.total_line": "  %1$s位 %2$s: %3$s点",
- "tour.scubadive.result.species": "出会った種類数（全員分）: %s",
+ "tour.scubadive.result.species": "出会った種類数",
  "tour.scubadive.result.none": "  写真は撮られませんでした。",
  "screen.scubadive.journal.tab_wild": "野生",
  "screen.scubadive.journal.tab_tour": "ツアー",
@@ -247,5 +247,12 @@
  "book.scubadive.manual.p12": "§lツアー§r\nガイドにエメラルドを払って申し込む。他の人は同じガイドで参加でき、主催者が出発ボタンを押す。\n\nシリンダー1本分だけ潜れる（水面で補充なし）。最後に点数ランキング。",
  "book.scubadive.manual.p13": "§lダイブポイント§r\n暖かい海\n流氷\n湖\n沈船\nドロップオフ\nセノーテ\n\n場所ごとに出会える生き物が違う。料金も違う。",
  "book.scubadive.manual.p14": "§lコマンド§r\n/scubadive trench\n一番近い海溝の座標を表示。座標をクリックするとテレポートコマンドが入る。\n\n良いダイビングを！",
- "item.scubadive.dive_manual": "スクーバダイブ ガイドブック"
+ "item.scubadive.dive_manual": "スクーバダイブ ガイドブック",
+ "tour.scubadive.result.species_line": "  %1$s: %2$s種",
+ "tour.scubadive.result.coral_line": "  %1$s: サンゴを%2$s回壊した（-%3$s点）",
+ "tour.scubadive.result.empty_line": "  %1$s: 水中でエア切れ（合計点が半分）",
+ "tour.scubadive.coral_penalty": "サンゴを壊した！ 環境破壊 -%s点",
+ "tour.scubadive.end.boat": "ボートに戻ったのでダイブ終了。",
+ "tour.scubadive.end.reserve": "残圧が少ないまま浮上したのでダイブ終了。",
+ "tour.scubadive.end.empty": "水中でエア切れ！ 合計点が半分になる。"
 }

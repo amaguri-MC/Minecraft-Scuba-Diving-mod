@@ -18,14 +18,21 @@ final class CoralBreak {
 	static void onPassThrough(Level level, BlockPos pos, Entity entity) {
 		if (!level.isClientSide() && entity instanceof Player player && !player.isSpectator()
 				&& player.getKnownMovement().length() > PASS_SPEED) {
-			level.destroyBlock(pos, true);
+			breakCoral(level, pos, player);
+		}
+	}
+
+	private static void breakCoral(Level level, BlockPos pos, Player player) {
+		if (level.destroyBlock(pos, true) && player instanceof net.minecraft.server.level.ServerPlayer sp
+				&& net.scubadive.tour.TourApi.isInTour(sp)) {
+			net.scubadive.tour.TourApi.onCoralBroken(sp);
 		}
 	}
 
 	static void onLand(Level level, BlockPos pos, Entity entity, double fallDistance) {
 		if (!level.isClientSide() && entity instanceof Player player && !player.isSpectator()
 				&& (fallDistance > LAND_FALL || -player.getKnownMovement().y > LAND_SPEED)) {
-			level.destroyBlock(pos, true);
+			breakCoral(level, pos, player);
 		}
 	}
 }

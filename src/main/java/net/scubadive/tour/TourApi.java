@@ -32,6 +32,14 @@ public final class TourApi {
 		return player.level().dimension().equals(DIMENSION);
 	}
 
+	/** Tank pressure (bar) every diver starts a tour with. */
+	public static final float TOUR_TANK = 100f;
+
+	/** Called when a tour diver breaks a coral by bumping into it. */
+	public static void onCoralBroken(ServerPlayer player) {
+		TourManager.coralBroken(player);
+	}
+
 	/** Called by the camera after a verified shot taken during a tour. */
 	public static void onPhoto(ServerPlayer player, Species species, int score) {
 		TourManager.recordPhoto(player, species, score);

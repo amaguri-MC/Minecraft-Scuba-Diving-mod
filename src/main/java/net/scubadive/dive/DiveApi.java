@@ -66,6 +66,11 @@ public final class DiveApi {
 		return live != null && live.neutral;
 	}
 
+	/** Server: sets the tank pressure (bar, 0..200). */
+	public static void setPressure(Player player, float bar) {
+		DiveServer.setPressure(player, bar);
+	}
+
 	/** Server: fills the player's tank to 200 bar and resets dive time / max depth. */
 	public static void refill(Player player) {
 		DiveServer.refill(player);

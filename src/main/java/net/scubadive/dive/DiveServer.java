@@ -23,9 +23,11 @@ public final class DiveServer {
 	/** Air use multiplier while not neutrally buoyant. */
 	private static final float NOT_NEUTRAL_FACTOR = 1.25f;
 	/** Blocks per tick (smoothed). Gentle finning upward stays below it; a full BCD or sprint-swimming up exceeds it. */
-	private static final float ASCENT_LIMIT = 0.09f;
+	private static final float ASCENT_LIMIT = 0.17f;
+	/** With a nearly full BCD a slower climb already counts as a runaway ascent. */
+	private static final float ASCENT_LIMIT_FULL_BCD = 0.08f;
 	/** Ticks of ignored warning before decompression sickness is certain. */
-	private static final int RAPID_LIMIT = 40;
+	private static final int RAPID_LIMIT = 60;
 	/** Only dives that went this deep (m) can cause it. */
 	private static final float ASCENT_MIN_DEPTH = 8f;
 	private static final float REFILL_PER_TICK = DiveData.FULL_TANK / (20f * 10f);
@@ -124,7 +126,8 @@ public final class DiveServer {
 	 * Keeping it up for RAPID_LIMIT ticks means the diver is "bent" and gets decompression sickness on surfacing.
 	 */
 	private static void checkAscent(ServerPlayer p, Live l, boolean bcd, boolean eyeInWater) {
-		if (bcd && eyeInWater && l.ascent > ASCENT_LIMIT && l.maxDepth >= ASCENT_MIN_DEPTH) {
+		boolean runaway = l.ascent > ASCENT_LIMIT || (l.air >= 0.9f && l.ascent > ASCENT_LIMIT_FULL_BCD);
+		if (bcd && eyeInWater && runaway && l.maxDepth >= ASCENT_MIN_DEPTH) {
 			l.rapidTicks++;
 			if (l.rapidTicks % 10 == 1) {
 				p.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("hud.scubadive.dc.rapid_ascent")
@@ -146,6 +149,10 @@ public final class DiveServer {
 			p.sendSystemMessage(net.minecraft.network.chat.Component.translatable("message.scubadive.bent")
 					.withStyle(net.minecraft.ChatFormatting.RED));
 		}
+	}
+
+	static void setPressure(Player player, float bar) {
+		live(player).pressure = Math.max(0f, Math.min(DiveData.FULL_TANK, bar));
 	}
 
 	/** Fills the tank and clears the dive log (tour start). */

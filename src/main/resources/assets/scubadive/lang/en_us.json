@@ -205,7 +205,7 @@
  "tour.scubadive.result.best_shot_line": "  %1$s. %2$s - %3$s: %4$s pts",
  "tour.scubadive.result.total": "Total score, best shot per species (top 3)",
  "tour.scubadive.result.total_line": "  %1$s. %2$s: %3$s pts",
- "tour.scubadive.result.species": "Species photographed (everyone): %s",
+ "tour.scubadive.result.species": "Species met",
  "tour.scubadive.result.none": "  No photos were taken.",
  "screen.scubadive.journal.tab_wild": "Wild",
  "screen.scubadive.journal.tab_tour": "Tour",
@@ -247,5 +247,12 @@
  "book.scubadive.manual.p12": "§lTours§r\nPay the guide to sign up; others join at the same guide and the host starts.\n\nOne cylinder only (no refills). Rankings at the end.",
  "book.scubadive.manual.p13": "§lDive sites§r\nWarm sea\nIce floe\nLake\nWreck\nDrop-off\nCenote\n\nEach has its own creatures and price.",
  "book.scubadive.manual.p14": "§lCommand§r\n/scubadive trench\nShows the nearest deep trench; click the coordinates for a teleport command.\n\nHappy diving!",
- "item.scubadive.dive_manual": "Scuba Dive Guide"
+ "item.scubadive.dive_manual": "Scuba Dive Guide",
+ "tour.scubadive.result.species_line": "  %1$s: %2$s species",
+ "tour.scubadive.result.coral_line": "  %1$s: broke %2$s corals (-%3$s)",
+ "tour.scubadive.result.empty_line": "  %1$s: ran out of air underwater (total halved)",
+ "tour.scubadive.coral_penalty": "Coral broken! Reef damage -%s",
+ "tour.scubadive.end.boat": "Back on the boat: your dive is over.",
+ "tour.scubadive.end.reserve": "Surfaced on reserve: your dive is over.",
+ "tour.scubadive.end.empty": "Out of air underwater! Your total is halved."
 }

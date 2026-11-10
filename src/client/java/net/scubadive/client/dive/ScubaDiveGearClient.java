@@ -228,7 +228,11 @@ public final class ScubaDiveGearClient {
 		int seconds = data.diveTicks() / 20;
 		String time = String.format("%d:%02d", seconds / 60, seconds % 60);
 		float shownDepth = depth();
-		int pColor = !bcd ? 0xFF80A0B0 : pressure > 100f ? 0xFF7CFFAA : pressure > 50f ? 0xFFFFD84A : 0xFFFF5050;
+		// Tours use a single 100 bar cylinder, so the gauge and warnings scale to it.
+		boolean tour = net.scubadive.tour.TourApi.noRefill(player);
+		float tank = tour ? net.scubadive.tour.TourApi.TOUR_TANK : DiveData.FULL_TANK;
+		float low = tour ? 15f : 50f;
+		int pColor = !bcd ? 0xFF80A0B0 : pressure > tank * 0.5f ? 0xFF7CFFAA : pressure > low ? 0xFFFFD84A : 0xFFFF5050;
 		boolean blink = (System.currentTimeMillis() / 400L) % 2L == 0L;
 
 		graphics.text(font, Component.translatable("hud.scubadive.dc.time", time), x + 5, y + 4, 0xFFFFFFFF, false);
@@ -238,7 +242,7 @@ public final class ScubaDiveGearClient {
 			graphics.text(font, Component.translatable("hud.scubadive.dc.pressure_none"), x + 5, y + 37, pColor, false);
 			graphics.text(font, Component.translatable("hud.scubadive.dc.bcd", "---"), x + 5, y + 48, 0xFF80A0B0, false);
 		} else {
-			if (pressure > 50f || blink) {
+			if (pressure > low || blink) {
 				graphics.text(font, Component.translatable("hud.scubadive.dc.pressure", Math.round(pressure)), x + 5, y + 37, pColor, false);
 			}
 			graphics.text(font, Component.translatable("hud.scubadive.dc.bcd", Math.round(air * 100f) + "%"), x + 5, y + 48, 0xFF9AD8FF, false);
@@ -262,7 +266,7 @@ public final class ScubaDiveGearClient {
 		int gTop = y + 5;
 		int gBottom = y + ph - 5;
 		graphics.fill(gx, gTop, gx + 4, gBottom, 0xFF303840);
-		int filled = Math.round((gBottom - gTop) * (pressure / DiveData.FULL_TANK));
+		int filled = Math.round((gBottom - gTop) * Math.min(1f, pressure / tank));
 		graphics.fill(gx, gBottom - filled, gx + 4, gBottom, pColor);
 
 		if (!bcd) {
@@ -270,7 +274,7 @@ public final class ScubaDiveGearClient {
 		}
 		if (pressure <= 0f && blink) {
 			graphics.centeredText(font, Component.translatable("hud.scubadive.dc.empty"), w / 2, h / 2 + 20, 0xFFFF5050);
-		} else if (pressure > 0f && pressure <= 50f && inWater && blink) {
+		} else if (pressure > 0f && pressure <= low && inWater && blink) {
 			graphics.centeredText(font, Component.translatable("hud.scubadive.dc.low"), w / 2, h / 2 + 20, 0xFFFFD84A);
 		}
 	}

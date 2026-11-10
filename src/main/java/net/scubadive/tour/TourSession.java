@@ -48,15 +48,24 @@ final class TourSession {
 		final Map<Species, Integer> best = new EnumMap<>(Species.class);
 		Species bestShotSpecies;
 		int bestShot;
+		/** Points lost for breaking corals. */
+		int penalty;
+		int coralsBroken;
+		/** Ran the tank dry underwater: the dive total is halved. */
+		boolean emptyTank;
 
 		Stat(String name) {
 			this.name = name;
 		}
 
 		int total() {
-			int sum = 0;
+			int sum = -penalty;
 			for (int v : best.values()) {
 				sum += v;
+			}
+			sum = Math.max(0, sum);
+			if (emptyTank) {
+				sum /= 2;
 			}
 			return sum;
 		}
@@ -249,6 +258,8 @@ final class TourSession {
 			ServerPlayNetworking.send(p, new TourLoadingPayload(-1, point.langKey()));
 			teleportToBoat(p, level, index++);
 			DiveApi.refill(p);
+			DiveApi.setPressure(p, TourApi.TOUR_TANK);
+			stats.computeIfAbsent(p.getUUID(), k -> new Stat(p.getName().getString()));
 			p.connection.send(new ClientboundSetTitlesAnimationPacket(10, 70, 20));
 			p.connection.send(new ClientboundSetSubtitleTextPacket(Component.translatable("tour.scubadive.start.subtitle")));
 			p.connection.send(new ClientboundSetTitleTextPacket(Component.translatable("tour.scubadive.start.title", Component.translatable(point.langKey()))));
@@ -281,6 +292,9 @@ final class TourSession {
 				removeMember(id);
 				continue;
 			}
+			if (!waiting.contains(id)) {
+				checkPersonalEnd(p, level);
+			}
 			if (waiting.contains(id)) {
 				if ((diveTicks + p.getId()) % 5 == 0 && !DiveSites.onBoat(origin, p.blockPosition())) {
 					teleportToBoat(p, level, indexOf(id));
@@ -303,11 +317,64 @@ final class TourSession {
 		}
 	}
 
-	/** The diver's tank is empty: send them to the boat and make them wait. */
+	/** Ticks spent under water per diver; a diver counts as having dived after DIVED_TICKS. */
+	private final Map<UUID, Integer> underTicks = new java.util.HashMap<>();
+	private static final int DIVED_TICKS = 100;
+	/** Surfacing with this little air left ends the diver's dive. */
+	private static final float RESERVE_BAR = 10f;
+
+	/** Ends a diver's own dive when they surface on reserve or climb back onto the boat. */
+	private void checkPersonalEnd(ServerPlayer p, ServerLevel level) {
+		if (phase != Phase.DIVING) {
+			return;
+		}
+		UUID id = p.getUUID();
+		if (p.isUnderWater()) {
+			underTicks.merge(id, 1, Integer::sum);
+			return;
+		}
+		boolean dived = underTicks.getOrDefault(id, 0) >= DIVED_TICKS;
+		if (!dived) {
+			return;
+		}
+		if (DiveSites.onBoat(origin, p.blockPosition())) {
+			finishDiver(p, level, "tour.scubadive.end.boat");
+		} else if (net.scubadive.dive.DiveApi.pressure(p) <= RESERVE_BAR) {
+			finishDiver(p, level, "tour.scubadive.end.reserve");
+		}
+	}
+
+	private void finishDiver(ServerPlayer p, ServerLevel level, String messageKey) {
+		if (!waiting.add(p.getUUID())) {
+			return;
+		}
+		p.sendSystemMessage(Component.translatable(messageKey));
+		teleportToBoat(p, level, indexOf(p.getUUID()));
+		p.sendOverlayMessage(Component.translatable("tour.scubadive.waiting"));
+		checkAllDone();
+	}
+
+	/** A diver broke a coral during the tour: environmental damage costs points. */
+	void coralBroken(ServerPlayer p) {
+		if (phase != Phase.DIVING || waiting.contains(p.getUUID())) {
+			return;
+		}
+		Stat stat = stats.computeIfAbsent(p.getUUID(), k -> new Stat(p.getName().getString()));
+		stat.penalty += CORAL_PENALTY;
+		stat.coralsBroken++;
+		p.sendOverlayMessage(Component.translatable("tour.scubadive.coral_penalty", CORAL_PENALTY)
+				.withStyle(net.minecraft.ChatFormatting.RED));
+	}
+
+	private static final int CORAL_PENALTY = 20;
+
+	/** The diver's tank is empty under water: big penalty, back to the boat. */
 	void outOfAir(ServerPlayer p) {
 		if (phase != Phase.DIVING || !waiting.add(p.getUUID())) {
 			return;
 		}
+		stats.computeIfAbsent(p.getUUID(), k -> new Stat(p.getName().getString())).emptyTank = true;
+		p.sendSystemMessage(Component.translatable("tour.scubadive.end.empty").withStyle(net.minecraft.ChatFormatting.RED));
 		ServerLevel level = level();
 		if (level != null) {
 			teleportToBoat(p, level, indexOf(p.getUUID()));
@@ -385,11 +452,17 @@ final class TourSession {
 			lines.add(Component.translatable("tour.scubadive.result.total_line", i + 1, s.name, s.total()));
 		}
 
-		Set<Species> all = new HashSet<>();
-		for (Stat s : stats.values()) {
-			all.addAll(s.best.keySet());
+		lines.add(Component.translatable("tour.scubadive.result.species"));
+		for (UUID id : stats.keySet()) {
+			Stat s = stats.get(id);
+			lines.add(Component.translatable("tour.scubadive.result.species_line", s.name, s.best.size()));
+			if (s.coralsBroken > 0) {
+				lines.add(Component.translatable("tour.scubadive.result.coral_line", s.name, s.coralsBroken, s.penalty));
+			}
+			if (s.emptyTank) {
+				lines.add(Component.translatable("tour.scubadive.result.empty_line", s.name));
+			}
 		}
-		lines.add(Component.translatable("tour.scubadive.result.species", all.size()));
 		forEachMember(p -> {
 			for (Component line : lines) {
 				p.sendSystemMessage(line);
