@@ -229,6 +229,10 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.waitTicks(40);
 		context.takeScreenshot("11_barracuda_closeup");
 		server.runCommand("kill @e[type=scubadive:barracuda]");
+		server.runCommand("tp @p " + (bx + 0.5) + " " + by + " " + (bz + 4) + ".2");
+		context.getInput().lookAt(0, 0);
+		context.waitTicks(40);
+		context.takeScreenshot("12_coral_macro");
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
 	}
 
