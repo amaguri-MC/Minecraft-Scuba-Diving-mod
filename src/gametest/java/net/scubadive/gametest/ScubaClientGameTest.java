@@ -189,7 +189,9 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 	private static void showcase(ClientGameTestContext context, TestSingleplayerContext sp) {
 		var server = sp.getServer();
 		int bx = 40, by = 200, bz = 40;
-		server.runCommand("tp @p " + bx + ".5 " + by + " " + bz + ".5 0 15");
+		server.runCommand("forceload add " + (bx - 8) + " " + (bz - 8) + " " + (bx + 8) + " " + (bz + 12));
+		context.waitTicks(40);
+		server.runCommand("tp @p " + bx + ".5 " + (by + 2) + " " + bz + ".5 0 15");
 		context.waitTicks(10);
 		sp.getConnection().waitForChunksRender(false, 20 * 60);
 		server.runCommand("fill " + (bx - 6) + " " + (by - 1) + " " + (bz - 6) + " " + (bx + 6) + " " + (by - 1) + " " + (bz + 10) + " minecraft:smooth_stone");
@@ -199,6 +201,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			server.runCommand("setblock " + x + " " + (by + 1) + " " + (bz + 6 + (i % 2)) + " scubadive:brain_coral");
 		}
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
+		server.runCommand("tp @p " + bx + ".5 " + by + " " + bz + ".5 0 15");
 		context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
 		context.getInput().lookAt(180, 25);
 		context.waitTicks(40);
