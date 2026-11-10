@@ -15,6 +15,7 @@ import net.scubadive.ScubaDive;
 
 public final class ScubaWorldgen {
 	public static final Feature<NoneFeatureConfiguration> BASALT_COLUMNS = new BasaltColumnsFeature(NoneFeatureConfiguration.CODEC);
+	public static final Feature<NoneFeatureConfiguration> ANEMONE_PATCH = new AnemonePatchFeature(NoneFeatureConfiguration.CODEC);
 	public static final Feature<NoneFeatureConfiguration> SHIPWRECK = new ShipwreckFeature(NoneFeatureConfiguration.CODEC);
 
 	private static ResourceKey<PlacedFeature> placed(String path) {
@@ -25,6 +26,7 @@ public final class ScubaWorldgen {
 	public static void init() {
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("basalt_columns"), BASALT_COLUMNS);
 		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("shipwreck"), SHIPWRECK);
+		Registry.register(BuiltInRegistries.FEATURE, ScubaDive.id("anemone_patch"), ANEMONE_PATCH);
 
 		// Plain ocean + deep ocean.
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(Biomes.OCEAN, Biomes.DEEP_OCEAN),
