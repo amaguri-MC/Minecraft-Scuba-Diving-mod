@@ -29,6 +29,8 @@ public final class NudibranchClient {
 		ModelLayerRegistry.registerModelLayer(LeafSheepModel.LAYER, LeafSheepModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(PhyllidiaModel.LAYER, PhyllidiaModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(ThecaceraModel.LAYER, ThecaceraModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(BornellaModel.LAYER, BornellaModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(CeratosomaModel.LAYER, CeratosomaModel::createBodyLayer);
 
 		register(ScubaCreatures.SEA_BUNNY, SeaBunnyModel.LAYER, SeaBunnyModel::new, "sea_bunny", 0.25f, 0.02f);
 		register(ScubaCreatures.SPANISH_DANCER, SpanishDancerModel.LAYER, SpanishDancerModel::new, "spanish_dancer", 0.55f, 0.15f);
@@ -36,6 +38,10 @@ public final class NudibranchClient {
 		register(ScubaCreatures.LEAF_SHEEP, LeafSheepModel.LAYER, LeafSheepModel::new, "leaf_sheep", 0.16f, 0.015f);
 		register(ScubaCreatures.PHYLLIDIA, PhyllidiaModel.LAYER, PhyllidiaModel::new, "phyllidia", 0.4f, 0.04f);
 		register(ScubaCreatures.THECACERA, ThecaceraModel.LAYER, ThecaceraModel::new, "thecacera", 0.22f, 0.02f);
+		// The blue sea slug shares the original nudibranch model (its layer is registered in ScubaCreaturesClient).
+		register(ScubaCreatures.BLUE_NUDIBRANCH, NudibranchModel.LAYER, NudibranchModel::new, "blue", 0.32f, 0.03f);
+		register(ScubaCreatures.BORNELLA, BornellaModel.LAYER, BornellaModel::new, "bornella", 0.3f, 0.03f);
+		register(ScubaCreatures.CERATOSOMA, CeratosomaModel.LAYER, CeratosomaModel::new, "ceratosoma", 0.45f, 0.08f);
 	}
 
 	private static void register(EntityType<? extends Nudibranch> type, ModelLayerLocation layer,

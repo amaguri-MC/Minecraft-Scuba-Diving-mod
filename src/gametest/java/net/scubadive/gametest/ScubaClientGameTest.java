@@ -268,7 +268,9 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			"yellow_tang", "cleaner_wrasse", "mandarinfish", "napoleon_wrasse", "garden_eel",
 			"sardine", "red_sea_bream", "striped_beakfish", "ocean_sunfish", "arctic_char",
 			"box_jellyfish", "comb_jelly", "lions_mane_jelly", "fried_egg_jelly", "echizen_jelly",
-			"nudibranch", "sea_bunny", "spanish_dancer", "blue_dragon", "leaf_sheep", "phyllidia", "thecacera");
+			"nudibranch", "sea_bunny", "spanish_dancer", "blue_dragon", "leaf_sheep", "phyllidia", "thecacera",
+			"blue_nudibranch", "bornella", "ceratosoma", "indonesian_sea_nettle", "upside_down_jelly", "cannonball_jelly",
+			"flower_hat_jelly", "blue_blubber_jelly");
 
 	/**
 	 * Creature gallery on a sky platform (in air, frozen, so nothing blurs them): every category as a lineup, then a

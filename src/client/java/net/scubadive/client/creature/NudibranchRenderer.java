@@ -18,7 +18,7 @@ public class NudibranchRenderer extends MobRenderer<Nudibranch, NudibranchRender
 	private final IntFunction<Identifier> textures;
 	private final float modelScale;
 
-	/** The original nudibranch (three colour variants). */
+	/** The original nudibranch (the white sea slug). */
 	public NudibranchRenderer(EntityRendererProvider.Context context) {
 		this(context, new NudibranchModel(context.bakeLayer(NudibranchModel.LAYER)), NudibranchModel::texture, MODEL_SCALE, 0.04f);
 	}

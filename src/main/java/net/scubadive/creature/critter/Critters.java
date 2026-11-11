@@ -7,6 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -16,6 +17,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import net.scubadive.ScubaDive;
@@ -45,6 +47,19 @@ public final class Critters {
 	public static final EntityType<Jellyfish> FRIED_EGG_JELLY = jelly("fried_egg_jelly", 0.45f, 0.5f);
 	/** Rare giant: bell about two blocks across, heavy oral arms; needs deep open water. */
 	public static final EntityType<Jellyfish> ECHIZEN_JELLY = jelly("echizen_jelly", 2.2f, 3.0f, 20.0, 7);
+	// Aquarium favourites (update-11).
+	public static final EntityType<Jellyfish> INDONESIAN_SEA_NETTLE = jelly("indonesian_sea_nettle", 0.4f, 1.0f, 3.0, 4);
+	public static final EntityType<Jellyfish> CANNONBALL_JELLY = jelly("cannonball_jelly", 0.45f, 0.5f);
+	public static final EntityType<Jellyfish> FLOWER_HAT_JELLY = jelly("flower_hat_jelly", 0.3f, 0.35f);
+	public static final EntityType<Jellyfish> BLUE_BLUBBER_JELLY = jelly("blue_blubber_jelly", 0.45f, 0.6f);
+	/** Lies bell-down on sandy or muddy floors. */
+	public static final EntityType<Jellyfish> UPSIDE_DOWN_JELLY = FabricEntityType.Builder.createMob(Jellyfish::new, MobCategory.AXOLOTLS, mob -> mob
+					.defaultAttributes(() -> Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.01))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							onSoftFloor(level, pos))))
+			.sized(0.5f, 0.3f)
+			.clientTrackingRange(10)
+			.build(key("upside_down_jelly"));
 
 	private Critters() {
 	}
@@ -94,6 +109,16 @@ public final class Critters {
 				&& Nudibranch.isReefFloor(level.getBlockState(f.below()));
 	}
 
+	/** Sand or mud floor at most 3 water cells below (upside-down jelly). */
+	private static boolean onSoftFloor(LevelReader level, BlockPos pos) {
+		BlockPos f = SeaZones.floorWater(level, pos, 3);
+		if (f == null) {
+			return false;
+		}
+		BlockState floor = level.getBlockState(f.below());
+		return floor.is(BlockTags.SAND) || floor.is(BlockTags.MUD);
+	}
+
 	/** A few blocks of open water around the position. */
 	private static boolean openWater(LevelReader level, BlockPos pos, int up) {
 		for (int dy = 0; dy <= up; dy++) {
@@ -117,6 +142,11 @@ public final class Critters {
 		register("lions_mane_jelly", LIONS_MANE_JELLY);
 		register("fried_egg_jelly", FRIED_EGG_JELLY);
 		register("echizen_jelly", ECHIZEN_JELLY);
+		register("indonesian_sea_nettle", INDONESIAN_SEA_NETTLE);
+		register("cannonball_jelly", CANNONBALL_JELLY);
+		register("flower_hat_jelly", FLOWER_HAT_JELLY);
+		register("blue_blubber_jelly", BLUE_BLUBBER_JELLY);
+		register("upside_down_jelly", UPSIDE_DOWN_JELLY);
 
 		// By water temperature. Floor critters use the UNDERGROUND_WATER_CREATURE cap and jellies the AXOLOTLS cap
 		// (both free in the open sea), leaving WATER_AMBIENT to the fish.
@@ -135,6 +165,14 @@ public final class Critters {
 		SeaZones.addSpawn(SeaZones.Region.COLD, MobCategory.AXOLOTLS, LIONS_MANE_JELLY, 2, 1, 1);
 		// The rare giant: weight 1, always alone.
 		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, ECHIZEN_JELLY, 1, 1, 1);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, INDONESIAN_SEA_NETTLE, 3, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.AXOLOTLS, UPSIDE_DOWN_JELLY, 3, 2, 5);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, CANNONBALL_JELLY, 3, 2, 4);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, CANNONBALL_JELLY, 3, 2, 4);
+		// Flower hat: a little rare, alone or in pairs.
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, FLOWER_HAT_JELLY, 1, 1, 2);
+		// Blue blubber drifts in loose swarms.
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, BLUE_BLUBBER_JELLY, 3, 3, 6);
 	}
 
 	private static void register(String id, EntityType<? extends Mob> type) {

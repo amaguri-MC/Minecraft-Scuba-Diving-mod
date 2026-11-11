@@ -53,7 +53,7 @@ public class SpanishDancer extends Nudibranch {
 			return;
 		}
 		if (--this.restTicks <= 0) {
-			this.swimTicks = SWIM_MIN + this.getRandom().nextInt(SWIM_SPREAD);
+			this.swimTicks = swimTime();
 			this.heading = this.getRandom().nextFloat() * 360.0f;
 			this.setNoGravity(true);
 			this.entityData.set(DANCING, true);
@@ -80,15 +80,31 @@ public class SpanishDancer extends Nudibranch {
 		double up = this.swimTicks > 50 ? (waterAbove ? 0.008 : 0.0) : -0.006;
 		// The undulating body gives a slight bob.
 		up += Math.sin(this.tickCount * 0.3) * 0.003;
-		this.setDeltaMovement(dx * SWIM_SPEED, up, dz * SWIM_SPEED);
+		double speed = swimSpeed();
+		this.setDeltaMovement(dx * speed, up, dz * speed);
 		this.setYRot(this.heading);
 		this.setYHeadRot(this.heading);
 		this.yBodyRot = this.heading;
 		if (this.swimTicks <= 0) {
 			this.setNoGravity(false);
 			this.entityData.set(DANCING, false);
-			this.restTicks = REST_MIN + this.getRandom().nextInt(REST_SPREAD);
+			this.restTicks = restTime();
 		}
+	}
+
+	/** Ticks of one swim bout. */
+	protected int swimTime() {
+		return SWIM_MIN + this.getRandom().nextInt(SWIM_SPREAD);
+	}
+
+	/** Ticks crawling between swim bouts. */
+	protected int restTime() {
+		return REST_MIN + this.getRandom().nextInt(REST_SPREAD);
+	}
+
+	/** Blocks per tick while swimming. */
+	protected double swimSpeed() {
+		return SWIM_SPEED;
 	}
 
 	@Override

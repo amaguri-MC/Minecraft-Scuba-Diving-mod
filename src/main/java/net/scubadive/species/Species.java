@@ -77,7 +77,16 @@ public enum Species {
 	BLUE_DRAGON("blue_dragon", "scubadive:blue_dragon", false, 100, Category.NUDIBRANCH, Hint.SURFACE, 3),
 	LEAF_SHEEP("leaf_sheep", "scubadive:leaf_sheep", false, 120, Category.NUDIBRANCH, Hint.REEF, 1),
 	PHYLLIDIA("phyllidia", "scubadive:phyllidia", false, 40, Category.NUDIBRANCH, Hint.ROCK, 5),
-	THECACERA("thecacera", "scubadive:thecacera", false, 70, Category.NUDIBRANCH, Hint.REEF, 2);
+	THECACERA("thecacera", "scubadive:thecacera", false, 70, Category.NUDIBRANCH, Hint.REEF, 2),
+	// update-11: more nudibranchs and aquarium jellies
+	BLUE_NUDIBRANCH("blue_nudibranch", "scubadive:blue_nudibranch", false, 35, Category.NUDIBRANCH, Hint.ROCK, 3),
+	BORNELLA("bornella", "scubadive:bornella", false, 90, Category.NUDIBRANCH, Hint.REEF, 6),
+	CERATOSOMA("ceratosoma", "scubadive:ceratosoma", false, 60, Category.NUDIBRANCH, Hint.REEF, 12),
+	INDONESIAN_SEA_NETTLE("indonesian_sea_nettle", "scubadive:indonesian_sea_nettle", false, 60, Category.JELLY, Hint.OPEN, 30),
+	UPSIDE_DOWN_JELLY("upside_down_jelly", "scubadive:upside_down_jelly", false, 55, Category.JELLY, Hint.SAND, 20),
+	CANNONBALL_JELLY("cannonball_jelly", "scubadive:cannonball_jelly", false, 50, Category.JELLY, Hint.TEMPERATE, 20),
+	FLOWER_HAT_JELLY("flower_hat_jelly", "scubadive:flower_hat_jelly", false, 85, Category.JELLY, Hint.TEMPERATE, 15),
+	BLUE_BLUBBER_JELLY("blue_blubber_jelly", "scubadive:blue_blubber_jelly", false, 50, Category.JELLY, Hint.OPEN, 35);
 
 	/** Journal tab a species is listed under. */
 	public enum Category {

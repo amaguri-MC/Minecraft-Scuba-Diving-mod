@@ -71,7 +71,15 @@ public enum Habitat {
 		put("scubadive:catfish", FRESH);
 		put("scubadive:blind_cavefish", FRESH);
 		put("scubadive:crayfish", FRESH);
-		// ---- update-10 ----
+		// ---- update-10 / 11 ----
+		put("scubadive:blue_nudibranch", TROPICAL, TEMPERATE);
+		put("scubadive:bornella", TROPICAL);
+		put("scubadive:ceratosoma", TROPICAL);
+		put("scubadive:indonesian_sea_nettle", TROPICAL);
+		put("scubadive:upside_down_jelly", TROPICAL);
+		put("scubadive:cannonball_jelly", TROPICAL, TEMPERATE);
+		put("scubadive:flower_hat_jelly", TEMPERATE);
+		put("scubadive:blue_blubber_jelly", TROPICAL);
 		put("scubadive:yellow_tang", TROPICAL);
 		put("scubadive:cleaner_wrasse", TROPICAL);
 		put("scubadive:mandarinfish", TROPICAL);

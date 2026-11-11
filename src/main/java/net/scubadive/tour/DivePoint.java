@@ -30,9 +30,13 @@ public enum DivePoint {
 			new Spawn("scubadive:yellow_tang", 5, 2, 4), new Spawn("scubadive:cleaner_wrasse", 3, 1, 1),
 			new Spawn("scubadive:garden_eel", 3, 1, 1), new Spawn("scubadive:box_jellyfish", 2, 1, 1),
 			new Spawn("scubadive:sea_bunny", 3, 1, 2), new Spawn("scubadive:phyllidia", 3, 1, 2), new Spawn("scubadive:thecacera", 2, 1, 2),
-			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3)),
+			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3),
+			new Spawn("scubadive:blue_nudibranch", 3, 1, 2), new Spawn("scubadive:ceratosoma", 2, 1, 1),
+			new Spawn("scubadive:upside_down_jelly", 3, 2, 4), new Spawn("scubadive:blue_blubber_jelly", 3, 3, 5),
+			new Spawn("scubadive:indonesian_sea_nettle", 2, 1, 2), new Spawn("scubadive:cannonball_jelly", 2, 2, 3)),
 			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2),
-					new Spawn("scubadive:mandarinfish", 2, 1, 1), new Spawn("scubadive:leaf_sheep", 2, 1, 1))),
+					new Spawn("scubadive:mandarinfish", 2, 1, 1), new Spawn("scubadive:leaf_sheep", 2, 1, 1),
+					new Spawn("scubadive:bornella", 2, 1, 1))),
 	// Cold sea under the floe: cold-water species only, with many cliones and lumpsuckers. Rare: a wolf eel
 	// out of its crevice, or a pod of dolphins under the ice.
 	ICE_FLOE("ice_floe", 6, 8, 28, EnumSet.of(Habitat.COLD), List.of(
@@ -61,7 +65,9 @@ public enum DivePoint {
 			new Spawn("scubadive:sea_urchin", 3, 2, 4), new Spawn("scubadive:moon_jelly", 3, 3, 6),
 			new Spawn("scubadive:stingray", 2, 1, 1), new Spawn("scubadive:red_sea_bream", 4, 2, 5),
 			new Spawn("scubadive:striped_beakfish", 3, 1, 1), new Spawn("scubadive:sardine", 4, 15, 25),
-			new Spawn("scubadive:fried_egg_jelly", 2, 1, 2), new Spawn("scubadive:phyllidia", 3, 1, 2)),
+			new Spawn("scubadive:fried_egg_jelly", 2, 1, 2), new Spawn("scubadive:phyllidia", 3, 1, 2),
+			new Spawn("scubadive:blue_nudibranch", 3, 1, 2), new Spawn("scubadive:cannonball_jelly", 2, 2, 3),
+			new Spawn("scubadive:flower_hat_jelly", 1, 1, 1)),
 			List.of(new Spawn("scubadive:hammerhead_shark", 1, 2, 4), new Spawn("scubadive:ocean_sunfish", 1, 1, 1),
 					new Spawn("scubadive:echizen_jelly", 1, 1, 1))),
 	// Warm reef shelf above a deep wall: reef fish on top, pelagic schools and sharks off the edge.
@@ -75,7 +81,8 @@ public enum DivePoint {
 			new Spawn("scubadive:clownfish", 3, 2, 3), new Spawn("scubadive:moray_eel", 2, 1, 1),
 			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:turtle", 1, 1, 1),
 			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3),
-			new Spawn("scubadive:box_jellyfish", 2, 1, 2)),
+			new Spawn("scubadive:box_jellyfish", 2, 1, 2), new Spawn("scubadive:ceratosoma", 1, 1, 1),
+			new Spawn("scubadive:indonesian_sea_nettle", 2, 1, 2), new Spawn("scubadive:blue_blubber_jelly", 2, 2, 4)),
 			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2),
 					new Spawn("scubadive:napoleon_wrasse", 2, 1, 1))),
 	// Fresh-water cavern: eyeless cave fish in the dark, crayfish, axolotls, glow squid. Rare: a big school

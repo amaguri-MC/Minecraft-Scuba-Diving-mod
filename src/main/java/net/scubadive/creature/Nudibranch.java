@@ -16,8 +16,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Tiny slow sea slug that crawls along reef rock and coral. Every nudibranch species is its own entity type
  * built on this class; subclasses change where it lives ({@link #isHome}), how it settles after spawning
- * ({@link #settle}) and how it moves ({@link #moveTick}). The colour variant is synced entity data; only the
- * original nudibranch has several (0 blue, 1 orange, 2 black/white), the other species have one.
+ * ({@link #settle}) and how it moves ({@link #moveTick}). The colour variant is synced entity data; every
+ * species currently has a single look (the original nudibranch is the white sea slug).
  */
 public class Nudibranch extends Mob {
 
@@ -26,8 +26,6 @@ public class Nudibranch extends Mob {
 	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
 		return level.isUnobstructed(this);
 	}
-	/** Colour variants of the original nudibranch. */
-	public static final int VARIANT_COUNT = 3;
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Nudibranch.class, EntityDataSerializers.INT);
 
 	private final int variantCount;
