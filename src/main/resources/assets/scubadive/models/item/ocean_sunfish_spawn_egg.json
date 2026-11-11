@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "scubadive:item/ocean_sunfish_spawn_egg"
+  }
+}

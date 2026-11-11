@@ -19,9 +19,11 @@ import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.scubadive.ScubaDive;
+import net.scubadive.creature.bottom.GardenEel;
 import net.scubadive.creature.spawn.SeaZones;
 
 /**
@@ -43,6 +45,11 @@ public final class ReefFish {
 	public static final ReefProfile TRIGGERFISH_PROFILE = new ReefProfile("triggerfish", 1.1, 1.6, 6.0, 1, false, ReefProfile.Trait.TERRITORIAL, 0.0);
 	public static final ReefProfile GROUPER_PROFILE = new ReefProfile("grouper", 3.0, 1.4, 2.5, 1, false, ReefProfile.Trait.LURKER, 0.4);
 	public static final ReefProfile BLUESTRIPE_SNAPPER_PROFILE = new ReefProfile("bluestripe_snapper", 6.0, 2.0, 8.0, 20, false, ReefProfile.Trait.SCHOOLING, 0.0);
+	public static final ReefProfile YELLOW_TANG_PROFILE = new ReefProfile("yellow_tang", 4.5, 1.8, 6.0, 4, false);
+	// The cleaner wrasse comes to divers instead of fleeing them.
+	public static final ReefProfile CLEANER_WRASSE_PROFILE = new ReefProfile("cleaner_wrasse", 0.4, 1.8, 6.0, 1, false, ReefProfile.Trait.CLEANER, 0.0);
+	public static final ReefProfile MANDARINFISH_PROFILE = new ReefProfile("mandarinfish", 3.0, 1.2, 3.0, 1, true, ReefProfile.Trait.BOTTOM, 0.25);
+	public static final ReefProfile NAPOLEON_WRASSE_PROFILE = new ReefProfile("napoleon_wrasse", 1.0, 1.2, 12.0, 1, false, ReefProfile.Trait.CURIOUS, 0.35);
 
 	private static final List<Entry> ENTRIES = new ArrayList<>();
 
@@ -59,6 +66,23 @@ public final class ReefFish {
 	public static final EntityType<ReefLoneFish> TRIGGERFISH = lone(TRIGGERFISH_PROFILE, 0.3f, 0.3f, false, 3, 1, 2);
 	public static final EntityType<ReefLoneFish> GROUPER = lone(GROUPER_PROFILE, 0.5f, 0.38f, false, 2, 1, 1);
 	public static final EntityType<ReefSchoolFish> BLUESTRIPE_SNAPPER = school(BLUESTRIPE_SNAPPER_PROFILE, 0.22f, 0.18f, false, 5, 8, 14);
+	public static final EntityType<ReefSchoolFish> YELLOW_TANG = school(YELLOW_TANG_PROFILE, 0.25f, 0.23f, false, 6, 2, 4);
+	public static final EntityType<ReefLoneFish> CLEANER_WRASSE = lone(CLEANER_WRASSE_PROFILE, 0.2f, 0.12f, true, 5, 1, 1);
+	// Rare species: weight 1.
+	public static final EntityType<ReefLoneFish> MANDARINFISH = lone(MANDARINFISH_PROFILE, 0.15f, 0.1f, true, 1, 1, 1);
+	public static final EntityType<ReefLoneFish> NAPOLEON_WRASSE = lone(NAPOLEON_WRASSE_PROFILE, 0.9f, 0.7f, false, 1, 1, 1);
+
+	public static final ResourceKey<EntityType<?>> GARDEN_EEL_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("garden_eel"));
+	/** Garden eel: burrow dweller on warm shallow sand (floor dweller cap, like the goby). */
+	public static final EntityType<GardenEel> GARDEN_EEL = FabricEntityType.Builder.createMob(GardenEel::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+					.defaultAttributes(() -> Mob.createMobAttributes()
+							.add(Attributes.MAX_HEALTH, 4.0)
+							.add(Attributes.MOVEMENT_SPEED, 0.0))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							canEelSpawnAt(level, pos))))
+			.sized(0.2f, 0.6f)
+			.clientTrackingRange(6)
+			.build(GARDEN_EEL_KEY);
 
 	private record Entry(ReefProfile profile, EntityType<? extends Mob> type, int weight, int min, int max) {
 	}
@@ -116,6 +140,16 @@ public final class ReefFish {
 		return false;
 	}
 
+	/** Warm shallow sand: a sand floor within 3 blocks below, 3 to 20 blocks under the surface. */
+	private static boolean canEelSpawnAt(LevelReader level, BlockPos pos) {
+		BlockPos floor = SeaZones.floorWater(level, pos, 3);
+		if (floor == null || GardenEel.sandFloor(level, floor) == null) {
+			return false;
+		}
+		int sea = level.getSeaLevel();
+		return floor.getY() >= sea - 20 && floor.getY() <= sea - 3;
+	}
+
 	public static void init() {
 		// Coral reef fish live in warm and lukewarm water; the grouper also in the temperate sea.
 		for (Entry e : ENTRIES) {
@@ -128,5 +162,11 @@ public final class ReefFish {
 			SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.WATER_AMBIENT, e.type(), e.weight(), e.min(), e.max());
 		}
 		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.WATER_AMBIENT, GROUPER, 5, 1, 1);
+
+		// Garden eels: one natural spawn founds a whole colony (see GardenEel#spawnColony).
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, GARDEN_EEL_KEY, GARDEN_EEL);
+		ResourceKey<Item> eelEgg = ResourceKey.create(Registries.ITEM, ScubaDive.id("garden_eel_spawn_egg"));
+		Registry.register(BuiltInRegistries.ITEM, eelEgg, new SpawnEggItem(new Item.Properties().setId(eelEgg).spawnEgg(GARDEN_EEL)));
+		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.UNDERGROUND_WATER_CREATURE, GARDEN_EEL, 3, 1, 1);
 	}
 }

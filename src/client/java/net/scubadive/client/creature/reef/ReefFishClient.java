@@ -23,6 +23,11 @@ public final class ReefFishClient {
 		ModelLayerRegistry.registerModelLayer(ReefFishModel.GROUPER, ReefFishModel::createGrouperLayer);
 		ModelLayerRegistry.registerModelLayer(ReefFishModel.SNAPPER, ReefFishModel::createSnapperLayer);
 		ModelLayerRegistry.registerModelLayer(LionfishModel.LAYER, LionfishModel::createLayer);
+		ModelLayerRegistry.registerModelLayer(TropicalFishLayers.YELLOW_TANG, TropicalFishLayers::createTangLayer);
+		ModelLayerRegistry.registerModelLayer(TropicalFishLayers.CLEANER_WRASSE, TropicalFishLayers::createWrasseLayer);
+		ModelLayerRegistry.registerModelLayer(TropicalFishLayers.MANDARINFISH, TropicalFishLayers::createMandarinLayer);
+		ModelLayerRegistry.registerModelLayer(TropicalFishLayers.NAPOLEON_WRASSE, TropicalFishLayers::createNapoleonLayer);
+		ModelLayerRegistry.registerModelLayer(GardenEelModel.LAYER, GardenEelModel::createBodyLayer);
 
 		register(ReefFish.BLUE_DAMSEL, ReefFishModel.SLENDER, "blue_damsel", 0.32f);
 		register(ReefFish.CHROMIS, ReefFishModel.SLENDER, "chromis", 0.30f);
@@ -38,6 +43,13 @@ public final class ReefFishClient {
 		register(ReefFish.TRIGGERFISH, ReefFishModel.TRIGGER, "triggerfish", 0.32f, 0.25f, 0.30f, 0.10f);
 		register(ReefFish.GROUPER, ReefFishModel.GROUPER, "grouper", 0.46f, 0.12f, 0.10f, 0.20f);
 		register(ReefFish.BLUESTRIPE_SNAPPER, ReefFishModel.SNAPPER, "bluestripe_snapper", 0.16f, 0.28f, 0.24f, 0.06f);
+
+		// Yellow tang ~0.35, cleaner wrasse ~0.3, mandarinfish ~0.2 (rapid little fin flutter), napoleon wrasse ~1.5.
+		register(ReefFish.YELLOW_TANG, TropicalFishLayers.YELLOW_TANG, "yellow_tang", 0.28f);
+		register(ReefFish.CLEANER_WRASSE, TropicalFishLayers.CLEANER_WRASSE, "cleaner_wrasse", 0.24f, 0.4f, 0.3f, 0.04f);
+		register(ReefFish.MANDARINFISH, TropicalFishLayers.MANDARINFISH, "mandarinfish", 0.11f, 0.12f, 0.45f, 0.04f);
+		register(ReefFish.NAPOLEON_WRASSE, TropicalFishLayers.NAPOLEON_WRASSE, "napoleon_wrasse", 0.5f, 0.1f, 0.12f, 0.5f);
+		EntityRenderers.register(ReefFish.GARDEN_EEL, GardenEelRenderer::new);
 	}
 
 	private static <T extends Mob> void register(EntityType<T> type, ModelLayerLocation layer, String id, float scale) {

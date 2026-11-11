@@ -13,7 +13,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-/** Tiny slow sea slug that crawls along the sea floor. Colour variant is synced entity data (0 blue, 1 orange, 2 black/white). */
+/**
+ * Tiny slow sea slug that crawls along reef rock and coral. Every nudibranch species is its own entity type
+ * built on this class; subclasses change where it lives ({@link #isHome}), how it settles after spawning
+ * ({@link #settle}) and how it moves ({@link #moveTick}). The colour variant is synced entity data; only the
+ * original nudibranch has several (0 blue, 1 orange, 2 black/white), the other species have one.
+ */
 public class Nudibranch extends Mob {
 
 	/** Water creatures: the default Mob check refuses positions inside liquid, which would block natural spawns. */
@@ -21,17 +26,25 @@ public class Nudibranch extends Mob {
 	public boolean checkSpawnObstruction(net.minecraft.world.level.LevelReader level) {
 		return level.isUnobstructed(this);
 	}
+	/** Colour variants of the original nudibranch. */
 	public static final int VARIANT_COUNT = 3;
 	private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Nudibranch.class, EntityDataSerializers.INT);
 
+	private final int variantCount;
 	private int moveTimer;
 	private boolean settled;
 	private boolean deliberate;
 	private boolean crawling;
-	private float heading;
+	protected float heading;
 
+	/** A species with a single look. */
 	public Nudibranch(EntityType<? extends Nudibranch> type, Level level) {
+		this(type, level, 1);
+	}
+
+	public Nudibranch(EntityType<? extends Nudibranch> type, Level level, int variantCount) {
 		super(type, level);
+		this.variantCount = Math.max(1, variantCount);
 	}
 
 	@Override
@@ -46,7 +59,12 @@ public class Nudibranch extends Mob {
 	}
 
 	public void setVariant(int variant) {
-		this.entityData.set(VARIANT, Math.floorMod(variant, VARIANT_COUNT));
+		this.entityData.set(VARIANT, Math.floorMod(variant, this.variantCount));
+	}
+
+	/** True when a player put it here on purpose (spawn egg, command...): it stays where it was placed. */
+	protected boolean isDeliberate() {
+		return this.deliberate;
 	}
 
 	@Override
@@ -83,17 +101,21 @@ public class Nudibranch extends Mob {
 				|| state.is(net.scubadive.reef.ScubaReefs.BRAIN_CORAL);
 	}
 
-	/** Moves a stray slug onto the nearest reef rock or coral within a few blocks (top face, in water). */
-	private void settleOnReef() {
+	/** Whether this species may sit in the water cell at pos (default: on reef rock or coral). */
+	protected boolean isHome(BlockPos pos) {
+		return isReefFloor(this.level().getBlockState(pos.below()));
+	}
+
+	/** Called once after a natural spawn: move to a proper home or leave the world. */
+	protected void settle() {
 		BlockPos here = this.blockPosition();
-		if (isReefFloor(this.level().getBlockState(here.below()))) {
+		if (isHome(here)) {
 			return;
 		}
 		BlockPos best = null;
 		double bestDist = Double.MAX_VALUE;
 		for (BlockPos p : BlockPos.betweenClosed(here.offset(-6, -3, -6), here.offset(6, 3, 6))) {
-			if (isReefFloor(this.level().getBlockState(p.below()))
-					&& this.level().getFluidState(p).is(FluidTags.WATER)) {
+			if (this.level().getFluidState(p).is(FluidTags.WATER) && isHome(p)) {
 				double d = p.distSqr(here);
 				if (d < bestDist) {
 					bestDist = d;
@@ -125,7 +147,10 @@ public class Nudibranch extends Mob {
 		if (!this.settled) {
 			this.settled = true;
 			if (!this.deliberate) {
-				settleOnReef();
+				settle();
+				if (this.isRemoved()) {
+					return;
+				}
 			}
 		}
 
@@ -137,7 +162,11 @@ public class Nudibranch extends Mob {
 		if (!this.isInWater()) {
 			return;
 		}
+		moveTick();
+	}
 
+	/** Server, in water: one tick of movement. Default: slow crawl in a random direction, staying at home. */
+	protected void moveTick() {
 		if (--this.moveTimer <= 0) {
 			this.moveTimer = 60 + this.getRandom().nextInt(140);
 			this.crawling = this.getRandom().nextInt(2) == 0;
@@ -150,9 +179,8 @@ public class Nudibranch extends Mob {
 			double dz = Math.cos(rad);
 			BlockPos ahead = BlockPos.containing(this.getX() + dx * 0.6, this.getY() + 0.1, this.getZ() + dz * 0.6);
 			if (this.level().getFluidState(ahead).is(FluidTags.WATER)
-					&& (this.deliberate || isReefFloor(this.level().getBlockState(ahead.below()))
-							|| !isReefFloor(this.level().getBlockState(this.blockPosition().below())))) {
-				double speed = 0.004;
+					&& (this.deliberate || isHome(ahead) || !isHome(this.blockPosition()))) {
+				double speed = crawlSpeed();
 				Vec3 motion = this.getDeltaMovement();
 				this.setDeltaMovement(dx * speed, motion.y, dz * speed);
 				this.setYRot(this.heading);
@@ -161,5 +189,10 @@ public class Nudibranch extends Mob {
 				this.moveTimer = 0;
 			}
 		}
+	}
+
+	/** Blocks per tick while crawling. */
+	protected double crawlSpeed() {
+		return 0.004;
 	}
 }

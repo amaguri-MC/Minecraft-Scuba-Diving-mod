@@ -26,8 +26,13 @@ public enum DivePoint {
 			new Spawn("scubadive:stingray", 2, 1, 1), new Spawn("minecraft:tropical_fish", 6, 3, 6),
 			new Spawn("minecraft:turtle", 1, 1, 1), new Spawn("scubadive:blue_starfish", 4, 1, 2),
 			new Spawn("scubadive:crown_of_thorns", 2, 1, 1), new Spawn("scubadive:sea_urchin", 4, 2, 4),
-			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:pufferfish", 2, 1, 2)),
-			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2))),
+			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:pufferfish", 2, 1, 2),
+			new Spawn("scubadive:yellow_tang", 5, 2, 4), new Spawn("scubadive:cleaner_wrasse", 3, 1, 1),
+			new Spawn("scubadive:garden_eel", 3, 1, 1), new Spawn("scubadive:box_jellyfish", 2, 1, 1),
+			new Spawn("scubadive:sea_bunny", 3, 1, 2), new Spawn("scubadive:phyllidia", 3, 1, 2), new Spawn("scubadive:thecacera", 2, 1, 2),
+			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3)),
+			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2),
+					new Spawn("scubadive:mandarinfish", 2, 1, 1), new Spawn("scubadive:leaf_sheep", 2, 1, 1))),
 	// Cold sea under the floe: cold-water species only, with many cliones and lumpsuckers. Rare: a wolf eel
 	// out of its crevice, or a pod of dolphins under the ice.
 	ICE_FLOE("ice_floe", 6, 8, 28, EnumSet.of(Habitat.COLD), List.of(
@@ -35,14 +40,16 @@ public enum DivePoint {
 			new Spawn("minecraft:cod", 10, 4, 8), new Spawn("minecraft:salmon", 8, 3, 6),
 			new Spawn("scubadive:clione", 10, 2, 5), new Spawn("scubadive:lumpsucker", 6, 1, 2),
 			new Spawn("minecraft:squid", 4, 2, 4), new Spawn("scubadive:sea_nettle", 5, 1, 3),
-			new Spawn("scubadive:cushion_star", 6, 1, 3)),
-			List.of(new Spawn("scubadive:wolf_eel", 3, 1, 1), new Spawn("minecraft:dolphin", 1, 2, 3))),
+			new Spawn("scubadive:cushion_star", 6, 1, 3), new Spawn("scubadive:comb_jelly", 4, 2, 4)),
+			List.of(new Spawn("scubadive:wolf_eel", 3, 1, 1), new Spawn("minecraft:dolphin", 1, 2, 3),
+					new Spawn("scubadive:lions_mane_jelly", 2, 1, 1))),
 	// Fresh-water lake: trout, carp, catfish on the bottom, crayfish, frogs. Rare: a big gathering of axolotls.
 	LAKE("lake", 2, 4, 14, EnumSet.of(Habitat.FRESH), List.of(
 			new Spawn("scubadive:rainbow_trout", 10, 1, 3), new Spawn("scubadive:carp", 8, 2, 4),
 			new Spawn("minecraft:salmon", 4, 2, 4), new Spawn("scubadive:catfish", 3, 1, 1),
 			new Spawn("scubadive:crayfish", 6, 1, 3), new Spawn("minecraft:tadpole", 4, 2, 5),
-			new Spawn("minecraft:frog", 2, 1, 2), new Spawn("minecraft:axolotl", 2, 1, 2)),
+			new Spawn("minecraft:frog", 2, 1, 2), new Spawn("minecraft:axolotl", 2, 1, 2),
+			new Spawn("scubadive:arctic_char", 4, 1, 3)),
 			List.of(new Spawn("minecraft:axolotl", 1, 3, 5))),
 	// Wreck on sand: predators and crevice dwellers around the timbers. Rare: hammerheads.
 	WRECK("wreck", 6, 12, 30, EnumSet.of(Habitat.TROPICAL, Habitat.TEMPERATE, Habitat.DEEP), List.of(
@@ -52,8 +59,11 @@ public enum DivePoint {
 			new Spawn("scubadive:octopus", 3, 1, 1), new Spawn("scubadive:cuttlefish", 2, 1, 1), new Spawn("scubadive:nudibranch", 6, 2, 3),
 			new Spawn("scubadive:frogfish", 2, 1, 1), new Spawn("scubadive:anthias", 5, 8, 14),
 			new Spawn("scubadive:sea_urchin", 3, 2, 4), new Spawn("scubadive:moon_jelly", 3, 3, 6),
-			new Spawn("scubadive:stingray", 2, 1, 1)),
-			List.of(new Spawn("scubadive:hammerhead_shark", 1, 2, 4))),
+			new Spawn("scubadive:stingray", 2, 1, 1), new Spawn("scubadive:red_sea_bream", 4, 2, 5),
+			new Spawn("scubadive:striped_beakfish", 3, 1, 1), new Spawn("scubadive:sardine", 4, 15, 25),
+			new Spawn("scubadive:fried_egg_jelly", 2, 1, 2), new Spawn("scubadive:phyllidia", 3, 1, 2)),
+			List.of(new Spawn("scubadive:hammerhead_shark", 1, 2, 4), new Spawn("scubadive:ocean_sunfish", 1, 1, 1),
+					new Spawn("scubadive:echizen_jelly", 1, 1, 1))),
 	// Warm reef shelf above a deep wall: reef fish on top, pelagic schools and sharks off the edge.
 	// Rare: whale shark or manta along the wall.
 	DROP_OFF("drop_off", 10, 10, 60, EnumSet.of(Habitat.TROPICAL, Habitat.DEEP), List.of(
@@ -63,8 +73,11 @@ public enum DivePoint {
 			new Spawn("scubadive:triggerfish", 3, 1, 2), new Spawn("scubadive:nudibranch", 4, 1, 3),
 			new Spawn("scubadive:blue_tang", 3, 2, 4), new Spawn("scubadive:butterflyfish", 3, 2, 2),
 			new Spawn("scubadive:clownfish", 3, 2, 3), new Spawn("scubadive:moray_eel", 2, 1, 1),
-			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:turtle", 1, 1, 1)),
-			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2))),
+			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:turtle", 1, 1, 1),
+			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3),
+			new Spawn("scubadive:box_jellyfish", 2, 1, 2)),
+			List.of(new Spawn("scubadive:whale_shark", 1, 1, 1), new Spawn("scubadive:manta_ray", 2, 1, 2),
+					new Spawn("scubadive:napoleon_wrasse", 2, 1, 1))),
 	// Fresh-water cavern: eyeless cave fish in the dark, crayfish, axolotls, glow squid. Rare: a big school
 	// of blind cave fish.
 	CENOTE("cenote", 8, 6, 30, EnumSet.of(Habitat.FRESH), List.of(

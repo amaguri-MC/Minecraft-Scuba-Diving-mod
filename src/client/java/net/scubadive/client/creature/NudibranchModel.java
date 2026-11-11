@@ -11,7 +11,8 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.Identifier;
 import net.scubadive.ScubaDive;
 
-/** Box model of a nudibranch: flat body, two rhinophores in front, gill tuft on the back. Texture 32x32. */
+/** Nudibranch (Chromodoris type): flat dorsum on a frilled mantle, two rhinophores in front, gill crown on the back. Generated with its texture by tools/K4_gen.py. */
+@SuppressWarnings("unused")
 public class NudibranchModel extends EntityModel<NudibranchRenderState> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(ScubaDive.id("nudibranch"), "main");
 
@@ -29,11 +30,18 @@ public class NudibranchModel extends EntityModel<NudibranchRenderState> {
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition mesh = new MeshDefinition();
 		PartDefinition root = mesh.getRoot();
-		PartPose origin = PartPose.offset(0.0f, 24.0f, 0.0f);
-		root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-2.0f, -2.0f, -2.5f, 4.0f, 2.0f, 5.0f), origin);
-		root.addOrReplaceChild("rhino_left", CubeListBuilder.create().texOffs(0, 8).addBox(0.5f, -4.0f, -2.5f, 1.0f, 2.0f, 1.0f), origin);
-		root.addOrReplaceChild("rhino_right", CubeListBuilder.create().texOffs(4, 8).addBox(-1.5f, -4.0f, -2.5f, 1.0f, 2.0f, 1.0f), origin);
-		root.addOrReplaceChild("gills", CubeListBuilder.create().texOffs(0, 12).addBox(-1.5f, -3.0f, 0.0f, 3.0f, 1.0f, 2.0f), origin);
+		PartDefinition mantle = root.addOrReplaceChild("mantle", CubeListBuilder.create()
+				.texOffs(0, 0).addBox(-2.5f, -1f, -3.5f, 5f, 1f, 7f), PartPose.offsetAndRotation(0f, 24f, 0f, 0f, 0f, 0f));
+		PartDefinition dorsum = root.addOrReplaceChild("dorsum", CubeListBuilder.create()
+				.texOffs(0, 9).addBox(-2f, -2f, -3f, 4f, 1f, 6f), PartPose.offsetAndRotation(0f, 24f, 0f, 0f, 0f, 0f));
+		PartDefinition rhinoLeft = root.addOrReplaceChild("rhino_left", CubeListBuilder.create()
+				.texOffs(21, 9).addBox(-0.5f, -2f, -0.5f, 1f, 2f, 1f), PartPose.offsetAndRotation(1f, 22f, -2.2f, 0.2f, 0f, 0.15f));
+		PartDefinition rhinoRight = root.addOrReplaceChild("rhino_right", CubeListBuilder.create()
+				.texOffs(21, 9).addBox(-0.5f, -2f, -0.5f, 1f, 2f, 1f), PartPose.offsetAndRotation(-1f, 22f, -2.2f, 0.2f, 0f, -0.15f));
+		PartDefinition gills = root.addOrReplaceChild("gills", CubeListBuilder.create()
+				.texOffs(26, 9).addBox(-0.5f, -2f, -0.5f, 1f, 2f, 1f)
+				.texOffs(0, 17).addBox(-1.5f, -1f, -0.5f, 1f, 1f, 1f)
+				.texOffs(0, 17).addBox(0.5f, -1f, -0.5f, 1f, 1f, 1f), PartPose.offsetAndRotation(0f, 22f, 1.8f, -0.25f, 0f, 0f));
 		return LayerDefinition.create(mesh, 32, 32);
 	}
 
@@ -41,9 +49,10 @@ public class NudibranchModel extends EntityModel<NudibranchRenderState> {
 	public void setupAnim(NudibranchRenderState state) {
 		super.setupAnim(state);
 		float t = state.ageInTicks;
-		this.rhinoLeft.xRot = (float) Math.sin(t * 0.15f) * 0.2f;
-		this.rhinoRight.xRot = (float) Math.sin(t * 0.15f + 1.2f) * 0.2f;
+		this.rhinoLeft.xRot = 0.2f + (float) Math.sin(t * 0.15f) * 0.2f;
+		this.rhinoRight.xRot = 0.2f + (float) Math.sin(t * 0.15f + 1.2f) * 0.2f;
 		this.gills.zRot = (float) Math.sin(t * 0.1f) * 0.12f;
+		this.gills.xRot = -0.25f + (float) Math.sin(t * 0.07f) * 0.1f;
 	}
 
 	public static Identifier texture(int variant) {

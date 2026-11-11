@@ -50,4 +50,10 @@ final class TouchHazard {
 	static void sting(Player player, int ticks, int amplifier) {
 		player.addEffect(new MobEffectInstance(MobEffects.POISON, ticks, amplifier));
 	}
+
+	/** A strong sting: poison plus nausea (the screen sways). */
+	static void sting(Player player, int ticks, int amplifier, int nauseaTicks) {
+		sting(player, ticks, amplifier);
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, nauseaTicks, 0));
+	}
 }

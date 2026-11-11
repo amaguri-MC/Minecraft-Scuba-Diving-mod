@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-/** Solitary reef fish (blue tang, moorish idol, lionfish, parrotfish, boxfish, triggerfish, grouper). */
+/** Solitary reef fish (blue tang, moorish idol, lionfish, parrotfish, boxfish, triggerfish, grouper, wrasses, mandarinfish). */
 public class ReefLoneFish extends AbstractFish implements ReefCreature {
 	private final ReefProfile profile;
 	private BlockPos home;
@@ -48,7 +48,11 @@ public class ReefLoneFish extends AbstractFish implements ReefCreature {
 	public void tick() {
 		super.tick();
 		if (this.home == null && !this.level().isClientSide()) {
-			this.home = this.profile.trait() == ReefProfile.Trait.LURKER ? ReefBehavior.findShelter(this) : this.blockPosition();
+			this.home = switch (this.profile.trait()) {
+				case LURKER -> ReefBehavior.findShelter(this);
+				case BOTTOM -> ReefBehavior.findFloorNook(this);
+				default -> this.blockPosition();
+			};
 		}
 	}
 

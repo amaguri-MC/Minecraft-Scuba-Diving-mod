@@ -2,12 +2,14 @@ package net.scubadive.creature.reef;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FollowFlockLeaderGoal;
 import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 /** Goal wiring shared by the schooling and solitary reef fish classes. */
 final class ReefBehavior {
@@ -27,6 +29,12 @@ final class ReefBehavior {
 				mob.getGoalSelector().removeAllGoals(g -> g instanceof RandomSwimmingGoal);
 				mob.getGoalSelector().addGoal(4, new ReefLurkGoal(mob));
 			}
+			case CLEANER -> mob.getGoalSelector().addGoal(2, new ReefCleanGoal(mob));
+			case BOTTOM -> {
+				mob.getGoalSelector().removeAllGoals(g -> g instanceof RandomSwimmingGoal);
+				mob.getGoalSelector().addGoal(4, new ReefBottomGoal(mob, profile));
+			}
+			case CURIOUS -> mob.getGoalSelector().addGoal(2, new ReefCuriousGoal(mob));
 			case SCHOOLING -> {
 				if (mob instanceof ReefSchoolFish school) {
 					// Own school logic replaces vanilla's loose 8-block flock goal.
@@ -37,6 +45,41 @@ final class ReefBehavior {
 			default -> {
 			}
 		}
+	}
+
+	/** Water cell right above the floor near the fish with the most coral around it, or its own cell. */
+	static BlockPos findFloorNook(PathfinderMob mob) {
+		Level level = mob.level();
+		BlockPos origin = mob.blockPosition();
+		BlockPos best = origin;
+		int bestScore = -1;
+		for (BlockPos p : BlockPos.betweenClosed(origin.offset(-5, -5, -5), origin.offset(5, 2, 5))) {
+			if (!level.isLoaded(p) || !level.getFluidState(p).is(FluidTags.WATER)) {
+				continue;
+			}
+			BlockPos below = p.below();
+			if (!level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) {
+				continue;
+			}
+			int score = 0;
+			for (Direction d : Direction.values()) {
+				if (d != Direction.UP && isCoral(level.getBlockState(p.relative(d)))) {
+					score += 2;
+				}
+			}
+			if (isCoral(level.getBlockState(p))) {
+				score += 1;
+			}
+			if (score > bestScore || (score == bestScore && origin.distSqr(p) < origin.distSqr(best))) {
+				bestScore = score;
+				best = p.immutable();
+			}
+		}
+		return best;
+	}
+
+	static boolean isCoral(BlockState s) {
+		return s.is(BlockTags.CORALS) || s.is(BlockTags.CORAL_BLOCKS) || s.is(BlockTags.WALL_CORALS);
 	}
 
 	/** Water cell near the fish with the most solid neighbours (a ceiling counts double), or its own cell. */

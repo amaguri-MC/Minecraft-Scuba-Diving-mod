@@ -55,7 +55,29 @@ public enum Species {
 	WOLF_EEL("wolf_eel", "scubadive:wolf_eel", false, 75, Category.COLD, Hint.COLD, 200),
 	// cephalopods
 	SPEAR_SQUID("spear_squid", "scubadive:spear_squid", false, 45, Category.CEPHALOPOD, Hint.TEMPERATE, 40),
-	CUTTLEFISH("cuttlefish", "scubadive:cuttlefish", false, 70, Category.CEPHALOPOD, Hint.TEMPERATE, 30);
+	CUTTLEFISH("cuttlefish", "scubadive:cuttlefish", false, 70, Category.CEPHALOPOD, Hint.TEMPERATE, 30),
+	// update-10: more fish, jellies and nudibranchs
+	YELLOW_TANG("yellow_tang", "scubadive:yellow_tang", false, 30, Category.REEF_FISH, Hint.REEF, 20),
+	CLEANER_WRASSE("cleaner_wrasse", "scubadive:cleaner_wrasse", false, 35, Category.REEF_FISH, Hint.REEF, 10),
+	MANDARINFISH("mandarinfish", "scubadive:mandarinfish", false, 110, Category.BOTTOM, Hint.REEF, 6),
+	NAPOLEON_WRASSE("napoleon_wrasse", "scubadive:napoleon_wrasse", false, 160, Category.BIG, Hint.DROP_OFF, 150),
+	GARDEN_EEL("garden_eel", "scubadive:garden_eel", false, 70, Category.BOTTOM, Hint.SAND, 40),
+	SARDINE("sardine", "scubadive:sardine", false, 20, Category.COLD, Hint.TEMPERATE, 20),
+	RED_SEA_BREAM("red_sea_bream", "scubadive:red_sea_bream", false, 40, Category.COLD, Hint.TEMPERATE, 60),
+	STRIPED_BEAKFISH("striped_beakfish", "scubadive:striped_beakfish", false, 45, Category.COLD, Hint.ROCK, 50),
+	OCEAN_SUNFISH("ocean_sunfish", "scubadive:ocean_sunfish", false, 180, Category.BIG, Hint.OPEN, 250),
+	ARCTIC_CHAR("arctic_char", "scubadive:arctic_char", false, 50, Category.FRESH, Hint.LAKE, 45),
+	BOX_JELLYFISH("box_jellyfish", "scubadive:box_jellyfish", false, 70, Category.JELLY, Hint.REEF, 25),
+	COMB_JELLY("comb_jelly", "scubadive:comb_jelly", false, 50, Category.JELLY, Hint.TEMPERATE, 8),
+	LIONS_MANE_JELLY("lions_mane_jelly", "scubadive:lions_mane_jelly", false, 90, Category.JELLY, Hint.COLD, 100),
+	FRIED_EGG_JELLY("fried_egg_jelly", "scubadive:fried_egg_jelly", false, 60, Category.JELLY, Hint.TEMPERATE, 35),
+	ECHIZEN_JELLY("echizen_jelly", "scubadive:echizen_jelly", false, 220, Category.JELLY, Hint.OPEN, 200),
+	SEA_BUNNY("sea_bunny", "scubadive:sea_bunny", false, 80, Category.NUDIBRANCH, Hint.REEF, 2),
+	SPANISH_DANCER("spanish_dancer", "scubadive:spanish_dancer", false, 90, Category.NUDIBRANCH, Hint.REEF, 30),
+	BLUE_DRAGON("blue_dragon", "scubadive:blue_dragon", false, 100, Category.NUDIBRANCH, Hint.SURFACE, 3),
+	LEAF_SHEEP("leaf_sheep", "scubadive:leaf_sheep", false, 120, Category.NUDIBRANCH, Hint.REEF, 1),
+	PHYLLIDIA("phyllidia", "scubadive:phyllidia", false, 40, Category.NUDIBRANCH, Hint.ROCK, 5),
+	THECACERA("thecacera", "scubadive:thecacera", false, 70, Category.NUDIBRANCH, Hint.REEF, 2);
 
 	/** Journal tab a species is listed under. */
 	public enum Category {

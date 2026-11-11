@@ -22,7 +22,13 @@ public record ReefProfile(String id, double fleeRadius, double fleeSpeed, double
 		/** Picks a sheltered spot (rock overhang) as home and stays there. */
 		LURKER,
 		/** Always lives in a school: loners rejoin, followers hold slots around the leader. */
-		SCHOOLING
+		SCHOOLING,
+		/** Cleaner wrasse: swims up to big fish or divers and fusses around them for a few seconds. */
+		CLEANER,
+		/** Keeps low over the floor near coral, creeping in short slow hops. */
+		BOTTOM,
+		/** Unafraid: now and then drifts over to a diver and looks at them. */
+		CURIOUS
 	}
 
 	public ReefProfile(String id, double fleeRadius, double fleeSpeed, double homeRange, int schoolSize, boolean hide) {

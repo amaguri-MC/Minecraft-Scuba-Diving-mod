@@ -28,6 +28,12 @@ import net.scubadive.creature.spawn.SeaZones;
 public final class ScubaCreatures {
 	public static final ResourceKey<Block> SEA_ANEMONE_KEY = ResourceKey.create(Registries.BLOCK, ScubaDive.id("sea_anemone"));
 	public static final ResourceKey<EntityType<?>> NUDIBRANCH_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("nudibranch"));
+	public static final ResourceKey<EntityType<?>> SEA_BUNNY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("sea_bunny"));
+	public static final ResourceKey<EntityType<?>> SPANISH_DANCER_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("spanish_dancer"));
+	public static final ResourceKey<EntityType<?>> BLUE_DRAGON_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("blue_dragon"));
+	public static final ResourceKey<EntityType<?>> LEAF_SHEEP_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("leaf_sheep"));
+	public static final ResourceKey<EntityType<?>> PHYLLIDIA_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("phyllidia"));
+	public static final ResourceKey<EntityType<?>> THECACERA_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("thecacera"));
 	public static final ResourceKey<EntityType<?>> PYGMY_SEAHORSE_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("pygmy_seahorse"));
 
 	public static final Block SEA_ANEMONE = new SeaAnemoneBlock(BlockBehaviour.Properties.of()
@@ -40,7 +46,8 @@ public final class ScubaCreatures {
 			.lightLevel(state -> 3)
 			.setId(SEA_ANEMONE_KEY));
 
-	public static final EntityType<Nudibranch> NUDIBRANCH = FabricEntityType.Builder.createMob(Nudibranch::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+	public static final EntityType<Nudibranch> NUDIBRANCH = FabricEntityType.Builder.<Nudibranch>createMob(
+					(type, level) -> new Nudibranch(type, level, Nudibranch.VARIANT_COUNT), MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 4.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.004))
@@ -49,6 +56,33 @@ public final class ScubaCreatures {
 			.sized(0.12f, 0.06f)
 			.clientTrackingRange(8)
 			.build(NUDIBRANCH_KEY);
+
+	// More sea slug species: each is its own entity type (its own journal entry), all on the nudibranch base.
+	public static final EntityType<Nudibranch> SEA_BUNNY = reefSlug(Nudibranch::new, SEA_BUNNY_KEY, 0.07f, 0.05f, 2.0);
+	public static final EntityType<SpanishDancer> SPANISH_DANCER = reefSlug(SpanishDancer::new, SPANISH_DANCER_KEY, 0.36f, 0.08f, 8.0);
+	public static final EntityType<Nudibranch> PHYLLIDIA = reefSlug(Nudibranch::new, PHYLLIDIA_KEY, 0.14f, 0.05f, 4.0);
+	public static final EntityType<Nudibranch> THECACERA = reefSlug(Nudibranch::new, THECACERA_KEY, 0.08f, 0.06f, 2.0);
+
+	public static final EntityType<LeafSheep> LEAF_SHEEP = FabricEntityType.Builder.createMob(LeafSheep::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+					.defaultAttributes(() -> Mob.createMobAttributes()
+							.add(Attributes.MAX_HEALTH, 1.0)
+							.add(Attributes.MOVEMENT_SPEED, 0.002))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							reefFloorNear(level, pos) || seagrassNear(level, pos))))
+			.sized(0.06f, 0.04f)
+			.clientTrackingRange(6)
+			.build(LEAF_SHEEP_KEY);
+
+	/** Floats at the surface: any water cell will do, it rises to the top after spawning. */
+	public static final EntityType<BlueDragon> BLUE_DRAGON = FabricEntityType.Builder.createMob(BlueDragon::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+					.defaultAttributes(() -> Mob.createMobAttributes()
+							.add(Attributes.MAX_HEALTH, 2.0)
+							.add(Attributes.MOVEMENT_SPEED, 0.003))
+					.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+							level.getFluidState(pos).is(FluidTags.WATER) && level.getFluidState(pos.above()).is(FluidTags.WATER))))
+			.sized(0.14f, 0.05f)
+			.clientTrackingRange(8)
+			.build(BLUE_DRAGON_KEY);
 
 	public static final EntityType<PygmySeahorse> PYGMY_SEAHORSE = FabricEntityType.Builder.createMob(PygmySeahorse::new, MobCategory.AXOLOTLS, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
@@ -74,10 +108,22 @@ public final class ScubaCreatures {
 
 		// Entities
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, NUDIBRANCH_KEY, NUDIBRANCH);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, SEA_BUNNY_KEY, SEA_BUNNY);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, SPANISH_DANCER_KEY, SPANISH_DANCER);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, BLUE_DRAGON_KEY, BLUE_DRAGON);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, LEAF_SHEEP_KEY, LEAF_SHEEP);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, PHYLLIDIA_KEY, PHYLLIDIA);
+		Registry.register(BuiltInRegistries.ENTITY_TYPE, THECACERA_KEY, THECACERA);
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, PYGMY_SEAHORSE_KEY, PYGMY_SEAHORSE);
 
 		// Spawn eggs
 		registerSpawnEgg("nudibranch_spawn_egg", NUDIBRANCH);
+		registerSpawnEgg("sea_bunny_spawn_egg", SEA_BUNNY);
+		registerSpawnEgg("spanish_dancer_spawn_egg", SPANISH_DANCER);
+		registerSpawnEgg("blue_dragon_spawn_egg", BLUE_DRAGON);
+		registerSpawnEgg("leaf_sheep_spawn_egg", LEAF_SHEEP);
+		registerSpawnEgg("phyllidia_spawn_egg", PHYLLIDIA);
+		registerSpawnEgg("thecacera_spawn_egg", THECACERA);
 		registerSpawnEgg("pygmy_seahorse_spawn_egg", PYGMY_SEAHORSE);
 
 		// Natural spawns: sea slugs on warm reefs (a few in the temperate sea), the rare pygmy seahorse in warm water.
@@ -85,6 +131,16 @@ public final class ScubaCreatures {
 		// the WATER_AMBIENT cap to themselves.
 		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, NUDIBRANCH, 10, 1, 3);
 		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.UNDERGROUND_WATER_CREATURE, NUDIBRANCH, 3, 1, 2);
+		// The other sea slugs share the floor-dweller cap; weights stay low so the reef is not covered in slugs.
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, SEA_BUNNY, 3, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.UNDERGROUND_WATER_CREATURE, SEA_BUNNY, 1, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, SPANISH_DANCER, 2, 1, 1);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, PHYLLIDIA, 4, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, THECACERA, 2, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.UNDERGROUND_WATER_CREATURE, THECACERA, 2, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.UNDERGROUND_WATER_CREATURE, LEAF_SHEEP, 1, 1, 1);
+		// Blue dragons drift over open warm water (deep lukewarm ocean included), a few together.
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.UNDERGROUND_WATER_CREATURE, BLUE_DRAGON, 2, 1, 3);
 		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.AXOLOTLS, PYGMY_SEAHORSE, 2, 1, 1);
 	}
 
@@ -93,6 +149,26 @@ public final class ScubaCreatures {
 		net.minecraft.core.BlockPos f = SeaZones.floorWater(level, pos, 3);
 		return f != null && level.getFluidState(f.above()).is(FluidTags.WATER)
 				&& Nudibranch.isReefFloor(level.getBlockState(f.below()));
+	}
+
+	/** Seagrass in a cell at most 3 cells below (leaf sheep graze on it). */
+	private static boolean seagrassNear(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos) {
+		net.minecraft.core.BlockPos f = SeaZones.floorWater(level, pos, 3);
+		return f != null && LeafSheep.isSeagrass(level.getBlockState(f));
+	}
+
+	/** A reef-crawling sea slug: same spawn rule, cap and behaviour as the original nudibranch. */
+	private static <T extends Nudibranch> EntityType<T> reefSlug(EntityType.EntityFactory<T> factory, ResourceKey<EntityType<?>> key,
+			float width, float height, double health) {
+		return FabricEntityType.Builder.createMob(factory, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+						.defaultAttributes(() -> Mob.createMobAttributes()
+								.add(Attributes.MAX_HEALTH, health)
+								.add(Attributes.MOVEMENT_SPEED, 0.004))
+						.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
+								reefFloorNear(level, pos))))
+				.sized(width, height)
+				.clientTrackingRange(8)
+				.build(key);
 	}
 
 	private static void registerSpawnEgg(String path, EntityType<? extends Mob> type) {

@@ -46,7 +46,8 @@ final class TourSpawner {
 			"scubadive:nudibranch", "scubadive:octopus", "scubadive:goby", "scubadive:stingray",
 			"scubadive:moray_eel", "scubadive:frogfish", "scubadive:pygmy_seahorse",
 			"scubadive:crayfish", "scubadive:catfish", "scubadive:lumpsucker", "scubadive:wolf_eel",
-			"minecraft:axolotl", "minecraft:tadpole", "minecraft:frog");
+			"minecraft:axolotl", "minecraft:tadpole", "minecraft:frog",
+			"scubadive:sea_bunny", "scubadive:spanish_dancer", "scubadive:leaf_sheep", "scubadive:phyllidia", "scubadive:thecacera", "scubadive:garden_eel");
 	/** Live in the dark only. */
 	private static final Set<String> DARK = Set.of("scubadive:blind_cavefish");
 	/** Only live on an anemone (they leave the world otherwise, see AnemoneDweller). */

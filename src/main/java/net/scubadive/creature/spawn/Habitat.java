@@ -71,6 +71,28 @@ public enum Habitat {
 		put("scubadive:catfish", FRESH);
 		put("scubadive:blind_cavefish", FRESH);
 		put("scubadive:crayfish", FRESH);
+		// ---- update-10 ----
+		put("scubadive:yellow_tang", TROPICAL);
+		put("scubadive:cleaner_wrasse", TROPICAL);
+		put("scubadive:mandarinfish", TROPICAL);
+		put("scubadive:napoleon_wrasse", TROPICAL);
+		put("scubadive:garden_eel", TROPICAL);
+		put("scubadive:sardine", TEMPERATE);
+		put("scubadive:red_sea_bream", TEMPERATE);
+		put("scubadive:striped_beakfish", TEMPERATE);
+		put("scubadive:ocean_sunfish", TEMPERATE, DEEP);
+		put("scubadive:arctic_char", FRESH);
+		put("scubadive:box_jellyfish", TROPICAL);
+		put("scubadive:comb_jelly", TEMPERATE, COLD);
+		put("scubadive:lions_mane_jelly", COLD);
+		put("scubadive:fried_egg_jelly", TEMPERATE);
+		put("scubadive:echizen_jelly", TEMPERATE);
+		put("scubadive:sea_bunny", TROPICAL, TEMPERATE);
+		put("scubadive:spanish_dancer", TROPICAL);
+		put("scubadive:blue_dragon", TROPICAL);
+		put("scubadive:leaf_sheep", TROPICAL);
+		put("scubadive:phyllidia", TROPICAL);
+		put("scubadive:thecacera", TROPICAL, TEMPERATE);
 	}
 
 	private static void put(String id, Habitat first, Habitat... rest) {

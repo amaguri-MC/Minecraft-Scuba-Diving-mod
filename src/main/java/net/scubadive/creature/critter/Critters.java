@@ -39,6 +39,12 @@ public final class Critters {
 	public static final EntityType<Jellyfish> MOON_JELLY = jelly("moon_jelly", 0.35f, 0.45f);
 	public static final EntityType<Jellyfish> SEA_NETTLE = jelly("sea_nettle", 0.35f, 0.8f);
 	public static final EntityType<Jellyfish> SPOTTED_JELLY = jelly("spotted_jelly", 0.4f, 0.5f);
+	public static final EntityType<Jellyfish> BOX_JELLYFISH = jelly("box_jellyfish", 0.35f, 0.75f);
+	public static final EntityType<Jellyfish> COMB_JELLY = jelly("comb_jelly", 0.25f, 0.35f);
+	public static final EntityType<Jellyfish> LIONS_MANE_JELLY = jelly("lions_mane_jelly", 1.0f, 2.0f, 8.0, 5);
+	public static final EntityType<Jellyfish> FRIED_EGG_JELLY = jelly("fried_egg_jelly", 0.45f, 0.5f);
+	/** Rare giant: bell about two blocks across, heavy oral arms; needs deep open water. */
+	public static final EntityType<Jellyfish> ECHIZEN_JELLY = jelly("echizen_jelly", 2.2f, 3.0f, 20.0, 7);
 
 	private Critters() {
 	}
@@ -60,10 +66,16 @@ public final class Critters {
 	}
 
 	private static EntityType<Jellyfish> jelly(String id, float width, float height) {
+		return jelly(id, width, height, 3.0, 3);
+	}
+
+	/** waterAbove: how many cells above the spawn position must be water too. */
+	private static EntityType<Jellyfish> jelly(String id, float width, float height, double health, int waterAbove) {
 		return FabricEntityType.Builder.createMob(Jellyfish::new, MobCategory.AXOLOTLS, mob -> mob
-						.defaultAttributes(() -> Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 3.0).add(Attributes.MOVEMENT_SPEED, 0.01))
+						.defaultAttributes(() -> Mob.createMobAttributes().add(Attributes.MAX_HEALTH, health).add(Attributes.MOVEMENT_SPEED, 0.01))
 						.spawnPlacement(SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR, SeaZones.wild((type, level, reason, pos, random) ->
-								openWater(level, pos))))
+								// The giant is rarer still: most otherwise valid spots are refused.
+								openWater(level, pos, waterAbove) && (!id.equals("echizen_jelly") || random.nextInt(3) == 0))))
 				.sized(width, height)
 				.clientTrackingRange(10)
 				.build(key(id));
@@ -83,8 +95,8 @@ public final class Critters {
 	}
 
 	/** A few blocks of open water around the position. */
-	private static boolean openWater(LevelReader level, BlockPos pos) {
-		for (int dy = 0; dy <= 3; dy++) {
+	private static boolean openWater(LevelReader level, BlockPos pos, int up) {
+		for (int dy = 0; dy <= up; dy++) {
 			if (!level.getFluidState(pos.above(dy)).is(FluidTags.WATER)) {
 				return false;
 			}
@@ -100,6 +112,11 @@ public final class Critters {
 		register("moon_jelly", MOON_JELLY);
 		register("sea_nettle", SEA_NETTLE);
 		register("spotted_jelly", SPOTTED_JELLY);
+		register("box_jellyfish", BOX_JELLYFISH);
+		register("comb_jelly", COMB_JELLY);
+		register("lions_mane_jelly", LIONS_MANE_JELLY);
+		register("fried_egg_jelly", FRIED_EGG_JELLY);
+		register("echizen_jelly", ECHIZEN_JELLY);
 
 		// By water temperature. Floor critters use the UNDERGROUND_WATER_CREATURE cap and jellies the AXOLOTLS cap
 		// (both free in the open sea), leaving WATER_AMBIENT to the fish.
@@ -111,6 +128,13 @@ public final class Critters {
 		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, MOON_JELLY, 8, 2, 5);
 		SeaZones.addSpawn(SeaZones.Region.COLD, MobCategory.UNDERGROUND_WATER_CREATURE, CUSHION_STAR, 8, 1, 3);
 		SeaZones.addSpawn(SeaZones.Region.COLD, MobCategory.AXOLOTLS, SEA_NETTLE, 6, 1, 3);
+		SeaZones.addSpawn(SeaZones.Region.WARM, MobCategory.AXOLOTLS, BOX_JELLYFISH, 3, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, COMB_JELLY, 5, 2, 4);
+		SeaZones.addSpawn(SeaZones.Region.COLD, MobCategory.AXOLOTLS, COMB_JELLY, 4, 2, 4);
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, FRIED_EGG_JELLY, 3, 1, 2);
+		SeaZones.addSpawn(SeaZones.Region.COLD, MobCategory.AXOLOTLS, LIONS_MANE_JELLY, 2, 1, 1);
+		// The rare giant: weight 1, always alone.
+		SeaZones.addSpawn(SeaZones.Region.TEMPERATE, MobCategory.AXOLOTLS, ECHIZEN_JELLY, 1, 1, 1);
 	}
 
 	private static void register(String id, EntityType<? extends Mob> type) {

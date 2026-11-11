@@ -19,6 +19,11 @@ public final class CrittersClient {
 		ModelLayerRegistry.registerModelLayer(JellyfishModel.MOON, JellyfishModel::moon);
 		ModelLayerRegistry.registerModelLayer(JellyfishModel.NETTLE, JellyfishModel::nettle);
 		ModelLayerRegistry.registerModelLayer(JellyfishModel.SPOTTED, JellyfishModel::spotted);
+		ModelLayerRegistry.registerModelLayer(BoxJellyModel.LAYER, BoxJellyModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(CombJellyModel.LAYER, CombJellyModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(LionsManeModel.LAYER, LionsManeModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(FriedEggJellyModel.LAYER, FriedEggJellyModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(EchizenJellyModel.LAYER, EchizenJellyModel::createBodyLayer);
 
 		EntityRenderers.register(Critters.BLUE_STARFISH, ctx -> new CritterRenderer<>(ctx,
 				new StarfishModel(ctx.bakeLayer(StarfishModel.BLUE), 5), 0.1f, 0.4f, ScubaDive.id("textures/entity/blue_starfish.png")));
@@ -34,5 +39,16 @@ public final class CrittersClient {
 				new JellyfishModel(ctx.bakeLayer(JellyfishModel.NETTLE), 12), 0.0f, 0.5f, ScubaDive.id("textures/entity/sea_nettle.png")));
 		EntityRenderers.register(Critters.SPOTTED_JELLY, ctx -> new CritterRenderer<>(ctx,
 				new JellyfishModel(ctx.bakeLayer(JellyfishModel.SPOTTED), 0), 0.0f, 0.6f, ScubaDive.id("textures/entity/spotted_jelly.png")));
+		EntityRenderers.register(Critters.BOX_JELLYFISH, ctx -> new CritterRenderer<>(ctx,
+				new BoxJellyModel(ctx.bakeLayer(BoxJellyModel.LAYER)), 0.0f, 0.45f, ScubaDive.id("textures/entity/box_jellyfish.png")));
+		EntityRenderers.register(Critters.COMB_JELLY, ctx -> new GlowCritterRenderer<>(ctx,
+				new CombJellyModel(ctx.bakeLayer(CombJellyModel.LAYER)), 0.0f, 0.6f, ScubaDive.id("textures/entity/comb_jelly.png"),
+				ScubaDive.id("textures/entity/comb_jelly_glow.png")));
+		EntityRenderers.register(Critters.LIONS_MANE_JELLY, ctx -> new CritterRenderer<>(ctx,
+				new LionsManeModel(ctx.bakeLayer(LionsManeModel.LAYER)), 0.0f, 1.1f, ScubaDive.id("textures/entity/lions_mane_jelly.png")));
+		EntityRenderers.register(Critters.FRIED_EGG_JELLY, ctx -> new CritterRenderer<>(ctx,
+				new FriedEggJellyModel(ctx.bakeLayer(FriedEggJellyModel.LAYER)), 0.0f, 0.6f, ScubaDive.id("textures/entity/fried_egg_jelly.png")));
+		EntityRenderers.register(Critters.ECHIZEN_JELLY, ctx -> new CritterRenderer<>(ctx,
+				new EchizenJellyModel(ctx.bakeLayer(EchizenJellyModel.LAYER)), 0.0f, 2.0f, ScubaDive.id("textures/entity/echizen_jelly.png")));
 	}
 }
