@@ -90,6 +90,18 @@ public class ReefSchoolFish extends AbstractSchoolingFish implements ReefCreatur
 		return this.profile.schoolSize();
 	}
 
+	/**
+	 * Vanilla takes (max - current size) new followers; a school already larger than the max (a big spawn group)
+	 * would pass a negative limit and crash the server tick. A full school simply takes nobody.
+	 */
+	@Override
+	public void addFollowers(java.util.stream.Stream<? extends AbstractSchoolingFish> fish) {
+		if (this.hasFollowers() && !this.canBeFollowed()) {
+			return;
+		}
+		super.addFollowers(fish);
+	}
+
 	@Override
 	public void tick() {
 		super.tick();

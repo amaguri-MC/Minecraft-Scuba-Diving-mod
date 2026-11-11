@@ -67,6 +67,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			journal(context);
 			zoo(context, sp);
 			underwater(context, sp);
+			tour(context, sp);
 		}
 	}
 
@@ -311,6 +312,37 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			context.takeScreenshot("16_close_" + s.id);
 		}
 		clearGallery(server, x0, y0, z0);
+	}
+
+	/** A real tour at the warm-sea dive point: 40 s in the tour dimension with every creature ticking. */
+	private static void tour(ClientGameTestContext context, TestSingleplayerContext sp) {
+		var server = sp.getServer();
+		server.runCommand("gamemode survival @p");
+		server.runCommand("item replace entity @p armor.head with scubadive:dive_mask");
+		server.runCommand("item replace entity @p armor.chest with scubadive:bcd");
+		server.runCommand("item replace entity @p armor.legs with scubadive:wetsuit");
+		server.runCommand("item replace entity @p armor.feet with scubadive:dive_fins");
+		boolean started = server.computeOnServer(s -> {
+			var player = s.getPlayerList().getPlayers().get(0);
+			return net.scubadive.tour.TourApi.start(player, net.scubadive.tour.DivePoint.WARM_SEA, List.of(player));
+		});
+		log("tour started: %s", started);
+		for (int i = 1; i <= 4; i++) {
+			context.waitTicks(200);
+			long avg = server.computeOnServer(s -> s.getAverageTickTimeNanos()) / 1000;
+			int count = server.computeOnServer(s -> {
+				var level = s.getLevel(net.scubadive.tour.TourApi.DIMENSION);
+				int n = 0;
+				if (level != null) for (Entity e : level.getAllEntities()) n++;
+				return n;
+			});
+			String dim = context.computeOnClient(mc -> mc.level == null ? "none" : mc.level.dimension().identifier().toString());
+			log("tour %ds: dimension %s, server avg tick %d us, entities in tour %d", i * 10, dim, avg, count);
+			if (i == 2) {
+				server.runCommand("execute as @p at @s run tp @s ~ ~-6 ~");
+			}
+		}
+		context.takeScreenshot("17_tour");
 	}
 
 	/** Removes the gallery creatures without death particles. */
