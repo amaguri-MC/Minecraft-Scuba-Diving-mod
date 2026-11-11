@@ -286,7 +286,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
 		server.runCommand("item replace entity @p armor.head with minecraft:air");
 		for (net.scubadive.species.Species.Category c : net.scubadive.species.Species.Category.values()) {
-			server.runCommand("kill @e[type=!minecraft:player," + area + "]");
+			clearGallery(server, x0, y0, z0);
 			List<net.scubadive.species.Species> list = new ArrayList<>();
 			for (net.scubadive.species.Species s : net.scubadive.species.Species.values()) {
 				if (s.category == c && !s.isBlock) list.add(s);
@@ -304,19 +304,29 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		}
 		for (net.scubadive.species.Species s : net.scubadive.species.Species.values()) {
 			if (!CLOSE_UP.contains(s.id)) continue;
-			server.runCommand("kill @e[type=!minecraft:player," + area + "]");
+			clearGallery(server, x0, y0, z0);
 			double back = s.lengthCm >= 150 ? 6 : (s.lengthCm >= 40 ? 2.5 : 1.2);
 			summonFrozen(server, s.target.toString(), x0 + 0.5, y0 + 1.2, z0 - 6 + 0.5 + back, 60f);
 			context.waitTicks(25);
 			context.takeScreenshot("16_close_" + s.id);
 		}
-		server.runCommand("kill @e[type=!minecraft:player," + area + "]");
+		clearGallery(server, x0, y0, z0);
+	}
+
+	/** Removes the gallery creatures without death particles. */
+	private static void clearGallery(net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext server, int x0, int y0, int z0) {
+		server.runOnServer(s -> {
+			var box = new net.minecraft.world.phys.AABB(x0 - 40, y0 - 20, z0 - 40, x0 + 40, y0 + 40, z0 + 40);
+			for (Entity e : s.overworld().getEntitiesOfClass(Entity.class, box, e -> !(e instanceof net.minecraft.world.entity.player.Player))) {
+				e.discard();
+			}
+		});
 	}
 
 	private static void summonFrozen(net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext server, String id,
 			double x, double y, double z, float yaw) {
 		server.runCommand(String.format(java.util.Locale.ROOT,
-				"summon %s %.2f %.2f %.2f {NoAI:1b,NoGravity:1b,PersistenceRequired:1b,Rotation:[%.1ff,0f]}", id, x, y, z, yaw));
+				"summon %s %.2f %.2f %.2f {NoAI:1b,NoGravity:1b,Invulnerable:1b,Silent:1b,PersistenceRequired:1b,Rotation:[%.1ff,0f]}", id, x, y, z, yaw));
 	}
 
 	/** Stays in the ocean for a while: server tick time, client fps and how many mod creatures are around. */
