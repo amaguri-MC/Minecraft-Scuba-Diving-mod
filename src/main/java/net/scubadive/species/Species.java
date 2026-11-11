@@ -38,11 +38,11 @@ public enum Species {
 	OCTOPUS("octopus", "scubadive:octopus", false, 80, Category.CEPHALOPOD, Hint.ROCK, 60),
 	// critters
 	BLUE_STARFISH("blue_starfish", "scubadive:blue_starfish", false, 25, Category.INVERT, Hint.REEF, 30),
-	CUSHION_STAR("cushion_star", "scubadive:cushion_star", false, 30, Category.INVERT, Hint.SAND, 25),
+	CUSHION_STAR("cushion_star", "scubadive:cushion_star", false, 30, Category.INVERT, Hint.TEMPERATE, 25),
 	CROWN_OF_THORNS("crown_of_thorns", "scubadive:crown_of_thorns", false, 60, Category.INVERT, Hint.REEF, 40),
 	SEA_URCHIN("sea_urchin", "scubadive:sea_urchin", false, 20, Category.INVERT, Hint.ROCK, 20),
-	MOON_JELLY("moon_jelly", "scubadive:moon_jelly", false, 30, Category.JELLY, Hint.OPEN, 25),
-	SEA_NETTLE("sea_nettle", "scubadive:sea_nettle", false, 55, Category.JELLY, Hint.TEMPERATE, 50),
+	MOON_JELLY("moon_jelly", "scubadive:moon_jelly", false, 30, Category.JELLY, Hint.TEMPERATE, 25),
+	SEA_NETTLE("sea_nettle", "scubadive:sea_nettle", false, 55, Category.JELLY, Hint.COLD, 50),
 	SPOTTED_JELLY("spotted_jelly", "scubadive:spotted_jelly", false, 45, Category.JELLY, Hint.REEF, 40),
 	CLIONE("clione", "scubadive:clione", false, 70, Category.JELLY, Hint.ICE, 3),
 	// fresh water and cold water
