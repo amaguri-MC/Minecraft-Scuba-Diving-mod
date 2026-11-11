@@ -64,6 +64,8 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			gear(context, sp, center);
 			book(context);
 			showcase(context, sp);
+			journal(context);
+			zoo(context, sp);
 			underwater(context, sp);
 		}
 	}
@@ -244,6 +246,61 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			log("brain coral tints at %s: %d sources:%s", p, sources.size(), b);
 		});
 		server.runCommand("item replace entity @p weapon.mainhand with scubadive:dive_light");
+	}
+
+	/** Journal: every category tab, with unknown species showing their hints. */
+	private static void journal(ClientGameTestContext context) {
+		context.setScreen(net.scubadive.client.camera.JournalScreen::new);
+		context.waitForScreen(net.scubadive.client.camera.JournalScreen.class);
+		context.waitTicks(5);
+		context.takeScreenshot("13_journal_all");
+		for (net.scubadive.species.Species.Category c : net.scubadive.species.Species.Category.values()) {
+			context.runOnClient(mc -> ((net.scubadive.client.camera.JournalScreen) mc.screen).selectCategory(c));
+			context.waitTicks(3);
+			context.takeScreenshot("14_journal_" + c.name().toLowerCase(java.util.Locale.ROOT));
+		}
+		context.setScreen(() -> null);
+	}
+
+	/** Every creature of each journal category, frozen in a glass water tank, photographed from the front. */
+	private static void zoo(ClientGameTestContext context, TestSingleplayerContext sp) {
+		var server = sp.getServer();
+		int x0 = 200, y0 = 150, z0 = 200;
+		server.runCommand("forceload add " + (x0 - 20) + " " + (z0 - 20) + " " + (x0 + 20) + " " + (z0 + 30));
+		context.waitTicks(40);
+		server.runCommand("fill " + (x0 - 2) + " " + (y0 + 2) + " " + (z0 - 13) + " " + (x0 + 2) + " " + (y0 + 2) + " " + (z0 - 9) + " minecraft:smooth_stone");
+		server.runCommand("tp @p " + x0 + ".5 " + (y0 + 3) + " " + (z0 - 11) + ".5 0 8");
+		context.waitTicks(10);
+		sp.getConnection().waitForChunksRender(false, 20 * 60);
+		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
+		server.runCommand("item replace entity @p armor.head with minecraft:air");
+		server.runCommand("effect give @p minecraft:night_vision 600 0 true");
+		for (net.scubadive.species.Species.Category c : net.scubadive.species.Species.Category.values()) {
+			// tank: glass shell 21 wide, 9 high, 12 deep, filled with water
+			server.runCommand("fill " + (x0 - 11) + " " + (y0 - 1) + " " + z0 + " " + (x0 + 11) + " " + (y0 + 9) + " " + (z0 + 12) + " minecraft:glass");
+			server.runCommand("fill " + (x0 - 10) + " " + y0 + " " + (z0 + 1) + " " + (x0 + 10) + " " + (y0 + 8) + " " + (z0 + 11) + " minecraft:water");
+			server.runCommand("fill " + (x0 - 10) + " " + (y0 - 1) + " " + (z0 + 1) + " " + (x0 + 10) + " " + (y0 - 1) + " " + (z0 + 11) + " minecraft:sand");
+			server.runCommand("kill @e[type=!minecraft:player,distance=..40]");
+			List<net.scubadive.species.Species> list = new ArrayList<>();
+			for (net.scubadive.species.Species s : net.scubadive.species.Species.values()) {
+				if (s.category == c && !s.isBlock) list.add(s);
+			}
+			int n = list.size();
+			for (int i = 0; i < n; i++) {
+				net.scubadive.species.Species s = list.get(i);
+				int col = i % 5;
+				int row = i / 5;
+				double x = x0 - 8 + col * 4 + 0.5;
+				double y = y0 + 1 + row * 3;
+				double z = z0 + 4 + (s.lengthCm > 150 ? 3 : 0) + 0.5;
+				server.runCommand("summon " + s.target + " " + x + " " + y + " " + z
+						+ " {NoAI:1b,NoGravity:1b,PersistenceRequired:1b,Rotation:[90f,0f]}");
+			}
+			context.waitTicks(40);
+			context.takeScreenshot("15_zoo_" + c.name().toLowerCase(java.util.Locale.ROOT));
+			log("zoo %s: %d species", c, n);
+		}
+		server.runCommand("kill @e[type=!minecraft:player,distance=..40]");
 	}
 
 	/** Stays in the ocean for a while: server tick time, client fps and how many mod creatures are around. */

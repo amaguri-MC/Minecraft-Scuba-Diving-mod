@@ -16,7 +16,7 @@
   "screen.scubadive.journal.col_name": "Species",
   "screen.scubadive.journal.col_best": "Best",
   "screen.scubadive.journal.col_count": "Shots",
-  "screen.scubadive.journal.unknown": "???",
+  "screen.scubadive.journal.unknown": "?????",
   "message.scubadive.camera.shot": "%s +%s",
   "message.scubadive.camera.new": "NEW!",
   "message.scubadive.camera.nothing": "Nothing to photograph",
