@@ -279,7 +279,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		String area = "x=" + x0 + ",y=" + y0 + ",z=" + z0 + ",distance=..40";
 		server.runCommand("forceload add " + (x0 - 20) + " " + (z0 - 20) + " " + (x0 + 20) + " " + (z0 + 30));
 		context.waitTicks(40);
-		server.runCommand("fill " + (x0 - 12) + " " + (y0 - 1) + " " + (z0 - 8) + " " + (x0 + 12) + " " + (y0 - 1) + " " + (z0 + 12) + " minecraft:sand");
+		server.runCommand("fill " + (x0 - 12) + " " + (y0 - 1) + " " + (z0 - 8) + " " + (x0 + 12) + " " + (y0 - 1) + " " + (z0 + 12) + " minecraft:smooth_stone");
 		server.runCommand("tp @p " + x0 + ".5 " + y0 + " " + (z0 - 6) + ".5 0 12");
 		context.waitTicks(10);
 		sp.getConnection().waitForChunksRender(false, 20 * 60);
