@@ -255,7 +255,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		context.takeScreenshot("13_journal_all");
 		for (net.scubadive.species.Species.Category c : net.scubadive.species.Species.Category.values()) {
-			context.runOnClient(mc -> ((net.scubadive.client.camera.JournalScreen) mc.screen).selectCategory(c));
+			context.runOnClient(mc -> ((net.scubadive.client.camera.JournalScreen) mc.gui.screen()).selectCategory(c));
 			context.waitTicks(3);
 			context.takeScreenshot("14_journal_" + c.name().toLowerCase(java.util.Locale.ROOT));
 		}

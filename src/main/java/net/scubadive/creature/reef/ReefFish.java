@@ -73,8 +73,11 @@ public final class ReefFish {
 	public static final EntityType<ReefLoneFish> NAPOLEON_WRASSE = lone(NAPOLEON_WRASSE_PROFILE, 0.9f, 0.7f, false, 1, 1, 1);
 
 	public static final ResourceKey<EntityType<?>> GARDEN_EEL_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ScubaDive.id("garden_eel"));
-	/** Garden eel: burrow dweller on warm shallow sand (floor dweller cap, like the goby). */
-	public static final EntityType<GardenEel> GARDEN_EEL = FabricEntityType.Builder.createMob(GardenEel::new, MobCategory.UNDERGROUND_WATER_CREATURE, mob -> mob
+	/**
+	 * Garden eel: burrow dweller on warm shallow sand. Counted with the fish (WATER_AMBIENT, cap 20): a colony would
+	 * fill the small floor-dweller cap and starve nudibranchs, stars and gobies.
+	 */
+	public static final EntityType<GardenEel> GARDEN_EEL = FabricEntityType.Builder.createMob(GardenEel::new, MobCategory.WATER_AMBIENT, mob -> mob
 					.defaultAttributes(() -> Mob.createMobAttributes()
 							.add(Attributes.MAX_HEALTH, 4.0)
 							.add(Attributes.MOVEMENT_SPEED, 0.0))
@@ -167,6 +170,6 @@ public final class ReefFish {
 		Registry.register(BuiltInRegistries.ENTITY_TYPE, GARDEN_EEL_KEY, GARDEN_EEL);
 		ResourceKey<Item> eelEgg = ResourceKey.create(Registries.ITEM, ScubaDive.id("garden_eel_spawn_egg"));
 		Registry.register(BuiltInRegistries.ITEM, eelEgg, new SpawnEggItem(new Item.Properties().setId(eelEgg).spawnEgg(GARDEN_EEL)));
-		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.UNDERGROUND_WATER_CREATURE, GARDEN_EEL, 3, 1, 1);
+		SeaZones.addSpawn(SeaZones.Region.TROPICAL_SHALLOW, MobCategory.WATER_AMBIENT, GARDEN_EEL, 3, 1, 1);
 	}
 }

@@ -182,7 +182,7 @@ public class GardenEel extends Mob {
 			return;
 		}
 		RandomSource r = this.getRandom();
-		int want = 4 + r.nextInt(8);
+		int want = 3 + r.nextInt(5);
 		BlockPos origin = this.blockPosition();
 		List<BlockPos> cells = new ArrayList<>();
 		for (int ring = 1; ring <= 3; ring++) {
