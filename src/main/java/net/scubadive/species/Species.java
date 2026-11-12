@@ -129,6 +129,20 @@ public enum Species {
 		return "species.scubadive." + id;
 	}
 
+	/** Rarity 1-5 from the photo points (rarer species are worth more). */
+	public int rarity() {
+		if (basePoints < 30) return 1;
+		if (basePoints < 50) return 2;
+		if (basePoints < 80) return 3;
+		if (basePoints < 150) return 4;
+		return 5;
+	}
+
+	/** Rarity as stars, e.g. ★★★☆☆. */
+	public String rarityStars() {
+		return "★".repeat(rarity()) + "☆".repeat(5 - rarity());
+	}
+
 	public static Species byTarget(Identifier target, boolean isBlock) {
 		for (Species s : values()) if (s.isBlock == isBlock && s.target.equals(target)) return s;
 		return null;

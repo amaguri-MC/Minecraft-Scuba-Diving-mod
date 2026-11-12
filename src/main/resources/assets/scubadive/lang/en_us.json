@@ -440,5 +440,6 @@
   "item.scubadive.flower_hat_jelly_spawn_egg": "Flower Hat Jellyfish Spawn Egg",
   "entity.scubadive.blue_blubber_jelly": "Blue Blubber Jellyfish",
   "species.scubadive.blue_blubber_jelly": "Blue Blubber Jellyfish",
-  "item.scubadive.blue_blubber_jelly_spawn_egg": "Blue Blubber Jellyfish Spawn Egg"
+  "item.scubadive.blue_blubber_jelly_spawn_egg": "Blue Blubber Jellyfish Spawn Egg",
+  "screen.scubadive.journal.hint_rarity": "Rarity: %s"
 }

@@ -440,5 +440,6 @@
   "item.scubadive.flower_hat_jelly_spawn_egg": "ハナガサクラゲのスポーンエッグ",
   "entity.scubadive.blue_blubber_jelly": "ブルージェリー",
   "species.scubadive.blue_blubber_jelly": "ブルージェリー",
-  "item.scubadive.blue_blubber_jelly_spawn_egg": "ブルージェリーのスポーンエッグ"
+  "item.scubadive.blue_blubber_jelly_spawn_egg": "ブルージェリーのスポーンエッグ",
+  "screen.scubadive.journal.hint_rarity": "レア度: %s"
 }

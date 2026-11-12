@@ -174,7 +174,9 @@ public final class JournalScreen extends Screen {
 				graphics.text(this.font, unknown, left, y, GRAY);
 				graphics.text(this.font, hint(s), left + Math.max(44, this.font.width(unknown) + 8), y, DIM);
 			} else {
-				graphics.text(this.font, Component.translatable(s.langKey()).getString(), left, y, WHITE);
+				String name = Component.translatable(s.langKey()).getString();
+				graphics.text(this.font, name, left, y, WHITE);
+				graphics.text(this.font, s.rarityStars(), left + this.font.width(name) + 6, y, GOLD);
 				graphics.text(this.font, String.valueOf(entry.best()), left + 170, y, GOLD);
 				graphics.text(this.font, String.valueOf(entry.count()), left + 230, y, WHITE);
 			}
@@ -189,7 +191,8 @@ public final class JournalScreen extends Screen {
 				? Component.translatable("screen.scubadive.journal.length_m", trimmed(s.lengthCm / 100.0)).getString()
 				: Component.translatable("screen.scubadive.journal.length_cm", s.lengthCm).getString();
 		return Component.translatable("screen.scubadive.journal.hint_habitat", Component.translatable(s.habitat.langKey())).getString()
-				+ "  " + Component.translatable("screen.scubadive.journal.hint_length", length).getString();
+				+ "  " + Component.translatable("screen.scubadive.journal.hint_length", length).getString()
+				+ "  " + Component.translatable("screen.scubadive.journal.hint_rarity", s.rarityStars()).getString();
 	}
 
 	private static String trimmed(double v) {
