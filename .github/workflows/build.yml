@@ -25,7 +25,9 @@ jobs:
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
       - name: build
-        run: ./gradlew build
+        # The Fabric maven sometimes serves broken asm POMs for a moment: retry instead of failing the build.
+        run: for i in 1 2 3; do ./gradlew build && exit 0; sleep 30; done; exit 1
+        shell: bash
       - name: capture build artifacts
         uses: actions/upload-artifact@v7
         with:
