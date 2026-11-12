@@ -1,5 +1,5 @@
 {
-  "itemGroup.scubadive.main": "Scuba Dive",
+  "itemGroup.scubadive.main": "Scuba: Gear & Items",
   "block.scubadive.sea_anemone": "Sea Anemone",
   "item.scubadive.sea_anemone": "Sea Anemone",
   "entity.scubadive.nudibranch": "White Sea Slug",
@@ -441,5 +441,10 @@
   "entity.scubadive.blue_blubber_jelly": "Blue Blubber Jellyfish",
   "species.scubadive.blue_blubber_jelly": "Blue Blubber Jellyfish",
   "item.scubadive.blue_blubber_jelly_spawn_egg": "Blue Blubber Jellyfish Spawn Egg",
-  "screen.scubadive.journal.hint_rarity": "Rarity: %s"
+  "screen.scubadive.journal.hint_rarity": "Rarity: %s",
+  "itemGroup.scubadive.fish": "Scuba: Fish",
+  "itemGroup.scubadive.bottom": "Scuba: Bottom Dwellers",
+  "itemGroup.scubadive.nudibranch": "Scuba: Nudibranchs",
+  "itemGroup.scubadive.jelly": "Scuba: Jellies",
+  "itemGroup.scubadive.cool_fresh": "Scuba: Temperate, Cold & Fresh"
 }

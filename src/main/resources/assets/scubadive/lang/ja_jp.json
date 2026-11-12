@@ -1,5 +1,5 @@
 {
-  "itemGroup.scubadive.main": "スキューバダイブ",
+  "itemGroup.scubadive.main": "スキューバ：装備・アイテム",
   "block.scubadive.sea_anemone": "イソギンチャク",
   "item.scubadive.sea_anemone": "イソギンチャク",
   "entity.scubadive.nudibranch": "シロウミウシ",
@@ -441,5 +441,10 @@
   "entity.scubadive.blue_blubber_jelly": "ブルージェリー",
   "species.scubadive.blue_blubber_jelly": "ブルージェリー",
   "item.scubadive.blue_blubber_jelly_spawn_egg": "ブルージェリーのスポーンエッグ",
-  "screen.scubadive.journal.hint_rarity": "レア度: %s"
+  "screen.scubadive.journal.hint_rarity": "レア度: %s",
+  "itemGroup.scubadive.fish": "スキューバ：魚",
+  "itemGroup.scubadive.bottom": "スキューバ：海底の生き物",
+  "itemGroup.scubadive.nudibranch": "スキューバ：ウミウシ",
+  "itemGroup.scubadive.jelly": "スキューバ：クラゲ",
+  "itemGroup.scubadive.cool_fresh": "スキューバ：温帯・冷たい海・淡水"
 }

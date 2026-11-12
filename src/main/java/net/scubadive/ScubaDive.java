@@ -41,18 +41,62 @@ public class ScubaDive implements ModInitializer {
 		net.scubadive.tour.TourManager.init();
 		net.scubadive.tour.center.DiveCenter.init();
 
-		// All items in the scubadive namespace are listed in this tab automatically.
-		Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, TAB_KEY, FabricCreativeModeTab.builder()
-				.title(Component.translatable("itemGroup.scubadive.main"))
-				.icon(() -> {
-					var camera = BuiltInRegistries.ITEM.getValue(id("camera"));
-					return new ItemStack(camera == Items.AIR ? Items.TURTLE_HELMET : camera);
-				})
-				.displayItems((context, entries) -> BuiltInRegistries.ITEM.entrySet().stream()
-						.filter(e -> e.getKey().identifier().getNamespace().equals(MOD_ID))
-						.forEach(e -> entries.accept(e.getValue())))
-				.build());
+		registerCreativeTabs();
 		LOGGER.info("ScubaDive loaded");
+	}
+
+	/** Creative inventory tabs: gear and blocks, then spawn eggs grouped like the journal (small groups merged). */
+	private enum CreativeGroup {
+		GEAR("gear", "camera"),
+		FISH("fish", "clownfish_spawn_egg"),
+		BOTTOM("bottom", "octopus_spawn_egg"),
+		NUDIBRANCH("nudibranch", "nudibranch_spawn_egg"),
+		JELLY("jelly", "moon_jelly_spawn_egg"),
+		COOL_FRESH("cool_fresh", "rainbow_trout_spawn_egg");
+
+		final String key;
+		final String icon;
+
+		CreativeGroup(String key, String icon) {
+			this.key = key;
+			this.icon = icon;
+		}
+
+		static CreativeGroup of(Identifier item) {
+			String path = item.getPath();
+			if (!path.endsWith("_spawn_egg")) {
+				return GEAR;
+			}
+			net.scubadive.species.Species s = net.scubadive.species.Species.byId(path.substring(0, path.length() - "_spawn_egg".length()));
+			if (s == null) {
+				return FISH;
+			}
+			return switch (s.category) {
+				case REEF_FISH, BIG -> FISH;
+				case BOTTOM, CEPHALOPOD, INVERT -> BOTTOM;
+				case NUDIBRANCH -> NUDIBRANCH;
+				case JELLY -> JELLY;
+				case COLD, FRESH -> COOL_FRESH;
+			};
+		}
+	}
+
+	private static void registerCreativeTabs() {
+		for (CreativeGroup group : CreativeGroup.values()) {
+			ResourceKey<CreativeModeTab> key = group == CreativeGroup.GEAR ? TAB_KEY
+					: ResourceKey.create(Registries.CREATIVE_MODE_TAB, id(group.key));
+			Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, key, FabricCreativeModeTab.builder()
+					.title(Component.translatable("itemGroup.scubadive." + (group == CreativeGroup.GEAR ? "main" : group.key)))
+					.icon(() -> {
+						var item = BuiltInRegistries.ITEM.getValue(id(group.icon));
+						return new ItemStack(item == Items.AIR ? Items.TURTLE_HELMET : item);
+					})
+					.displayItems((context, entries) -> BuiltInRegistries.ITEM.entrySet().stream()
+							.filter(e -> e.getKey().identifier().getNamespace().equals(MOD_ID)
+									&& CreativeGroup.of(e.getKey().identifier()) == group)
+							.forEach(e -> entries.accept(e.getValue())))
+					.build());
+		}
 	}
 
 	public static Identifier id(String path) {
