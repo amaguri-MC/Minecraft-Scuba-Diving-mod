@@ -35,6 +35,7 @@ public class ScubaDive implements ModInitializer {
 		net.scubadive.creature.fresh.FreshwaterCreatures.init();
 		net.scubadive.creature.temperate.TemperateFish.init();
 		net.scubadive.creature.cephalopod.Cephalopods.init();
+		net.scubadive.creature.penguin.Penguins.init();
 		net.scubadive.guide.DiveManual.init();
 		net.scubadive.equipment.WristSlot.init();
 		net.scubadive.creature.spawn.HotspotSpawner.init();

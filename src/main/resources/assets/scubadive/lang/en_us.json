@@ -446,5 +446,14 @@
   "itemGroup.scubadive.bottom": "Scuba: Bottom Dwellers",
   "itemGroup.scubadive.nudibranch": "Scuba: Nudibranchs",
   "itemGroup.scubadive.jelly": "Scuba: Jellies",
-  "itemGroup.scubadive.cool_fresh": "Scuba: Temperate, Cold & Fresh"
+  "itemGroup.scubadive.cool_fresh": "Scuba: Temperate, Cold & Fresh",
+  "entity.scubadive.gentoo_penguin": "Gentoo Penguin",
+  "species.scubadive.gentoo_penguin": "Gentoo Penguin",
+  "item.scubadive.gentoo_penguin_spawn_egg": "Gentoo Penguin Spawn Egg",
+  "entity.scubadive.rockhopper_penguin": "Rockhopper Penguin",
+  "species.scubadive.rockhopper_penguin": "Rockhopper Penguin",
+  "item.scubadive.rockhopper_penguin_spawn_egg": "Rockhopper Penguin Spawn Egg",
+  "entity.scubadive.cape_penguin": "Cape Penguin",
+  "species.scubadive.cape_penguin": "Cape Penguin",
+  "item.scubadive.cape_penguin_spawn_egg": "Cape Penguin Spawn Egg"
 }

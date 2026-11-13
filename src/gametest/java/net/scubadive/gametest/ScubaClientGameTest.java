@@ -268,7 +268,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			"yellow_tang", "cleaner_wrasse", "mandarinfish", "napoleon_wrasse", "garden_eel",
 			"sardine", "red_sea_bream", "striped_beakfish", "ocean_sunfish", "arctic_char",
 			"box_jellyfish", "comb_jelly", "lions_mane_jelly", "fried_egg_jelly", "echizen_jelly",
-			"nudibranch", "sea_bunny", "spanish_dancer", "blue_dragon", "leaf_sheep", "phyllidia", "thecacera",
+			"gentoo_penguin", "rockhopper_penguin", "cape_penguin", "nudibranch", "sea_bunny", "spanish_dancer", "blue_dragon", "leaf_sheep", "phyllidia", "thecacera",
 			"blue_nudibranch", "bornella", "ceratosoma", "indonesian_sea_nettle", "upside_down_jelly", "cannonball_jelly",
 			"flower_hat_jelly", "blue_blubber_jelly");
 
@@ -385,6 +385,14 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.getInput().lookAt(0, 45);
 		context.waitTicks(40);
 		context.takeScreenshot("07_underwater_light");
+		// penguins in the water: they must take the streamlined swimming pose
+		server.runCommand("execute as @p at @s run summon scubadive:gentoo_penguin ^-1 ^ ^3 {NoAI:1b,Invulnerable:1b,Rotation:[90f,0f]}");
+		server.runCommand("execute as @p at @s run summon scubadive:rockhopper_penguin ^1 ^ ^3 {NoAI:1b,Invulnerable:1b,Rotation:[90f,0f]}");
+		server.runCommand("execute as @p at @s run summon scubadive:cape_penguin ^ ^1 ^4 {NoAI:1b,Invulnerable:1b,Rotation:[90f,0f]}");
+		context.getInput().lookAt(0, 10);
+		server.runCommand("effect give @p minecraft:night_vision 600 0 true");
+		context.waitTicks(30);
+		context.takeScreenshot("18_penguins_in_water");
 		for (int phase = 1; phase <= 3; phase++) {
 			context.waitTicks(200);
 			long avg = server.computeOnServer(s -> s.getAverageTickTimeNanos()) / 1000;

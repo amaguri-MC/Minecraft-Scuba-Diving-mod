@@ -86,7 +86,10 @@ public enum Species {
 	UPSIDE_DOWN_JELLY("upside_down_jelly", "scubadive:upside_down_jelly", false, 55, Category.JELLY, Hint.SAND, 20),
 	CANNONBALL_JELLY("cannonball_jelly", "scubadive:cannonball_jelly", false, 50, Category.JELLY, Hint.TEMPERATE, 20),
 	FLOWER_HAT_JELLY("flower_hat_jelly", "scubadive:flower_hat_jelly", false, 85, Category.JELLY, Hint.TEMPERATE, 15),
-	BLUE_BLUBBER_JELLY("blue_blubber_jelly", "scubadive:blue_blubber_jelly", false, 50, Category.JELLY, Hint.OPEN, 35);
+	BLUE_BLUBBER_JELLY("blue_blubber_jelly", "scubadive:blue_blubber_jelly", false, 50, Category.JELLY, Hint.OPEN, 35),
+	GENTOO_PENGUIN("gentoo_penguin", "scubadive:gentoo_penguin", false, 70, Category.COLD, Hint.ICE, 75),
+	ROCKHOPPER_PENGUIN("rockhopper_penguin", "scubadive:rockhopper_penguin", false, 80, Category.COLD, Hint.ROCK, 55),
+	CAPE_PENGUIN("cape_penguin", "scubadive:cape_penguin", false, 75, Category.COLD, Hint.TEMPERATE, 65);
 
 	/** Journal tab a species is listed under. */
 	public enum Category {

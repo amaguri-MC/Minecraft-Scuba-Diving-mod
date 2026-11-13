@@ -446,5 +446,14 @@
   "itemGroup.scubadive.bottom": "スキューバ：海底の生き物",
   "itemGroup.scubadive.nudibranch": "スキューバ：ウミウシ",
   "itemGroup.scubadive.jelly": "スキューバ：クラゲ",
-  "itemGroup.scubadive.cool_fresh": "スキューバ：温帯・冷たい海・淡水"
+  "itemGroup.scubadive.cool_fresh": "スキューバ：温帯・冷たい海・淡水",
+  "entity.scubadive.gentoo_penguin": "ジェンツーペンギン",
+  "species.scubadive.gentoo_penguin": "ジェンツーペンギン",
+  "item.scubadive.gentoo_penguin_spawn_egg": "ジェンツーペンギンのスポーンエッグ",
+  "entity.scubadive.rockhopper_penguin": "イワトビペンギン",
+  "species.scubadive.rockhopper_penguin": "イワトビペンギン",
+  "item.scubadive.rockhopper_penguin_spawn_egg": "イワトビペンギンのスポーンエッグ",
+  "entity.scubadive.cape_penguin": "ケープペンギン",
+  "species.scubadive.cape_penguin": "ケープペンギン",
+  "item.scubadive.cape_penguin_spawn_egg": "ケープペンギンのスポーンエッグ"
 }
