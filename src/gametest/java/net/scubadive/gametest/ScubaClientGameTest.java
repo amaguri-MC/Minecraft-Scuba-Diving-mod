@@ -314,6 +314,15 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			context.takeScreenshot("16_close_" + s.id);
 		}
 		clearGallery(server, x0, y0, z0);
+		// penguins in a water box in front of the camera: streamlined swimming pose
+		server.runCommand("fill " + (x0 - 3) + " " + y0 + " " + (z0 - 4) + " " + (x0 + 3) + " " + (y0 + 3) + " " + (z0 + 1) + " minecraft:water");
+		summonFrozen(server, "scubadive:gentoo_penguin", x0 - 1.2, y0 + 1.2, z0 - 3.0, 90f);
+		summonFrozen(server, "scubadive:rockhopper_penguin", x0 + 1.4, y0 + 0.6, z0 - 2.5, 60f);
+		summonFrozen(server, "scubadive:cape_penguin", x0 + 0.3, y0 + 2.0, z0 - 1.5, 120f);
+		server.runCommand("tp @p " + x0 + ".5 " + (y0 + 1) + " " + (z0 - 7) + ".5 0 5");
+		context.waitTicks(40);
+		context.takeScreenshot("19_penguins_swim_pose");
+		clearGallery(server, x0, y0, z0);
 	}
 
 	/** A real tour at the warm-sea dive point: 40 s in the tour dimension with every creature ticking. */
