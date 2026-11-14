@@ -44,7 +44,9 @@ public enum DivePoint {
 			new Spawn("minecraft:cod", 10, 4, 8), new Spawn("minecraft:salmon", 8, 3, 6),
 			new Spawn("scubadive:clione", 10, 2, 5), new Spawn("scubadive:lumpsucker", 6, 1, 2),
 			new Spawn("minecraft:squid", 4, 2, 4), new Spawn("scubadive:sea_nettle", 5, 1, 3),
-			new Spawn("scubadive:cushion_star", 6, 1, 3), new Spawn("scubadive:comb_jelly", 4, 2, 4)),
+			new Spawn("scubadive:cushion_star", 6, 1, 3), new Spawn("scubadive:comb_jelly", 4, 2, 4),
+			// the ice floe's headliner: Gentoo penguins zipping under the ice in small groups
+			new Spawn("scubadive:gentoo_penguin", 7, 3, 6)),
 			List.of(new Spawn("scubadive:wolf_eel", 3, 1, 1), new Spawn("minecraft:dolphin", 1, 2, 3),
 					new Spawn("scubadive:lions_mane_jelly", 2, 1, 1))),
 	// Fresh-water lake: trout, carp, catfish on the bottom, crayfish, frogs. Rare: a big gathering of axolotls.
