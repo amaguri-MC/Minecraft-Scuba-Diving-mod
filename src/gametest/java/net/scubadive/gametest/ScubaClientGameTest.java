@@ -60,6 +60,7 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			context.takeScreenshot("00_spawn");
 
 			terrainCost(context, sp);
+			coldSeas(context, sp);
 			BlockPos center = locate(context, sp);
 			gear(context, sp, center);
 			book(context);
@@ -105,6 +106,25 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 			max = Math.max(max, t);
 		}
 		return max;
+	}
+
+	/** Generates fresh cold-ocean and snowy-beach chunks (a penguin spawn rule once crashed world generation there). */
+	private static void coldSeas(ClientGameTestContext context, TestSingleplayerContext sp) {
+		var server = sp.getServer();
+		for (String name : new String[] {"cold_ocean", "frozen_ocean", "snowy_beach", "beach"}) {
+			BlockPos at = server.computeOnServer(s -> {
+				var found = s.overworld().findClosestBiome3d(h -> h.unwrapKey().map(k -> k.identifier().getPath().equals(name)).orElse(false),
+						new BlockPos(3000, 64, 3000), 12800, 32, 64);
+				return found == null ? null : found.getFirst();
+			});
+			log("cold seas: %s at %s", name, at);
+			if (at == null) continue;
+			server.runCommand("tp @p " + at.getX() + " 120 " + at.getZ());
+			context.waitTicks(5);
+			sp.getConnection().waitForChunksRender(false, 20 * 120);
+			context.waitTicks(40);
+			context.takeScreenshot("01c_" + name);
+		}
 	}
 
 	/** Same search as /locate structure scubadive:dive_center, timed. */
