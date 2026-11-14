@@ -354,9 +354,9 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		summonFrozen(server, "minecraft:dolphin", x0 + 3.0, y0 + 3.2, z0 + 1.0, 90f);
 		summonFrozen(server, "minecraft:nautilus", x0 + 2.5, y0 + 0.8, z0 - 2.5, 60f);
 		summonFrozen(server, "minecraft:squid", x0 - 2.0, y0 + 3.4, z0 - 2.0, 90f);
-		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:0}", x0 - 0.5, y0 + 1.5, z0 - 3.5));
-		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:1}", x0 + 0.5, y0 + 1.5, z0 - 3.5));
-		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:2}", x0 + 1.6, y0 + 1.5, z0 - 3.5));
+		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:0,Rotation:[90f,0f]}", x0 - 0.5, y0 + 1.5, z0 - 3.5));
+		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:1,Rotation:[90f,0f]}", x0 + 0.5, y0 + 1.5, z0 - 3.5));
+		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:pufferfish %.1f %.1f %.1f {NoAI:1b,NoGravity:1b,Invulnerable:1b,PuffState:2,Rotation:[90f,0f]}", x0 + 1.6, y0 + 1.5, z0 - 3.5));
 		server.runCommand("tp @p " + x0 + ".5 " + (y0 + 2) + " " + (z0 - 7) + ".5 0 10");
 		context.waitTicks(40);
 		context.takeScreenshot("20_vanilla_renewal");

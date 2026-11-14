@@ -12,4 +12,6 @@ public class VanillaNautilusRenderState extends NautilusRenderState {
 	public Identifier armorTexture;
 	/** Vertical shift (blocks) that puts the saddle seat at the rider's attachment point. */
 	public float seatLift;
+	/** Extra size so the saddle seat meets the rider (1 = the modelled size). */
+	public float gearScale = 1.0f;
 }

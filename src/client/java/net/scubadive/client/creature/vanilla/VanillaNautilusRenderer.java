@@ -23,6 +23,8 @@ public class VanillaNautilusRenderer extends MobRenderer<Nautilus, VanillaNautil
 	private static final Identifier TEXTURE = ScubaDive.id("textures/entity/vanilla/nautilus.png");
 	private static final String[] ARMOR_MATERIALS = {"copper", "iron", "gold", "diamond", "netherite"};
 	private static final float MAX_LIFT = 0.4f;
+	/** Largest size factor for a ridden-size nautilus. */
+	private static final float MAX_GROW = 1.8f;
 	private static final float MAX_SINK = 0.25f;
 
 	public VanillaNautilusRenderer(EntityRendererProvider.Context context) {
@@ -45,10 +47,14 @@ public class VanillaNautilusRenderer extends MobRenderer<Nautilus, VanillaNautil
 		state.hasSaddle = !entity.getItemBySlot(EquipmentSlot.SADDLE).isEmpty();
 		state.armorTexture = armorTexture(entity.getBodyArmorItem());
 		state.seatLift = 0.0f;
+		state.gearScale = 1.0f;
 		if (!state.isBaby) {
 			Vec3 seat = entity.getAttachments().getNullable(EntityAttachment.PASSENGER, 0, 0.0f);
 			if (seat != null) {
-				float lift = (float) seat.y - VanillaNautilusModel.SEAT_PX / 16.0f * state.ageScale;
+				// Grow the shell (a riding nautilus is a giant one) until its seat reaches the rider, then lift the rest.
+				float seatAtOne = VanillaNautilusModel.SEAT_PX / 16.0f * state.ageScale;
+				state.gearScale = Mth.clamp((float) seat.y / seatAtOne, 1.0f, MAX_GROW);
+				float lift = (float) seat.y - seatAtOne * state.gearScale;
 				state.seatLift = Mth.clamp(lift, -MAX_SINK, MAX_LIFT);
 			}
 		}
@@ -80,12 +86,13 @@ public class VanillaNautilusRenderer extends MobRenderer<Nautilus, VanillaNautil
 	@Override
 	protected void scale(VanillaNautilusRenderState state, PoseStack poseStack) {
 		super.scale(state, poseStack);
-		poseStack.scale(state.ageScale, state.ageScale, state.ageScale);
+		float s = state.ageScale * state.gearScale;
+		poseStack.scale(s, s, s);
 	}
 
 	@Override
 	protected float getShadowRadius(VanillaNautilusRenderState state) {
-		return super.getShadowRadius(state) * state.ageScale;
+		return super.getShadowRadius(state) * state.ageScale * state.gearScale;
 	}
 
 	@Override
