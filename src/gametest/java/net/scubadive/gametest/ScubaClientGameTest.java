@@ -138,6 +138,15 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		log("dive center chunks ready in %d ms", (System.nanoTime() - w) / 1_000_000);
 		context.waitTicks(20);
 		context.takeScreenshot("02_dive_center_above");
+		// the hut from four sides (roof shape check)
+		int top = server.computeOnServer(s -> s.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+				found.getX(), found.getZ()));
+		int[][] sides = {{0, -14, 0}, {14, 0, 90}, {0, 14, 180}, {-14, 0, 270}};
+		for (int[] d : sides) {
+			server.runCommand("tp @p " + (found.getX() + d[0]) + " " + (top + 5) + " " + (found.getZ() + d[1]) + " " + d[2] + " 15");
+			context.waitTicks(30);
+			context.takeScreenshot("02b_dive_center_yaw" + d[2]);
+		}
 		return found;
 	}
 
