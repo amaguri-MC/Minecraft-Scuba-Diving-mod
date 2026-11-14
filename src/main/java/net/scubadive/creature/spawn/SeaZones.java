@@ -199,7 +199,8 @@ public final class SeaZones {
 
 	/**
 	 * Wraps a spawn placement rule so vanilla natural spawning never puts the creature into the tour dimension
-	 * (its whole map is one warm-ocean biome; the tour spawner fills each site from its own table instead).
+	 * (its whole map is one warm-ocean biome; the tour spawner fills each site from its own table instead), and so
+	 * a rule that reads too far during chunk generation refuses the spawn instead of crashing world generation.
 	 */
 	public static <T extends Entity> SpawnPlacements.SpawnPredicate<T> wild(SpawnPlacements.SpawnPredicate<T> rule) {
 		return (type, level, reason, pos, random) -> {
@@ -207,7 +208,13 @@ public final class SeaZones {
 					&& level.getLevel().dimension().equals(TourApi.DIMENSION)) {
 				return false;
 			}
-			return rule.test(type, level, reason, pos, random);
+			try {
+				return rule.test(type, level, reason, pos, random);
+			} catch (IllegalStateException e) {
+				// A rule that looks too far during chunk generation reads outside the generation region; vanilla
+				// throws "Requested chunk unavailable". Treat it as "no spawn here" instead of crashing the world.
+				return false;
+			}
 		};
 	}
 }
