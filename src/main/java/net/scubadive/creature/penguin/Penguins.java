@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -130,12 +130,10 @@ public final class Penguins {
 		for (int dx = -32; dx <= 32; dx += 16) {
 			for (int dz = -32; dz <= 32; dz += 16) {
 				BlockPos at = pos.offset(dx, 0, dz);
-				// During chunk generation only the chunks next to this one are readable: asking for any other
-				// one crashes world generation ("Requested chunk unavailable"), so skip what is out of reach.
-				if (!level.hasChunk(SectionPos.blockToSectionCoord(at.getX()), SectionPos.blockToSectionCoord(at.getZ()))) {
-					continue;
-				}
-				Holder<Biome> b = level.getBiome(at);
+				// The biome straight from the biome source, without touching any chunk: during chunk generation a
+				// chunk read outside the generation region crashes world generation ("Requested chunk unavailable").
+				Holder<Biome> b = level.getUncachedNoiseBiome(QuartPos.fromBlock(at.getX()), QuartPos.fromBlock(at.getY()),
+						QuartPos.fromBlock(at.getZ()));
 				if (SeaZones.zoneOf(b) == SeaZones.Zone.COLD || b.is(Biomes.SNOWY_BEACH) || b.is(Biomes.SNOWY_PLAINS)
 						|| b.is(Biomes.SNOWY_TAIGA) || b.is(Biomes.ICE_SPIKES) || b.is(Biomes.FROZEN_RIVER)) {
 					return true;
