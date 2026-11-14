@@ -19,6 +19,7 @@ public class ScubaDiveClient implements ClientModInitializer {
 		net.scubadive.client.creature.fresh.FreshwaterCreaturesClient.init();
 		net.scubadive.client.creature.cephalopod.CephalopodsClient.init();
 		net.scubadive.client.creature.penguin.PenguinsClient.init();
+		net.scubadive.client.creature.vanilla.VanillaRenewalClient.init();
 		net.scubadive.client.equipment.WristSlotClient.init();
 		net.scubadive.client.tour.TourClient.init();
 		net.scubadive.client.tour.DiveCenterClient.init();

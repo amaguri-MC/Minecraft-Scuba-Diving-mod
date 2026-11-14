@@ -455,5 +455,6 @@
   "item.scubadive.rockhopper_penguin_spawn_egg": "Rockhopper Penguin Spawn Egg",
   "entity.scubadive.cape_penguin": "Cape Penguin",
   "species.scubadive.cape_penguin": "Cape Penguin",
-  "item.scubadive.cape_penguin_spawn_egg": "Cape Penguin Spawn Egg"
+  "item.scubadive.cape_penguin_spawn_egg": "Cape Penguin Spawn Egg",
+  "species.scubadive.nautilus": "Nautilus"
 }

@@ -82,6 +82,7 @@ public enum DivePoint {
 			new Spawn("scubadive:blue_tang", 3, 2, 4), new Spawn("scubadive:butterflyfish", 3, 2, 2),
 			new Spawn("scubadive:clownfish", 3, 2, 3), new Spawn("scubadive:moray_eel", 2, 1, 1),
 			new Spawn("scubadive:spotted_jelly", 3, 2, 4), new Spawn("minecraft:turtle", 1, 1, 1),
+			new Spawn("minecraft:nautilus", 2, 1, 1),
 			new Spawn("scubadive:spanish_dancer", 1, 1, 1), new Spawn("scubadive:blue_dragon", 2, 2, 3),
 			new Spawn("scubadive:box_jellyfish", 2, 1, 2), new Spawn("scubadive:ceratosoma", 1, 1, 1),
 			new Spawn("scubadive:indonesian_sea_nettle", 2, 1, 2), new Spawn("scubadive:blue_blubber_jelly", 2, 2, 4)),

@@ -22,6 +22,7 @@ import net.minecraft.world.phys.AABB;
 
 import net.scubadive.creature.ScubaCreatures;
 import net.scubadive.creature.spawn.Habitat;
+import net.scubadive.species.Species;
 import net.scubadive.tour.site.DiveSites;
 
 /**
@@ -183,8 +184,8 @@ final class TourSpawner {
 		for (DivePoint.Spawn s : table) {
 			Identifier id = Identifier.tryParse(s.entityId());
 			EntityType<?> type = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
-			// Tours show only the mod's own creatures (vanilla ones are not in the journal and score nothing).
-			if (id == null || !"scubadive".equals(id.getNamespace())) {
+			// Tours show only journal creatures: the mod's own plus the renewed vanilla ones listed in Species.
+			if (id == null || !("scubadive".equals(id.getNamespace()) || Species.byTarget(id, false) != null)) {
 				continue;
 			}
 			if (type != null && s.weight() > 0 && Habitat.fits(s.entityId(), point.habitats)) {

@@ -26,15 +26,15 @@ public enum Habitat {
 	private static final Map<String, Set<Habitat>> TABLE = new HashMap<>();
 
 	static {
-		// ---- vanilla ----
+		// ---- vanilla (turtle, dolphin, nautilus, pufferfish, squid have a renewed look and are in the journal) ----
 		put("minecraft:cod", COLD, TEMPERATE);
 		put("minecraft:salmon", COLD, TEMPERATE, FRESH);
 		put("minecraft:tropical_fish", TROPICAL);
 		put("minecraft:pufferfish", TROPICAL);
 		put("minecraft:turtle", TROPICAL);
-		put("minecraft:dolphin", TROPICAL, TEMPERATE, COLD);
-		put("minecraft:squid", TROPICAL, TEMPERATE, COLD);
-		put("minecraft:nautilus", TROPICAL, TEMPERATE, DEEP);
+		put("minecraft:dolphin", TROPICAL, TEMPERATE, COLD);   // COLD: the ice-floe tour's rare pod
+		put("minecraft:squid", TEMPERATE, COLD);
+		put("minecraft:nautilus", TROPICAL, DEEP);
 		put("minecraft:glow_squid", DEEP, FRESH);
 		put("minecraft:axolotl", FRESH);
 		put("minecraft:frog", FRESH);

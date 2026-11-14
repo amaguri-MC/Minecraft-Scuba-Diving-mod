@@ -4,7 +4,13 @@ import net.minecraft.resources.Identifier;
 
 /** Every photographable subject. Display name: lang key "species.scubadive.<id>". */
 public enum Species {
-	// Vanilla mobs are deliberately not photographable subjects: only this mod's creatures count.
+	// Vanilla mobs are not photographable subjects, except the five whose look this mod renews
+	// (client/creature/vanilla): they are listed under their vanilla entity ids.
+	TURTLE("turtle", "minecraft:turtle", false, 90, Category.BIG, Hint.REEF, 100),
+	DOLPHIN("dolphin", "minecraft:dolphin", false, 110, Category.BIG, Hint.OPEN, 250),
+	NAUTILUS("nautilus", "minecraft:nautilus", false, 120, Category.CEPHALOPOD, Hint.DEEP, 20),
+	PUFFERFISH("pufferfish", "minecraft:pufferfish", false, 40, Category.REEF_FISH, Hint.REEF, 25),
+	SQUID("squid", "minecraft:squid", false, 45, Category.CEPHALOPOD, Hint.TEMPERATE, 45),
 	// scubadive (phase 1)
 	SEA_ANEMONE("sea_anemone", "scubadive:sea_anemone", true, 10, Category.INVERT, Hint.ANEMONE, 30),
 	NUDIBRANCH("nudibranch", "scubadive:nudibranch", false, 40, Category.NUDIBRANCH, Hint.REEF, 4),

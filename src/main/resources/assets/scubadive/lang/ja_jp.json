@@ -455,5 +455,6 @@
   "item.scubadive.rockhopper_penguin_spawn_egg": "イワトビペンギンのスポーンエッグ",
   "entity.scubadive.cape_penguin": "ケープペンギン",
   "species.scubadive.cape_penguin": "ケープペンギン",
-  "item.scubadive.cape_penguin_spawn_egg": "ケープペンギンのスポーンエッグ"
+  "item.scubadive.cape_penguin_spawn_egg": "ケープペンギンのスポーンエッグ",
+  "species.scubadive.nautilus": "オウムガイ"
 }
