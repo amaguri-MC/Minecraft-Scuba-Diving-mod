@@ -138,14 +138,30 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		log("dive center chunks ready in %d ms", (System.nanoTime() - w) / 1_000_000);
 		context.waitTicks(20);
 		context.takeScreenshot("02_dive_center_above");
-		// the hut from four sides (roof shape check)
-		int top = server.computeOnServer(s -> s.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
-				found.getX(), found.getZ()));
-		int[][] sides = {{0, -14, 0}, {14, 0, 90}, {0, 14, 180}, {-14, 0, 270}};
-		for (int[] d : sides) {
-			server.runCommand("tp @p " + (found.getX() + d[0]) + " " + (top + 5) + " " + (found.getZ() + d[1]) + " " + d[2] + " 15");
-			context.waitTicks(30);
-			context.takeScreenshot("02b_dive_center_yaw" + d[2]);
+		// the hut from four sides (roof shape check): find the roof by its spruce stairs near the located spot
+		BlockPos roof = server.computeOnServer(s -> {
+			ServerLevel level = s.overworld();
+			long sx = 0, sy = 0, sz = 0, n = 0;
+			BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+			for (int x = found.getX() - 64; x <= found.getX() + 64; x++) {
+				for (int z = found.getZ() - 64; z <= found.getZ() + 64; z++) {
+					for (int y = 60; y <= 90; y++) {
+						if (level.getBlockState(m.set(x, y, z)).is(net.minecraft.world.level.block.Blocks.SPRUCE_STAIRS)) {
+							sx += x; sy += y; sz += z; n++;
+						}
+					}
+				}
+			}
+			return n == 0 ? null : new BlockPos((int) (sx / n), (int) (sy / n), (int) (sz / n));
+		});
+		log("dive center roof at %s", roof);
+		if (roof != null) {
+			int[][] sides = {{0, -12, 0}, {12, 0, 90}, {0, 12, 180}, {-12, 0, 270}};
+			for (int[] d : sides) {
+				server.runCommand("tp @p " + (roof.getX() + d[0]) + " " + (roof.getY() + 3) + " " + (roof.getZ() + d[1]) + " " + d[2] + " 12");
+				context.waitTicks(30);
+				context.takeScreenshot("02b_dive_center_yaw" + d[2]);
+			}
 		}
 		return found;
 	}
