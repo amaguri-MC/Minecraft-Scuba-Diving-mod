@@ -141,18 +141,18 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		// the hut from four sides (roof shape check): find the roof by its spruce stairs near the located spot
 		BlockPos roof = server.computeOnServer(s -> {
 			ServerLevel level = s.overworld();
-			long sx = 0, sy = 0, sz = 0, n = 0;
+			long sx = 0, sy = 0, sz = 0, cnt = 0;
 			BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
 			for (int x = found.getX() - 64; x <= found.getX() + 64; x++) {
 				for (int z = found.getZ() - 64; z <= found.getZ() + 64; z++) {
 					for (int y = 60; y <= 90; y++) {
 						if (level.getBlockState(m.set(x, y, z)).is(net.minecraft.world.level.block.Blocks.SPRUCE_STAIRS)) {
-							sx += x; sy += y; sz += z; n++;
+							sx += x; sy += y; sz += z; cnt++;
 						}
 					}
 				}
 			}
-			return n == 0 ? null : new BlockPos((int) (sx / n), (int) (sy / n), (int) (sz / n));
+			return cnt == 0 ? null : new BlockPos((int) (sx / cnt), (int) (sy / cnt), (int) (sz / cnt));
 		});
 		log("dive center roof at %s", roof);
 		if (roof != null) {
@@ -419,6 +419,14 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		context.getInput().lookAt(0, 45);
 		context.waitTicks(40);
 		context.takeScreenshot("07_underwater_light");
+		// mask gamma: same view without and with the dive mask
+		server.runCommand("item replace entity @p weapon.mainhand with minecraft:air");
+		server.runCommand("item replace entity @p armor.head with minecraft:air");
+		context.waitTicks(10);
+		context.takeScreenshot("07a_no_mask");
+		server.runCommand("item replace entity @p armor.head with scubadive:dive_mask");
+		context.waitTicks(10);
+		context.takeScreenshot("07b_with_mask");
 		// penguins in the water: they must take the streamlined swimming pose
 		server.runCommand("execute as @p at @s run summon scubadive:gentoo_penguin ^-1 ^ ^3 {NoAI:1b,Invulnerable:1b,Rotation:[90f,0f]}");
 		server.runCommand("execute as @p at @s run summon scubadive:rockhopper_penguin ^1 ^ ^3 {NoAI:1b,Invulnerable:1b,Rotation:[90f,0f]}");

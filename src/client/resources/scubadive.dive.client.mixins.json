@@ -3,7 +3,8 @@
 	"package": "net.scubadive.client.mixin.dive",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"AvatarRendererCapeMixin"
+		"AvatarRendererCapeMixin",
+		"LightmapMaskGammaMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
