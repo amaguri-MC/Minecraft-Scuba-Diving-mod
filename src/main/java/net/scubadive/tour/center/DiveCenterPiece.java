@@ -201,12 +201,13 @@ public class DiveCenterPiece extends StructurePiece {
 		// Roof: stairs sloping down towards both long sides, ridge planks in the middle, one block of overhang.
 		Direction land = f.sea().getOpposite();
 		for (int u = -5; u <= 5; u++) {
-			set(level, f.at(u, 4, fy + 3), stair(f.sea(), false), clip);
-			set(level, f.at(u, -4, fy + 3), stair(land, false), clip);
+			// A stair's FACING is its tall back: it must face the ridge, so the step side runs down to the eaves.
+			set(level, f.at(u, 4, fy + 3), stair(land, false), clip);
+			set(level, f.at(u, -4, fy + 3), stair(f.sea(), false), clip);
 			for (int v = 1; v <= 3; v++) {
 				int y = fy + 3 + (4 - v);
-				set(level, f.at(u, v, y), stair(f.sea(), false), clip);
-				set(level, f.at(u, -v, y), stair(land, false), clip);
+				set(level, f.at(u, v, y), stair(land, false), clip);
+				set(level, f.at(u, -v, y), stair(f.sea(), false), clip);
 			}
 			set(level, f.at(u, 0, fy + 6), PLANKS, clip);
 		}
