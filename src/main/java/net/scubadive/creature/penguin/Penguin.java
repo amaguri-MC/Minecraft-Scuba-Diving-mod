@@ -162,7 +162,7 @@ public class Penguin extends PathfinderMob {
 
 		PenguinMoveControl(Penguin penguin) {
 			super(penguin);
-			this.swim = new SmoothSwimmingMoveControl<>(penguin, 85, 10, 0.12f, 1.0f, false);
+			this.swim = new SmoothSwimmingMoveControl<>(penguin, 85, 12, 0.2f, 1.0f, false);
 		}
 
 		@Override

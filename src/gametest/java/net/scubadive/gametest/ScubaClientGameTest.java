@@ -383,6 +383,18 @@ public class ScubaClientGameTest implements FabricClientGameTest {
 		server.runCommand("tp @p " + x0 + ".5 " + (y0 + 1) + " " + (z0 - 5) + ".5 0 10");
 		context.waitTicks(20);
 		context.takeScreenshot("20b_vanilla_renewal_close");
+		// renewed salmon (three sizes) and cod
+		clearGallery(server, x0, y0, z0);
+		server.runCommand("fill " + (x0 - 6) + " " + y0 + " " + (z0 - 5) + " " + (x0 + 6) + " " + (y0 + 5) + " " + (z0 + 4) + " minecraft:water");
+		for (String[] f : new String[][] {{"small", "-2.5", "3.2"}, {"medium", "-0.5", "3.2"}, {"large", "2.0", "3.2"}}) {
+			server.runCommand("summon minecraft:salmon " + (x0 + Double.parseDouble(f[1])) + " " + (y0 + Double.parseDouble(f[2])) + " " + (z0 - 2.5)
+					+ " {NoAI:1b,NoGravity:1b,Invulnerable:1b,type:\"" + f[0] + "\",Rotation:[90f,0f]}");
+		}
+		summonFrozen(server, "minecraft:cod", x0 - 1.5, y0 + 1.2, z0 - 3.0, 90f);
+		summonFrozen(server, "minecraft:cod", x0 + 1.5, y0 + 1.0, z0 - 2.5, 60f);
+		server.runCommand("tp @p " + x0 + ".5 " + (y0 + 2) + " " + (z0 - 7) + ".5 0 5");
+		context.waitTicks(40);
+		context.takeScreenshot("20c_salmon_cod");
 		// nautilus with saddle and armor, ridden, seen from the side
 		clearGallery(server, x0, y0, z0);
 		server.runCommand(String.format(java.util.Locale.ROOT, "summon minecraft:nautilus %.1f %.1f %.1f {NoAI:1b,Invulnerable:1b,Tame:1b,Rotation:[90f,0f]}", x0 + 0.5, y0 + 1.5, z0 - 1.5));
